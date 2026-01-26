@@ -36,6 +36,7 @@ Discuss what you need to develop this project. This includes background informat
 ## Collaborators
 
 - Egi Rama
+- Jeeae Chae
 
 <div align="center">
 
