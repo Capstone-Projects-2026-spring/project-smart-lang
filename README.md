@@ -39,6 +39,7 @@ Discuss what you need to develop this project. This includes background informat
 - Jeeae Chae
 - Cameron Kerestus
 - Abdulrazig Mohammed
+- Jason Jaya
 
 <div align="center">
 
