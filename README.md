@@ -38,6 +38,7 @@ Discuss what you need to develop this project. This includes background informat
 - Egi Rama
 - Jeeae Chae
 - Cameron Kerestus
+- Abdulrazig Mohammed
 
 <div align="center">
 
