@@ -7,7 +7,9 @@
 
 
 </div>
+## Project Overview
 
+Language expansion in AAC devices 
 
 ## Keywords
 
