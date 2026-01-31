@@ -39,7 +39,7 @@ Discuss what you need to develop this project. This includes background informat
 ## Collaborators
 
 - Egi Rama
-- Jeeae Chae
+- 
 - Cameron Kerestus
 - Abdulrazig Mohammed
 - Jason Jaya
@@ -48,6 +48,6 @@ Discuss what you need to develop this project. This includes background informat
 <div align="center">
 
 [//]: # (Replace with your collaborators)
-[Ian Tyler Applebaum](https://github.com/ApplebaumIan) • [Kyle Dragon Lee](https://github.com/leekd99)
+[Ian Tyler Applebaum](https://github.com/ApplebaumIan) • [Kyle Dragon Lee](https://github.com/leekd99) • [Jeeae Chae](https://github.com/jeeae3/)
 
 </div>
