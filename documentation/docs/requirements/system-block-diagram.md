@@ -4,13 +4,7 @@ sidebar_position: 2
 
 # System Block Diagram
 
-<img
-  src="https://github.com/user-attachments/assets/ef4b926b-0c1f-4d13-bb26-ca631a3e9bb0"
-  alt="System Block Diagram"
-  style="max-width: 100%; height: auto;"
-/>
-
-
+<img width="2477" height="871" alt="System Block Diagram" src="https://github.com/user-attachments/assets/ef4b926b-0c1f-4d13-bb26-ca631a3e9bb0" />
 
 **Figure 1** provides an overview of the grid-based AAC (Augmentative and Alternative Communication) application architecture.
 
