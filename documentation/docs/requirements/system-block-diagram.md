@@ -11,7 +11,6 @@ sidebar_position: 2
 />
 
 
-
 **Figure 1** provides an overview of the grid-based AAC (Augmentative and Alternative Communication) application architecture.
 
 ## System Overview
