@@ -39,10 +39,8 @@ Discuss what you need to develop this project. This includes background informat
 ## Collaborators
 
 - Egi Rama
-- 
 - Cameron Kerestus
 - Abdulrazig Mohammed
-- Jason Jaya
 - Oswayne Smith
 
 <div align="center">
