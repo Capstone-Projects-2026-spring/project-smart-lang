@@ -38,14 +38,9 @@ Discuss what you need to develop this project. This includes background informat
 
 ## Collaborators
 
-- Egi Rama
-- Cameron Kerestus
-- Abdulrazig Mohammed
-- Oswayne Smith
-
 <div align="center">
 
 [//]: # (Replace with your collaborators)
-[Jeeae Chae](https://github.com/jeeae3/) • [Jason Jaya](https://github.com/jason-jaya/) • [Cameron Kerestus](https://github.com/Teamk09/) • [Egi Rama](https://github.com/egirama/)
+[Jeeae Chae](https://github.com/jeeae3/) • [Jason Jaya](https://github.com/jason-jaya/) • [Cameron Kerestus](https://github.com/Teamk09/) • [Egi Rama](https://github.com/egirama/) • [Abdulrazig Mohammed](https://github.com/Abdu9991/) • [Oswayne Smith](https://github.com/oswaynesmith)
 
 </div>
