@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1#Conceptual Design
-
+sidebar_position: 1
+title: Conceptual Design
 ---
 
 # System OverviewDS
