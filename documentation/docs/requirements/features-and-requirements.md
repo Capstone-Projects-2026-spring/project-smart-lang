@@ -11,8 +11,9 @@ sidebar_position: 4
   * Accounts will save user data and can be accessed from different devices.
     
 * The user will see the primary interface upon opening the application.
-  * The user will be able to see the sentence built from their selected word tiles.
+  * The user will be able to see the constructed sentence built from their selected word tiles.
   * The user will be able to delete word tiles from the sentence or clear the entire sentence.
+  * The system will use text to speech and user will be able to play audio output of the constructed sentence.
   * The system will able to save word tiles the user have used in the past.
   * The system will suggest word tiles.
     
