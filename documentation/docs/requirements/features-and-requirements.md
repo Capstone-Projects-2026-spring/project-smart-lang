@@ -22,3 +22,12 @@ sidebar_position: 4
   
 ### Non-Functional Requirements
 
+* The app will have a simplified userflow
+  * Users must be able to add a word, delete a word, clear a sentence, and speak a sentence in ≤2 taps each from the primary screen.
+
+* When a user presses the speech button for audio output, the audio will play slowly and clearly and will be uninterrupted until the sentence is complete.
+  * Speech takes place within 3 seconds of the button being tapped.
+
+* A user account is not required for sentence formation and speech.
+
+* The app will support text scaling without clipping or overlapping to ensure readability.
