@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">System Block Diagram | Project Smart Lang</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="System Block Diagram | Project Smart Lang"><meta data-rh="true" name="description" content="System Block Diagram"><meta data-rh="true" property="og:description" content="System Block Diagram"><link data-rh="true" rel="icon" href="/project-smart-lang/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram" hreflang="en"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Requirements Specification","item":"https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/category/requirements-specification"},{"@type":"ListItem","position":2,"name":"System Block Diagram","item":"https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"}]}</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><link rel="stylesheet" href="/project-smart-lang/assets/css/styles.7aa687c6.css">
-<script src="/project-smart-lang/assets/js/runtime~main.09447949.js" defer="defer"></script>
+<script src="/project-smart-lang/assets/js/runtime~main.027517aa.js" defer="defer"></script>
 <script src="/project-smart-lang/assets/js/main.371dc6c6.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -42,6 +42,26 @@
 <li class=""><strong>Suggestion Engine</strong> – Provides context-aware word predictions</li>
 </ul>
 <p>Completed sentences are converted to speech using the <strong>Web Speech API</strong>, enabling real-time text-to-speech output.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="logging-and-analytics-components">Logging and Analytics Components<a href="#logging-and-analytics-components" class="hash-link" aria-label="Direct link to Logging and Analytics Components" title="Direct link to Logging and Analytics Components" translate="no">​</a></h2>
+<p>The system implements <strong>persistent cloud-based logging</strong> to track and analyze user interaction patterns:</p>
+<ul>
+<li class=""><strong>Suggestion Logger</strong> – Records all word predictions shown to users and their selection patterns</li>
+<li class=""><strong>Vocabulary Usage Tracker</strong> – Logs frequency and context of word/symbol usage</li>
+<li class=""><strong>Event Logger</strong> – Captures user interactions, session data, and communication patterns</li>
+</ul>
+<p><strong>Logging Flow:</strong></p>
+<ol>
+<li class="">Events captured locally in <strong>IndexedDB</strong> during offline sessions</li>
+<li class="">Automatic synchronization to <strong>cloud storage</strong> when connectivity resumes</li>
+<li class=""><strong>Cloud-based log aggregation</strong> for analytics and machine learning</li>
+<li class="">All data anonymized and privacy-protected according to user preferences</li>
+</ol>
+<p><strong>Cloud Analytics Services</strong> process logs to:</p>
+<ul>
+<li class="">Generate usage insights and reports</li>
+<li class="">Improve suggestion algorithms</li>
+<li class="">Identify vocabulary patterns for personalization</li>
+</ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="backend-architecture">Backend Architecture<a href="#backend-architecture" class="hash-link" aria-label="Direct link to Backend Architecture" title="Direct link to Backend Architecture" translate="no">​</a></h2>
 <p>The backend is developed using <strong>Node.js with Express</strong> (or alternatively <strong>Python with Flask</strong>) and exposes functionality through:</p>
 <ul>
@@ -52,19 +72,38 @@
 <ul>
 <li class="">User authentication via <strong>Google OAuth (SSO)</strong></li>
 <li class="">Vocabulary synchronization across devices</li>
+<li class=""><strong>Persistent storage and analysis of usage logs</strong></li>
+<li class=""><strong>Aggregation of suggestion effectiveness metrics</strong></li>
 <li class="">Usage analytics processing</li>
 <li class="">Personalization and preference management</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="data-storage">Data Storage<a href="#data-storage" class="hash-link" aria-label="Direct link to Data Storage" title="Direct link to Data Storage" translate="no">​</a></h2>
-<p>Data storage is divided into two main categories:</p>
+<p>The cloud-based data storage architecture includes:</p>
 <ul>
 <li class="">
-<p><strong>Databases (PostgreSQL or MongoDB)</strong></p>
+<p><strong>Managed Cloud Databases</strong> (e.g., AWS RDS PostgreSQL, Google Cloud SQL, Azure Cosmos DB)</p>
 <ul>
 <li class="">User profiles</li>
 <li class="">Custom vocabularies</li>
 <li class="">Usage history</li>
+<li class=""><strong>Suggestion interaction logs</strong></li>
+<li class=""><strong>Vocabulary usage statistics</strong></li>
 <li class="">Personalization data</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Cloud Object Storage</strong> (e.g., AWS S3, Google Cloud Storage, Azure Blob Storage)</p>
+<ul>
+<li class="">Symbol and image assets</li>
+<li class="">Audio files</li>
+<li class="">Backup archives</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Frontend Local Storage</strong></p>
+<ul>
+<li class=""><strong>IndexedDB</strong> for offline data caching</li>
+<li class=""><strong>Service Worker cache</strong> for application assets</li>
 </ul>
 </li>
 <li class="">
@@ -76,12 +115,19 @@
 </li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="external-services-and-integrations">External Services and Integrations<a href="#external-services-and-integrations" class="hash-link" aria-label="Direct link to External Services and Integrations" title="Direct link to External Services and Integrations" translate="no">​</a></h2>
-<p>The system integrates with several external services:</p>
+<p>The system integrates with:</p>
 <ul>
+<li class=""><strong>Cloud Provider Services</strong> (AWS/GCP/Azure)<!-- -->
+<ul>
+<li class="">Authentication services (can replace or complement Google OAuth)</li>
+<li class="">Cloud storage and databases</li>
+<li class="">Content Delivery Network (CDN)</li>
+<li class="">Monitoring and logging services</li>
+</ul>
+</li>
 <li class=""><strong>Google OAuth</strong> for secure authentication</li>
-<li class=""><strong>Cloud Backup Services</strong> for data preservation</li>
-<li class=""><strong>Analytics Services</strong> for usage tracking (with privacy safeguards)</li>
-<li class=""><strong>Content Delivery Network (CDN)</strong> for efficient delivery of static assets</li>
+<li class=""><strong>Cloud-native Backup Services</strong> for automated data preservation</li>
+<li class=""><strong>Analytics Services</strong> (e.g., Google Analytics, AWS CloudWatch) for usage tracking with privacy safeguards</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="design-priorities">Design Priorities<a href="#design-priorities" class="hash-link" aria-label="Direct link to Design Priorities" title="Direct link to Design Priorities" translate="no">​</a></h2>
 <p>The application is designed with a strong emphasis on:</p>
@@ -90,6 +136,6 @@
 <li class="">Offline functionality</li>
 <li class="">Personalization</li>
 </ul>
-<p>These priorities ensure the system meets the diverse communication needs of AAC users and supports caregivers in configuring and maintaining the experience.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/Capstone-Projects-2026-spring/project-smart-lang/edit/main/documentation/docs/requirements/system-block-diagram.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><details><summary>Revision History</summary><table><thead><tr><th scope="row">Author</th><th scope="row">Revision</th><th scope="row">Date</th></tr></thead><tbody><tr><td colspan="3" style="text-align:center;font-style:italic;color:#666">Loading...</td></tr></tbody></table></details><span class="theme-last-updated">Last updated<!-- --> by <b>Jason Jaya</b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/project-smart-lang/docs/requirements/system-overview"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">System Overview</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/project-smart-lang/docs/requirements/general-requirements"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">General Requirements</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#system-overview" class="table-of-contents__link toc-highlight">System Overview</a></li><li><a href="#frontend-architecture" class="table-of-contents__link toc-highlight">Frontend Architecture</a></li><li><a href="#communication-flow-components" class="table-of-contents__link toc-highlight">Communication Flow Components</a></li><li><a href="#backend-architecture" class="table-of-contents__link toc-highlight">Backend Architecture</a></li><li><a href="#data-storage" class="table-of-contents__link toc-highlight">Data Storage</a></li><li><a href="#external-services-and-integrations" class="table-of-contents__link toc-highlight">External Services and Integrations</a></li><li><a href="#design-priorities" class="table-of-contents__link toc-highlight">Design Priorities</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/project-smart-lang/docs/intro">Documentation</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/Capstone-Projects-2026-spring/project-smart-lang" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a class="footer__link-item" href="/project-smart-lang/tutorial/open-source-usage">Template Contributors</a></li></ul></div></div><div class="footer__bottom text--center"><div class="margin-bottom--sm"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--light_NVdE"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--dark_xIcU"></div><div class="footer__copyright">Copyright © 2026 Project Smart Lang, Inc. Built with Docusaurus.</div></div></div></footer></div>
+<p>These priorities ensure the system meets the diverse communication needs of AAC users and supports caregivers in configuring and maintaining the experience.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/Capstone-Projects-2026-spring/project-smart-lang/edit/main/documentation/docs/requirements/system-block-diagram.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"><details><summary>Revision History</summary><table><thead><tr><th scope="row">Author</th><th scope="row">Revision</th><th scope="row">Date</th></tr></thead><tbody><tr><td colspan="3" style="text-align:center;font-style:italic;color:#666">Loading...</td></tr></tbody></table></details><span class="theme-last-updated">Last updated<!-- --> by <b>Jason Jaya</b></span></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/project-smart-lang/docs/requirements/system-overview"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">System Overview</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/project-smart-lang/docs/requirements/general-requirements"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">General Requirements</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#system-overview" class="table-of-contents__link toc-highlight">System Overview</a></li><li><a href="#frontend-architecture" class="table-of-contents__link toc-highlight">Frontend Architecture</a></li><li><a href="#communication-flow-components" class="table-of-contents__link toc-highlight">Communication Flow Components</a></li><li><a href="#logging-and-analytics-components" class="table-of-contents__link toc-highlight">Logging and Analytics Components</a></li><li><a href="#backend-architecture" class="table-of-contents__link toc-highlight">Backend Architecture</a></li><li><a href="#data-storage" class="table-of-contents__link toc-highlight">Data Storage</a></li><li><a href="#external-services-and-integrations" class="table-of-contents__link toc-highlight">External Services and Integrations</a></li><li><a href="#design-priorities" class="table-of-contents__link toc-highlight">Design Priorities</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Docs</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/project-smart-lang/docs/intro">Documentation</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/Capstone-Projects-2026-spring/project-smart-lang" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a class="footer__link-item" href="/project-smart-lang/tutorial/open-source-usage">Template Contributors</a></li></ul></div></div><div class="footer__bottom text--center"><div class="margin-bottom--sm"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--light_NVdE"><img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg" alt="My Site Logo" class="footer__logo themedComponent_mlkZ themedComponent--dark_xIcU"></div><div class="footer__copyright">Copyright © 2026 Project Smart Lang, Inc. Built with Docusaurus.</div></div></div></footer></div>
 </body>
 </html>
