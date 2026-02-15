@@ -40,3 +40,9 @@ The AAC project uses a large library of symbols (SCLERA/Mulberry) and audio file
 
 * To get the latest image library, run npm run download-assets. This will add the images to /public/assets/symbols.
 * Localized JSON files for dictionaries are in /src/data/locales. Be careful not to overwrite the base schema.json.
+
+# 6. Running the App
+
+npm start
+
+The app should run on the local host port number. 
