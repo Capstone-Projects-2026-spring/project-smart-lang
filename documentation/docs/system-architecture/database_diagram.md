@@ -1,7 +1,7 @@
 ---
 id: database-diagram
 title: Database Diagram
-sidebar_label: Diagrams
+sidebar_label: Database Diagram
 ---
 
 # AAC Database Entity-Relation Diagram
@@ -20,7 +20,7 @@ erDiagram
         int user_id FK
         string first_name
         string last_name
-        string role
+        enum role  "CHILD, CAREGIVER"
     }
 
     VOCABULARY_CATEGORY {
@@ -40,7 +40,7 @@ erDiagram
         datetime last_used
         int position_x
         int position_y
-        string item_type
+        enum item_type  "LIBRARY, CUSTOM"  
         boolean is_suggestion_item
     }
 
