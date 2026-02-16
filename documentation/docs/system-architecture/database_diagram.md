@@ -1,10 +1,12 @@
 ---
 id: database-diagram
 title: Database Diagram
-sidebar_label: Database Diagrams
+sidebar_label: Database Diagram
 ---
 
-# AAC Database Entity-Relation Diagram
+# AAC Database Diagram
+
+## Entity-Relationship Diagram
 
 ```mermaid
 erDiagram
@@ -20,7 +22,7 @@ erDiagram
         int user_id FK
         string first_name
         string last_name
-        string role
+        enum role  "CHILD, CAREGIVER"
     }
 
     VOCABULARY_CATEGORY {
@@ -40,7 +42,7 @@ erDiagram
         datetime last_used
         int position_x
         int position_y
-        string item_type
+        enum item_type  "LIBRARY, CUSTOM"  
         boolean is_suggestion_item
     }
 
@@ -79,3 +81,8 @@ erDiagram
     AUDIO |o--|| SYMBOL : "connected to"
     USER_PROFILE ||--|| USER : "has"
 ```
+
+## Table Design
+
+![Alt text](/img/entity_tables.png)
+
