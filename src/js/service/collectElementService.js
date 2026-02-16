@@ -387,9 +387,9 @@ async function updateCollectElements(isSecondTry) {
     );
     let darkMode =
       metadata.colorConfig.elementBackgroundColor ===
-      constants.DEFAULT_ELEMENT_BACKGROUND_COLOR_DARK;
+      constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR;
     let backgroundColor = darkMode
-      ? constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR_DARK
+      ? constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR
       : constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR;
     let textColor = darkMode
       ? constants.DEFAULT_ELEMENT_FONT_COLOR_DARK

@@ -5,7 +5,7 @@
         v-for="(tile, index) in suggestions"
         :key="index"
         class="prediction-tile"
-        :style="{ backgroundColor: tile.backgroundColor || '#ffffff' }"
+        :style="{ backgroundColor: '#ffffff' }"
         @click="selectTile(tile)"
         :aria-label="'Predicted tile: ' + tile.label"
         role="button"
@@ -93,8 +93,8 @@ export default {
   background: #e8ecf0;
   border-bottom: 2px solid #bbb;
   flex-shrink: 0;
-  min-height: 80px;
-  max-height: 100px;
+  min-height: 150px;
+  max-height: 150px;
   align-items: stretch;
   overflow-x: auto;
   overflow-y: hidden;
@@ -135,7 +135,7 @@ export default {
 }
 
 .tile-img {
-  max-height: 55px;
+  max-height: 100px;
   max-width: 100%;
   object-fit: contain;
 }
