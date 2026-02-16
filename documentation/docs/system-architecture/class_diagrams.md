@@ -1,7 +1,7 @@
 ---
 id: architecture-diagrams
 title: Architecture Diagrams
-sidebar_label: Diagrams
+sidebar_label: Architecture Diagrams
 ---
 
 # Architecture Diagrams
@@ -35,5 +35,6 @@ This diagram represents the core domain entities of the AAC system. A `User` own
 `UsageLog` entities track interaction history for analytics and potential adaptive features. Together, these classes define the core data model and relationships that drive application behavior.
 
 ---
+
 
 
