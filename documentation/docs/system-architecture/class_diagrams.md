@@ -35,6 +35,3 @@ This diagram represents the core domain entities of the AAC system. A `User` own
 `UsageLog` entities track interaction history for analytics and potential adaptive features. Together, these classes define the core data model and relationships that drive application behavior.
 
 ---
-
-
-
