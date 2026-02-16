@@ -6,16 +6,20 @@ sidebar_position: 4
 
 ## Functional Requirements
     
-* The user will see the primary interface upon opening the application.
+* User will be able to use AAC Grid upon opening interface
   * The user will be able to see the constructed sentence built from their selected word tiles.
-  * The user will be able to delete word tiles from the sentence or clear the entire sentence.
+  * The user will be able to delete word tiles from the sentence bar or clear the entire sentence bar.
   * The system will use text to speech and user will be able to play audio output of the constructed sentence.
-  * The system will able to save word tiles the user have used in the past.
-  * The system will suggest word tiles.
-    
-* Users will be able to customize the tile board.
-  * Users or caregivers will able to add, delete, and customize word tiles.
   * The system will allow for users to have multiple saved boards and have category-based navigation between them.
+
+* The system will have next word suggestions
+  * The system will track word tile usage and unused word tiles.
+  * User will be able to regenerate next word suggestions.
+    
+* Caregiver will have tools for vocabulary management 
+  * Caregivers will be able to add custom word tiles or remove word tiles.
+  * Caregivers will be able to select word tiles to add to grid from vocabulary library.
+  * Caregivers will be able to give personalized word suggestions to next word suggestion generator.
 
 * Users will be able to create a user profile with an email and password.
   * Users are not required to have a registered account.

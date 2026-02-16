@@ -1,10 +1,10 @@
 ---
 id: database-diagram
-title: Database
-sidebar_label: Database
+title: Database Diagram
+sidebar_label: Database Diagram
 ---
 
-# AAC Database
+# AAC Database Diagram
 
 ## Entity-Relationship Diagram
 
