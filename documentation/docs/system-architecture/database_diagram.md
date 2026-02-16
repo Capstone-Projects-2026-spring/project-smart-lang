@@ -1,7 +1,7 @@
 ---
 id: database-diagram
 title: Database Diagram
-sidebar_label: Diagrams
+sidebar_label: Database Diagrams
 ---
 
 # AAC Database Entity-Relation Diagram
