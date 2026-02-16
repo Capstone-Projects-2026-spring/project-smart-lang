@@ -1,10 +1,12 @@
 ---
 id: database-diagram
-title: Database Diagram
-sidebar_label: Database Diagram
+title: Database
+sidebar_label: Database
 ---
 
-# AAC Database Entity-Relation Diagram
+# AAC Database
+
+## Entity-Relationship Diagram
 
 ```mermaid
 erDiagram
@@ -79,3 +81,8 @@ erDiagram
     AUDIO |o--|| SYMBOL : "connected to"
     USER_PROFILE ||--|| USER : "has"
 ```
+
+## Table Design
+
+![Alt text](/img/entity_tables.png)
+
