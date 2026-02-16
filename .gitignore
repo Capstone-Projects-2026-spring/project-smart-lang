@@ -1,5 +1,10 @@
+# Dependencies
+node_modules/
+package-lock.json
+
 # Generated files
 .docusaurus
+build/
 
 # Misc
 .DS_Store
