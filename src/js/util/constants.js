@@ -103,8 +103,7 @@ constants.VOICE_TYPE_EXTERNAL_DATA = "VOICE_TYPE_EXTERNAL_DATA";
 constants.VOICE_DEVICE_DEFAULT = "VOICE_DEVICE_DEFAULT";
 
 constants.GRIDSET_FOLDER = "app/gridsets/";
-constants.BOARDS_REPO_BASE_URL =
-  "https://asterics.github.io/AsTeRICS-Grid-Boards/";
+constants.BOARDS_REPO_BASE_URL = "";
 
 constants.BOARD_TYPE_SELFCONTAINED = "BOARD_TYPE_SELFCONTAINED";
 constants.BOARD_TYPE_SINGLE = "BOARD_TYPE_SINGLE";

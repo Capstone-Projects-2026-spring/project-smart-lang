@@ -15,17 +15,17 @@ Users interact with the system through tablets, desktop computers, or mobile dev
 
 ## Frontend Architecture
 
-The frontend is built using **React** with **HTML5** and **JavaScript** and consists of two primary interfaces:
+The frontend is built using **Vue 2.7** with **HTML5** and **JavaScript** and consists of two primary interfaces:
 
-- **AAC Grid UI**  
+- **AAC Grid UI**
   Designed for communication users to select symbols and construct messages.
 
-- **Caregiver Interface**  
+- **Caregiver Interface**
   Used for configuration, vocabulary management, and system personalization.
 
 The frontend follows an **offline-first architecture** using:
-- **IndexedDB** for local data storage  
-- **Service Workers** for caching and offline access  
+- **PouchDB** (IndexedDB-backed) for local data storage
+- **Service Workers** (via Workbox) for caching and offline access
 
 This allows users to continue communicating even without an active internet connection.
 
@@ -33,37 +33,29 @@ This allows users to continue communicating even without an active internet conn
 
 Several core components work together to support message creation:
 
-- **Word Selection Handler** – Processes symbol and word selections  
-- **Sentence Builder** – Constructs complete messages from selected words  
-- **Suggestion Engine** – Provides context-aware word predictions  
+- **Word Selection Handler** – Processes symbol and word selections
+- **Sentence Builder** – Constructs complete messages from selected words
+- **Suggestion Engine** – Provides context-aware word predictions
 
 Completed sentences are converted to speech using the **Web Speech API**, enabling real-time text-to-speech output.
 
 ## Logging and Analytics Components
 
-The system implements **persistent cloud-based logging** to track and analyze user interaction patterns:
+The system tracks user interaction patterns locally:
 
-- **Suggestion Logger** – Records all word predictions shown to users and their selection patterns
-- **Vocabulary Usage Tracker** – Logs frequency and context of word/symbol usage
-- **Event Logger** – Captures user interactions, session data, and communication patterns
+- **UsageLog** – Records tile usage frequency and context for the client-side prediction engine
 
 **Logging Flow:**
-1. Events captured locally in **IndexedDB** during offline sessions
-2. Automatic synchronization to **cloud storage** when connectivity resumes
-3. **Cloud-based log aggregation** for analytics and machine learning
-4. All data anonymized and privacy-protected according to user preferences
-
-**Cloud Analytics Services** process logs to:
-- Generate usage insights and reports
-- Improve suggestion algorithms
-- Identify vocabulary patterns for personalization
+1. Events captured locally in **PouchDB** during all sessions
+2. Data used by the client-side n-gram prediction engine to improve word suggestions
+3. Optional synchronization to **CouchDB** when cloud sync is configured
 
 ## Backend Architecture
 
-The backend is developed using **Node.js with Express** (or alternatively **Python with Flask**) and exposes functionality through:
+The application does **not** use a custom backend server. Instead, it relies on:
 
-- **REST APIs** for standard data operations  
-- **Optional WebSocket connections** for real-time features  
+- **CouchDB** as a remote database for optional cloud sync (via PouchDB replication)
+- **superlogin-client** for user authentication (username/password registration and login)
 
 Backend responsibilities include:
 - User authentication via **Google OAuth (SSO)**
@@ -75,48 +67,40 @@ Backend responsibilities include:
 
 ## Data Storage
 
-The cloud-based data storage architecture includes:
+The data storage architecture includes:
 
-- **Managed Cloud Databases** (e.g., AWS RDS PostgreSQL, Google Cloud SQL, Azure Cosmos DB)
-  - User profiles  
-  - Custom vocabularies  
-  - Usage history  
-  - **Suggestion interaction logs**
-  - **Vocabulary usage statistics**
-  - Personalization data  
+- **PouchDB (Local Browser Storage)**
+  - User grids and board configurations (GridData documents)
+  - Grid element definitions (GridElement documents)
+  - Board metadata and settings (MetaData documents)
+  - Images and symbols (GridImage documents)
+  - Encrypted data wrappers (EncryptedObject documents)
+  - Usage history for prediction
 
-- **Cloud Object Storage** (e.g., AWS S3, Google Cloud Storage, Azure Blob Storage)
-  - Symbol and image assets  
-  - Audio files  
-  - Backup archives
+- **CouchDB (Optional Remote Sync)**
+  - Mirrors local PouchDB data for cross-device synchronization
+  - User authentication via superlogin
 
-- **Frontend Local Storage**
-  - **IndexedDB** for offline data caching
-  - **Service Worker cache** for application assets
-
-- **File Storage**  
-  - Symbol and image assets  
-  - Audio files  
+- **Service Worker Cache**
+  - Application assets (JS bundles, CSS, fonts, icons)
+  - ARASAAC pictogram images (cached on first fetch)
 
 ## External Services and Integrations
 
 The system integrates with:
 
-- **Cloud Provider Services** (AWS/GCP/Azure)
-  - Authentication services (can replace or complement Google OAuth)
-  - Cloud storage and databases
-  - Content Delivery Network (CDN)
-  - Monitoring and logging services
-  
-- **Google OAuth** for secure authentication  
-- **Cloud-native Backup Services** for automated data preservation  
-- **Analytics Services** (e.g., Google Analytics, AWS CloudWatch) for usage tracking with privacy safeguards
+- **ARASAAC API** for pictogram/symbol search and retrieval
+- **CouchDB** for optional cloud data synchronization
+- **superlogin** for user registration and authentication
+- **ResponsiveVoice** as a complementary text-to-speech engine
+- **Google OAuth** (planned) for SSO authentication alongside superlogin
+- **ElevenLabs** (planned) for premium AI-powered voice synthesis
 
 ## Design Priorities
 
 The application is designed with a strong emphasis on:
-- Accessibility  
-- Offline functionality  
-- Personalization  
+- Accessibility
+- Offline functionality
+- Personalization
 
 These priorities ensure the system meets the diverse communication needs of AAC users and supports caregivers in configuring and maintaining the experience.

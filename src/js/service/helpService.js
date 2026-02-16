@@ -1,15 +1,14 @@
 import { i18nService } from './i18nService';
 
 let helpService = {};
-//let HELP_BASE_PATH = 'https://github.com/asterics/AsTeRICS-Grid/blob/master/docs/documentation_user/';
 // TODO: replace with self-hosted documentation URL
-let HELP_BASE_PATH = 'https://www.asterics.eu/manuals/asterics-grid/';
+let HELP_BASE_PATH = '#';
 let GOOGLE_TRANSLATE_BASE_PATH = 'https://translate.google.com/translate?sl=en&tl=de&u=';
 //let HELP_FILE_POSTFIX = '.md';
 let HELP_FILE_POSTFIX = '.html';
 
 let _initHelpFile = '';
-let _initHash = '#asterics-grid-user-documentation';
+let _initHash = '#user-documentation';
 let _helpFile = _initHelpFile;
 let _helpHash = _initHash;
 let _lastHelpFile = _helpFile;

@@ -10,27 +10,21 @@ This section describes the primary system components and their interfaces. Refer
 
 ## Vue (Frontend Application)
 
-Vue is a progressive JavaScript framework used to build the client-side interface of the application. It manages reactive state, component rendering, and user interactions. The application is structured as a single-page application (SPA) and runs entirely in the browser.
+Vue is a progressive JavaScript framework used to build the client-side interface of the application. It manages reactive state, component rendering, and user interactions. The application is structured as a single-page application (SPA) using Vue 2.7 and runs entirely in the browser.
 
-Vue communicates with external services (such as ElevenLabs) and local storage (PouchDB) through service modules. These service layers abstract speech synthesis, data persistence, and network communication from the UI components, improving modularity and maintainability.
+Vue communicates with local storage (PouchDB) and speech services through service modules. These service layers abstract speech synthesis, data persistence, and network communication from the UI components, improving modularity and maintainability. Application state is managed through a custom stateService.js module, and routing is handled by the Navigo library.
 
 ## PouchDB (Local Offline Storage)
 
 PouchDB is a browser-based NoSQL database that enables offline-first data storage. It stores user data locally, including vocabulary sets, board configurations, user preferences, and usage history.
 
-When connectivity is available, PouchDB can synchronize with a remote database (if configured). This allows the application to function without internet access while maintaining eventual consistency once the network is restored.
+When connectivity is available, PouchDB can synchronize with a remote CouchDB database. This allows the application to function without internet access while maintaining eventual consistency once the network is restored.
 
 ## Browser SpeechSynthesis (Web Speech API)
 
 The built-in browser SpeechSynthesis API provides native text-to-speech functionality without relying on external services. It offers low-latency speech generation directly within the client environment.
 
-This component serves as a fallback or lightweight alternative to ElevenLabs, reducing external API usage and ensuring basic speech functionality is available even when the application is offline.
-
-## ElevenLabs (Cloud Text-to-Speech Service)
-
-ElevenLabs is a cloud-based text-to-speech (TTS) service that provides high-quality neural voice synthesis. The application sends text payloads to the ElevenLabs API and receives streamed or buffered audio responses.
-
-This service is used when higher fidelity or more natural-sounding speech output is required. API keys and request configuration are handled securely through environment variables or, if necessary, through a proxy layer to avoid exposing credentials in the client.
+This component serves as the primary speech engine and provides basic speech functionality even when the application is offline. It is complemented by ResponsiveVoice for broader language coverage, with ElevenLabs integration planned for higher-quality voice synthesis.
 
 ## ARASAAC (Pictogram Library)
 
@@ -54,7 +48,7 @@ When the application detects a new version, it notifies the user and applies the
 
 The application provides optional cloud synchronization through CouchDB, enabling users to access their grids and settings across multiple devices. The sync service uses the superlogin-client library for authentication and establishes secure connections to a remote CouchDB instance.
 
-When cloud sync is enabled, PouchDB automatically replicates local changes to the remote database and vice versa, providing conflict resolution and eventual consistency. Users can register an account, log in, and enable bidirectional sync while maintaining full offline functionality. The service connects to login1.couchdb.asterics-foundation.org in production environments.
+When cloud sync is enabled, PouchDB automatically replicates local changes to the remote database and vice versa, providing conflict resolution and eventual consistency. Users can register an account, log in, and enable bidirectional sync while maintaining full offline functionality.
 
 ## ResponsiveVoice TTS Service
 
@@ -66,19 +60,27 @@ ResponsiveVoice voices are automatically detected and made available in the voic
 
 The application includes a configurable external speech service framework (speechServiceExternal.js) that allows integration with any HTTP-based text-to-speech provider. Users can specify a custom TTS endpoint URL via application settings, enabling the use of premium or specialized speech services.
 
-The external service API supports two voice types: streaming playback (where audio is played directly by the remote server) and data-based playback (where audio data is returned to the client). The framework implements voice discovery, caching, playback control, and status checking through standardized REST endpoints. This architecture enables future integration with services like ElevenLabs, Google Cloud TTS, or custom TTS infrastructure.
+The external service API supports two voice types: streaming playback (where audio is played directly by the remote server) and data-based playback (where audio data is returned to the client). The framework implements voice discovery, caching, playback control, and status checking through standardized REST endpoints. This architecture enables future integration with services like Google Cloud TTS or custom TTS infrastructure.
+
+## ElevenLabs (Planned Integration)
+
+ElevenLabs is a premium AI-powered text-to-speech service that offers high-quality, natural-sounding voice synthesis with support for multiple languages and voice cloning. Integration with ElevenLabs is planned as an additional speech provider within the External Speech Service framework. Once implemented, users will be able to select ElevenLabs voices alongside browser-native and ResponsiveVoice options for enhanced speech quality.
+
+## Google OAuth (Planned Integration)
+
+Google OAuth is planned as an additional authentication method alongside the existing superlogin username/password system. Once implemented, users will be able to sign in with their Google account via OAuth 2.0 SSO, providing a simplified login experience and reducing the need for separate credentials. The OAuth flow will complement the existing superlogin-client authentication, not replace it.
 
 ## HTTP REST Action Service
 
 The HTTP REST Action Service (httpService.js) enables grid elements to trigger arbitrary HTTP requests to external APIs and web services. This component supports GET, POST, PUT, and DELETE methods with configurable headers, authentication, and request bodies.
 
-To handle CORS restrictions, the service can route requests through a CORS proxy at proxy.asterics-foundation.org. This functionality allows AAC grids to control smart home devices, interact with web services, trigger webhooks, or retrieve external data. Response data can be displayed in live elements or used to trigger conditional actions, making the communication device extensible to any HTTP-compatible system.
+To handle CORS restrictions, the service can route requests through a configurable CORS proxy. This functionality allows AAC grids to control smart home devices, interact with web services, trigger webhooks, or retrieve external data. Response data can be displayed in live elements or used to trigger conditional actions, making the communication device extensible to any HTTP-compatible system.
 
-## Cloud Board Repository Service
+## Board Repository Service
 
-The Board Repository Service (boardService.js) provides access to a curated collection of pre-made communication boards hosted on GitHub. Users can browse, preview, and import board templates from asterics.github.io/AsTeRICS-Grid-Boards, significantly reducing setup time for new users.
+The Board Repository Service (boardService.js) provides the structure for accessing pre-made communication board templates. Users can browse, preview, and import board templates to reduce setup time.
 
-The repository serves metadata files describing available boards, their categories, languages, and intended user groups. Boards are designed by the community and cover common communication scenarios, age groups, and topic areas. The service fetches board definitions remotely and imports them into the local PouchDB database, where they can be customized and personalized by the user.
+The repository serves metadata files describing available boards, their categories, languages, and intended user groups. Boards cover common communication scenarios, age groups, and topic areas. The service imports board definitions into the local PouchDB database, where they can be customized and personalized by the user.
 
 ## Live Element Service
 

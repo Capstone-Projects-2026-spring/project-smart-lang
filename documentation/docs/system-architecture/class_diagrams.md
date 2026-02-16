@@ -17,7 +17,7 @@ This section documents the key architectural diagrams for the AAC system. These 
 />
 
 
-This diagram illustrates the Vue-based frontend architecture of the AAC system. State is centralized in the Store, UI components compose the `AACBoard`, and service layers abstract speech synthesis and offline persistence. The `SpeechService` implements the Strategy pattern to allow dynamic selection between different speech engines (for example, the browser SpeechSynthesis API and the ElevenLabs service).
+This diagram illustrates the Vue-based frontend architecture of the AAC system. State is managed through a custom stateService.js module, UI components compose the `AACBoard`, and service layers abstract speech synthesis and offline persistence. The `SpeechService` implements the Strategy pattern to allow dynamic selection between different speech engines (for example, the browser SpeechSynthesis API, ResponsiveVoice, configurable external speech services, and ElevenLabs as a planned integration).
 
 This layered structure improves separation of concerns by keeping presentation logic, state management, and infrastructure services decoupled from one another.
 

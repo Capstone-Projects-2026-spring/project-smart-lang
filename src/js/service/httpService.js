@@ -46,7 +46,7 @@ async function doActionInternal(action) {
         let url = new URL(action.restUrl);
         if (action.useCorsProxy) {
             // TODO: replace with self-hosted CORS proxy
-            url = new URL('https://proxy.asterics-foundation.org/proxy_nofilter.php');
+            url = new URL('https://YOUR-CORS-PROXY.example.com');
             url.searchParams.append('csurl', action.restUrl);
         }
         const response = await fetch(url, requestOptions);

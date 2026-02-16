@@ -4,78 +4,106 @@ title: Database Diagram
 sidebar_label: Database Diagrams
 ---
 
-# AAC Database Entity-Relation Diagram
+# AAC Database - Document Model
+
+The application uses PouchDB (a browser-based NoSQL database) for local storage, with optional CouchDB synchronization for cloud backup. Data is stored as JSON documents rather than in relational tables.
+
+## Core Document Types
+
+### GridData
+Represents a complete communication grid (board). Each grid contains an array of grid elements arranged in a layout.
+
+```
+GridData {
+  id: string                  // unique identifier
+  modelName: "GridData"
+  modelVersion: string        // schema version
+  label: object | string      // grid name (locale map or plain string)
+  rowCount: number            // number of rows in grid layout
+  minColumnCount: number      // minimum columns in grid layout
+  gridElements: GridElement[] // array of elements in the grid
+  isGlobal: boolean           // whether this is the global/home grid
+}
+```
+
+### GridElement
+Represents a single tile/cell within a grid. Elements can be normal communication tiles, collect elements, prediction elements, or live data elements.
+
+```
+GridElement {
+  id: string
+  modelName: "GridElement"
+  width: number               // tile width in grid units
+  height: number              // tile height in grid units
+  x: number                   // grid position x
+  y: number                   // grid position y
+  label: object | string      // display text (locale map or string)
+  type: string                // ELEMENT_TYPE_NORMAL | ELEMENT_TYPE_COLLECT |
+                              // ELEMENT_TYPE_PREDICTION | ELEMENT_TYPE_LIVE
+  image: GridImage             // optional image for the tile
+  actions: object[]           // array of actions triggered on selection
+  backgroundColor: string     // tile background color
+  borderColor: string         // tile border color
+  fontColor: string           // text color
+  hidden: boolean             // whether element is hidden
+  colorCategory: string       // color coding category
+}
+```
+
+### MetaData
+Stores user-level settings and configuration.
+
+```
+MetaData {
+  id: string
+  modelName: "MetaData"
+  inputConfig: object         // input method configuration
+  colorConfig: object         // color scheme settings
+  textConfig: object          // text display settings
+  notificationConfig: object  // notification preferences
+  locked: boolean             // whether UI is locked
+}
+```
+
+### GridImage
+Image data associated with a grid element.
+
+```
+GridImage {
+  id: string
+  data: string                // base64-encoded image data or URL
+  author: string              // image attribution
+  authorURL: string           // author link
+}
+```
+
+### EncryptedObject
+Wrapper for encrypted data stored in CouchDB.
+
+```
+EncryptedObject {
+  id: string
+  modelName: "EncryptedObject"
+  encryptedDataBase64: string  // AES-encrypted JSON payload
+  modelVersionShort: string    // short version for metadata
+}
+```
+
+## Document Relationships
 
 ```mermaid
 erDiagram
-    USER {
-        int user_id PK
-        string email
-        string auth_provider
-        datetime last_login
-        date date_joined
-    }
-
-    USER_PROFILE {
-        int user_id FK
-        string first_name
-        string last_name
-        string role
-    }
-
-    VOCABULARY_CATEGORY {
-        int vocab_id PK
-        int user_id FK
-        int symbol_id FK
-        string label
-    }
-
-    VOCABULARY_ITEM {
-        int item_id PK
-        int user_id FK
-        int vocab_id FK
-        int symbol_id FK
-        string label
-        int usage_count
-        datetime last_used
-        int position_x
-        int position_y
-        string item_type
-        boolean is_suggestion_item
-    }
-
-    CUSTOM_ITEM {
-        int item_id PK
-        datetime created_at
-    }
-
-    SUGGESTION_ITEM {
-        int suggestion_item_id PK
-        int item_id FK
-        int suggestion_weight
-        date date_start
-        date date_end
-        time time_start
-        time time_end
-    }
-
-    SYMBOL {
-        int symbol_id PK
-        string image_url
-    }
-
-    AUDIO {
-        int audio_id PK
-        int symbol_id FK
-        string audio_url
-    }
-
-    USER ||--|{ VOCABULARY_ITEM : "includes"
-    USER ||--o{ VOCABULARY_CATEGORY : "includes"
-    VOCABULARY_ITEM }|--|| VOCABULARY_CATEGORY : "part of"
-    VOCABULARY_ITEM ||--o| CUSTOM_ITEM : "is item"
-    VOCABULARY_ITEM ||--o| SUGGESTION_ITEM : "is item"
-    SYMBOL ||--|| VOCABULARY_ITEM : "connected to"
-    AUDIO |o--|| SYMBOL : "connected to"
-    USER_PROFILE ||--|| USER : "has"
+    USER ||--|{ GridData : "owns"
+    USER ||--|| MetaData : "has settings"
+    GridData ||--|{ GridElement : "contains"
+    GridElement ||--o| GridImage : "displays"
+    GridElement ||--|{ Action : "triggers"
 ```
+
+## Storage Architecture
+
+- **Local**: PouchDB stores documents in IndexedDB within the browser
+- **Remote** (optional): CouchDB instance for cross-device synchronization
+- **Encryption**: All remote data is AES-encrypted using SJCL before sync
+- **Authentication**: superlogin-client handles user registration and login
+- **Prediction Model**: Stored separately in localStorage as JSON (~50KB)

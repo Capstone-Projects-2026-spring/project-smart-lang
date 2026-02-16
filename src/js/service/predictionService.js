@@ -46,6 +46,14 @@ let _saveTimer = null;
 // lowercase label → { label, imageUrl, backgroundColor }
 let _tileMap = new Map();
 
+// Default tiles shown when the collect bar is empty (in priority order).
+// This list is used directly by getSuggestions() and bypasses unigram scores,
+// ensuring curated defaults always appear regardless of bootstrap inflation.
+let _defaultSuggestionLabels = [
+  "I", "WANT", "HELP", "I LIKE IT", "I DON'T LIKE IT", "STOP",
+  "GIVE ME", "REST", "MORE", "YES", "NO", "OK"
+];
+
 // ── Legacy stubs (called by collectElementService, gridView, etc.) ──
 // These are no-ops — the old prediction-element system is unused.
 predictionService.predict = function () {};
@@ -127,6 +135,22 @@ predictionService.buildTileLabels = async function () {
 predictionService.getSuggestions = function (input, count) {
   let desired = count || 6;
   let words = _tokenize(input);
+
+  // When the collect bar is empty, return curated default suggestions
+  // directly instead of using unigram scores (which are inflated by
+  // bootstrap templates and would bury multi-word tiles like I LIKE IT).
+  if (words.length === 0) {
+    let results = [];
+    for (let label of _defaultSuggestionLabels) {
+      let tile = _tileMap.get(label);
+      if (tile) {
+        results.push(tile);
+        if (results.length >= desired) break;
+      }
+    }
+    return results;
+  }
+
   let candidates = {}; // word -> score
 
   // 1) Trigram lookup: last two words
@@ -351,6 +375,28 @@ function _bootstrap(grids) {
       starters: [["I", "WANT"]],
       cats: ["TRANSPORTS", "LEISURE", "SPORTS", "EVENTS"],
     },
+    // Negation patterns (AAC users say "I NO WANT" instead of "I don't want")
+    {
+      starters: [["I", "NO"]],
+      cats: ["VERBS"],
+    },
+    {
+      starters: [["NO"]],
+      cats: ["FOOD", "DRINKS", "TOYS", "CLOTHES"],
+    },
+    // WANT → objects (without "I" prefix)
+    {
+      starters: [["WANT"]],
+      cats: ["FOOD", "DRINKS", "TOYS", "CLOTHES", "OBJECTS"],
+    },
+    // IT HURTS → body parts
+    {
+      starters: [["IT", "HURTS"]],
+      cats: ["BODY"],
+    },
+    // EAT/DRINK → specific items
+    { starters: [["EAT"]], cats: ["FOOD"] },
+    { starters: [["DRINK"]], cats: ["DRINKS"] },
   ];
 
   for (let tmpl of templates) {
@@ -361,7 +407,7 @@ function _bootstrap(grids) {
         for (let starter of tmpl.starters) {
           // Teach the full chain: e.g. ["I", "WANT", "PIZZA"]
           let sentence = [...starter, child];
-          _learnSentence(sentence, 2);
+          _learnSentence(sentence, 1);
           count++;
         }
       }
@@ -375,44 +421,214 @@ function _bootstrap(grids) {
     }
   }
 
-  // Common starters: what follows "I", "YOU", etc.
+  // Auto-discover verb tiles that exist in the grid and seed them
+  let verbTiles = [
+    "EAT", "DRINK", "GO", "LISTEN", "SEE", "SMELL", "MAKE",
+    "TALK TO", "HAVE", "GIVE", "WEAR", "SLEEP", "PLAY", "BUY",
+    "VISIT", "TRAVEL", "COME", "RETURN", "THINK", "CRY", "LAUGH",
+    "DISCUSS", "CELEBRATE", "WAIT"
+  ];
+  for (let verb of verbTiles) {
+    if (_tileMap.has(verb)) {
+      _learnBigram("WANT", verb, 3);
+      _learnBigram("I", verb, 2);
+      _learnBigram("NO", verb, 2);
+    }
+  }
+
+  // ── Comprehensive bigram patterns ────────────────────────────────
   let starterBigrams = [
+    // After I → verbs and common continuations
     ["I", "WANT", 10],
     ["I", "LIKE", 8],
-    ["I", "FEEL", 5],
-    ["I", "AM", 5],
-    ["I", "SEE", 4],
-    ["I", "NEED", 4],
+    ["I", "NO", 7],
+    ["I", "FEEL", 6],
+    ["I", "AM", 6],
+    ["I", "SEE", 5],
+    ["I", "HAVE", 4],
+    ["I", "MAKE", 3],
+    ["I", "THINK", 3],
+
+    // After YOU → verbs directed at another person
     ["YOU", "WANT", 4],
     ["YOU", "LIKE", 4],
     ["YOU", "ARE", 3],
+    ["YOU", "HAVE", 3],
+
+    // Multi-word tile internal bigrams (so the tokenized words connect)
     ["GIVE", "ME", 8],
-    ["TALK", "TO", 5],
-    ["GO", "TO", 5],
-    ["COME", "BACK", 4],
-    ["ABOUT", "ME", 3],
-    ["I DON'T LIKE", "IT", 3],
-    ["I LIKE", "IT", 3],
+    ["TALK", "TO", 6],
+    ["GO", "TO", 6],
+    ["COME", "BACK", 5],
+    ["ABOUT", "ME", 4],
+    ["IT", "HURTS", 5],
+    ["DON'T", "LIKE", 4],
+    ["LIKE", "IT", 4],
+
+    // After WANT → action verbs
+    ["WANT", "EAT", 6],
+    ["WANT", "DRINK", 6],
+    ["WANT", "PLAY", 5],
+    ["WANT", "GO", 5],
+    ["WANT", "REST", 5],
+    ["WANT", "HELP", 5],
+    ["WANT", "SLEEP", 4],
+    ["WANT", "MAKE", 4],
+    ["WANT", "SEE", 4],
+    ["WANT", "LISTEN", 3],
+    ["WANT", "COME", 3],
+
+    // Negation patterns
+    ["NO", "MORE", 5],
+    ["NO", "WANT", 5],
+    ["NO", "STOP", 4],
+    ["NO", "I", 3],
+    ["NO", "BAD", 3],
+
+    // After STOP → follow-ups
+    ["STOP", "IT", 4],
+    ["STOP", "NO", 3],
+    ["STOP", "I", 2],
+
+    // After YES → continuation
+    ["YES", "MORE", 4],
+    ["YES", "I", 3],
+    ["YES", "WANT", 3],
+
+    // After OK → continuation
+    ["OK", "I", 3],
+    ["OK", "WANT", 3],
+    ["OK", "YES", 2],
+
+    // After BAD → reactions
+    ["BAD", "HELP", 3],
+    ["BAD", "STOP", 3],
+    ["BAD", "I", 3],
+
+    // After HELP → follow-ups
+    ["HELP", "I", 3],
+    ["HELP", "WANT", 3],
+    ["HELP", "STOP", 2],
+
+    // After MORE → what do you want more of
+    ["MORE", "I", 2],
+    ["MORE", "WANT", 2],
+    ["MORE", "YES", 2],
+
+    // After REST → continuation
+    ["REST", "I", 2],
+    ["REST", "YES", 2],
+    ["REST", "MORE", 2],
+
+    // ── Trailing-word follow-ups for multi-word tiles ──────────────
+    // After "I LIKE IT" or "I DON'T LIKE IT" → last token is "IT"
+    ["IT", "MORE", 3],
+    ["IT", "YES", 3],
+    ["IT", "I", 2],
+    ["IT", "WANT", 2],
+    ["IT", "NO", 2],
+    ["IT", "STOP", 2],
+
+    // After "COME BACK" → last token is "BACK"
+    ["BACK", "I", 2],
+    ["BACK", "WANT", 2],
+    ["BACK", "YES", 2],
+
+    // After feelings tiles → reactions
+    ["HAPPY", "I", 2],
+    ["HAPPY", "YES", 2],
+    ["HAPPY", "MORE", 2],
+    ["SAD", "HELP", 3],
+    ["SAD", "I", 2],
+    ["SAD", "BAD", 2],
+    ["ANGRY", "STOP", 3],
+    ["ANGRY", "NO", 3],
+    ["ANGRY", "HELP", 2],
+    ["TIRED", "REST", 4],
+    ["TIRED", "SLEEP", 3],
+    ["TIRED", "I", 2],
+    ["SICK", "HELP", 4],
+    ["SICK", "BAD", 3],
+    ["NERVOUS", "HELP", 3],
+    ["NERVOUS", "I", 2],
+    ["CONFUSED", "HELP", 3],
+    ["WORRIED", "HELP", 3],
   ];
   for (let [w1, w2, n] of starterBigrams) {
     _learnBigram(w1, w2, n);
   }
 
-  // Unigram starters (shown when collect bar is empty)
-  let defaultStarters = {
-    I: 20,
-    YOU: 10,
-    YES: 8,
-    NO: 8,
-    HELP: 7,
-    STOP: 6,
-    OK: 5,
-    WANT: 5,
-    MORE: 5,
-    "GIVE ME": 4,
-  };
-  for (let [w, n] of Object.entries(defaultStarters)) {
-    _unigrams[w] = (_unigrams[w] || 0) + n;
+  // ── Explicit trigrams for key multi-word sequences ───────────────
+  // After "I LIKE IT" or "I DON'T LIKE IT" (trigram LIKE|IT)
+  _learnTrigram("LIKE", "IT", "MORE", 3);
+  _learnTrigram("LIKE", "IT", "YES", 2);
+  _learnTrigram("LIKE", "IT", "I", 2);
+
+  // After "I WANT" → common verbs (trigram I|WANT)
+  _learnTrigram("I", "WANT", "EAT", 4);
+  _learnTrigram("I", "WANT", "DRINK", 4);
+  _learnTrigram("I", "WANT", "PLAY", 3);
+  _learnTrigram("I", "WANT", "GO", 3);
+  _learnTrigram("I", "WANT", "REST", 3);
+  _learnTrigram("I", "WANT", "HELP", 3);
+  _learnTrigram("I", "WANT", "SLEEP", 2);
+
+  // After "I NO" → negated verbs (trigram I|NO)
+  _learnTrigram("I", "NO", "WANT", 4);
+  _learnTrigram("I", "NO", "SEE", 3);
+  _learnTrigram("I", "NO", "LIKE", 3);
+  _learnTrigram("I", "NO", "EAT", 2);
+  _learnTrigram("I", "NO", "DRINK", 2);
+
+  // After "I FEEL" → feelings (trigram I|FEEL)
+  _learnTrigram("I", "FEEL", "HAPPY", 2);
+  _learnTrigram("I", "FEEL", "SAD", 2);
+  _learnTrigram("I", "FEEL", "ANGRY", 2);
+  _learnTrigram("I", "FEEL", "TIRED", 2);
+  _learnTrigram("I", "FEEL", "SICK", 2);
+  _learnTrigram("I", "FEEL", "NERVOUS", 2);
+
+  // After "I AM" → states (trigram I|AM)
+  _learnTrigram("I", "AM", "HAPPY", 2);
+  _learnTrigram("I", "AM", "SAD", 2);
+  _learnTrigram("I", "AM", "ANGRY", 2);
+  _learnTrigram("I", "AM", "TIRED", 2);
+  _learnTrigram("I", "AM", "SICK", 2);
+
+  // After "IT HURTS" → body parts (trigram IT|HURTS)
+  let bodyParts = categoryChildren.get("BODY") || [];
+  for (let part of bodyParts) {
+    if (part !== "IT HURTS") _learnTrigram("IT", "HURTS", part, 2);
+  }
+
+  // After "TALK TO" → people (trigram TALK|TO)
+  let people = categoryChildren.get("PEOPLE") || [];
+  for (let person of people) {
+    _learnTrigram("TALK", "TO", person, 2);
+  }
+
+  // After "GO TO" → places (trigram GO|TO)
+  let places = categoryChildren.get("PLACES") || [];
+  for (let place of places) {
+    _learnTrigram("GO", "TO", place, 2);
+  }
+
+  // ── Follow-up bigrams after category children ────────────────────
+  // After tapping a food/drink item → suggest continuation words
+  for (let catName of ["FOOD", "DRINKS"]) {
+    let children = categoryChildren.get(catName) || [];
+    for (let child of children) {
+      _learnBigram(child, "MORE", 1);
+      _learnBigram(child, "YES", 1);
+      _learnBigram(child, "I", 1);
+    }
+  }
+
+  // After tapping a person → suggest common follow-ups
+  for (let person of people) {
+    _learnBigram(person, "I", 1);
+    _learnBigram(person, "HELP", 1);
+    _learnBigram(person, "YES", 1);
   }
 
   _saveModel();
@@ -445,6 +661,13 @@ function _learnBigram(prev, word, weight) {
   weight = weight || 1;
   if (!_bigrams[prev]) _bigrams[prev] = {};
   _bigrams[prev][word] = (_bigrams[prev][word] || 0) + weight;
+}
+
+function _learnTrigram(word1, word2, word3, weight) {
+  weight = weight || 1;
+  let key = word1 + "|" + word2;
+  if (!_trigrams[key]) _trigrams[key] = {};
+  _trigrams[key][word3] = (_trigrams[key][word3] || 0) + weight;
 }
 
 function _tokenize(text) {

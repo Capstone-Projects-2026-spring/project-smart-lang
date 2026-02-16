@@ -11,15 +11,27 @@ sidebar_position: 4
 - JavaScript (ES6+)
 - HTML5
 - CSS3
-- Vue 3
-- Pinia
-- Vue Router
-- CouchDB
-- Node.js (npm)
+- Vue 2.7 (with vue-template-compiler)
+- Navigo (client-side router)
+- Custom stateService.js (application state management)
+- PouchDB (browser-based offline storage)
+- CouchDB (remote sync via superlogin-client)
+- Google OAuth (planned for SSO authentication)
+- jQuery 3.7 (DOM manipulation)
+- SJCL (Stanford JavaScript Crypto Library for encryption)
+- Node.js (npm/yarn)
+
+## Build Tools
+- Webpack 5
+- Babel 7
+- Husky (git hooks)
+- Prettier (code formatting)
 
 ## Speech Integration
-- Browser SpeechSynthesis API  
-- External Speech API (optional)
+- Browser SpeechSynthesis API
+- ResponsiveVoice (third-party TTS library)
+- External Speech API (optional, configurable endpoint)
+- ElevenLabs (planned integration for premium voice synthesis)
 
 ## Documentation Tools
 - Docusaurus
@@ -28,6 +40,7 @@ sidebar_position: 4
 - Draw.io / Lucidchart
 
 ## Testing Tools
+- Jest (unit testing framework)
 - Manual Functional Testing
 - Lighthouse (PWA Audits)
 

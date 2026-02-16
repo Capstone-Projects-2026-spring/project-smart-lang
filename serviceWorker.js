@@ -110,19 +110,17 @@ async function tryFetchImage(url, fetchMode = undefined) {
 }
 
 function shouldCacheImage(url, request) {
-    // TODO: replace with self-hosted endpoint
-    let isOwnHost = url.hostname === 'grid.asterics.eu';
+    let isOwnHost = url.hostname === self.location.hostname;
     let isImageRequest = request.destination === 'image';
     return !isOwnHost && isImageRequest && !shouldCacheStaleWhileRevalidate(url);
 }
 
 function shouldCacheStaleWhileRevalidate(url, request) {
-    return url.href.startsWith('https://asterics.github.io/AsTeRICS-Grid-Boards');
+    return false; // Board repository fetching disabled
 }
 
 function shouldCacheNormal(url, request) {
-    // TODO: replace with self-hosted endpoint
-    let isOwnHost = url.hostname === 'grid.asterics.eu';
+    let isOwnHost = url.hostname === self.location.hostname;
     return isOwnHost && !shouldCacheImage(url, request) && !shouldCacheStaleWhileRevalidate(url);
 }
 

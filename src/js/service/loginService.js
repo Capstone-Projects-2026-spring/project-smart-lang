@@ -27,7 +27,7 @@ let _lastParamHashedPw = null;
 let _lastParamSaveUser = null;
 // TODO: replace with self-hosted CouchDB endpoint
 let _serverUrl = (constants.IS_ENVIRONMENT_PROD || constants.FORCE_CONNECT_DB)
-    ? 'https://login1.couchdb.asterics-foundation.org'
+    ? 'https://YOUR-COUCHDB-SERVER.example.com'
     : `http://${location.hostname}:3000`;
 loginService.ERROR_CODE_UNAUTHORIZED = 'ERROR_CODE_UNAUTHORIZED';
 
