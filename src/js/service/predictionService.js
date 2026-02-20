@@ -37,6 +37,17 @@ let _bigrams = {};
 let _trigrams = {};
 let _unigrams = {};
 
+// ── User-learned model (written only by real tile taps, never bootstrap) ──
+// Suggestions from these stores are appended at the END of the list so that
+// freshly learned personal patterns show up immediately without displacing
+// the existing curated suggestions.
+let _userBigrams = {};
+let _userTrigrams = {};
+
+// Tracks the previous collect-bar word sequence so learnFromInput can
+// detect which word was just added.
+let _prevCollectWords = [];
+
 const STORAGE_KEY = "aac_ngram_model_v1";
 const BOOTSTRAP_KEY = "aac_ngram_bootstrapped_v1";
 const SAVE_DEBOUNCE_MS = 2000;
@@ -50,14 +61,56 @@ let _tileMap = new Map();
 // This list is used directly by getSuggestions() and bypasses unigram scores,
 // ensuring curated defaults always appear regardless of bootstrap inflation.
 let _defaultSuggestionLabels = [
-  "I", "WANT", "HELP", "I LIKE IT", "I DON'T LIKE IT", "STOP",
-  "GIVE ME", "REST", "MORE", "YES", "NO", "OK"
+  "I",
+  "WANT",
+  "HELP",
+  "I LIKE IT",
+  "I DON'T LIKE IT",
+  "STOP",
+  "GIVE ME",
+  "REST",
+  "MORE",
+  "YES",
+  "NO",
+  "OK",
 ];
 
 // ── Legacy stubs (called by collectElementService, gridView, etc.) ──
 // These are no-ops — the old prediction-element system is unused.
 predictionService.predict = function () {};
-predictionService.learnFromInput = function () {};
+predictionService.learnFromInput = function (text) {
+  // Called by collectElementService on every tile tap with the full
+  // collect-bar text.  We diff against the previous state to find the
+  // word that was just added and learn from it immediately.
+  let words = _tokenize(text);
+
+  // Bar was cleared or a word was deleted — just reset state, no learning.
+  if (words.length <= _prevCollectWords.length) {
+    _prevCollectWords = words;
+    return;
+  }
+
+  // A new word was appended at the end.
+  let newWord  = words[words.length - 1];
+  let prevWord = words.length >= 2 ? words[words.length - 2] : null;
+  let prev2    = words.length >= 3 ? words[words.length - 3] : null;
+
+  // Bigram: prevWord → newWord
+  if (prevWord) {
+    if (!_userBigrams[prevWord]) _userBigrams[prevWord] = {};
+    _userBigrams[prevWord][newWord] = (_userBigrams[prevWord][newWord] || 0) + 1;
+  }
+
+  // Trigram: prev2 | prevWord → newWord
+  if (prev2 && prevWord) {
+    let key = prev2 + "|" + prevWord;
+    if (!_userTrigrams[key]) _userTrigrams[key] = {};
+    _userTrigrams[key][newWord] = (_userTrigrams[key][newWord] || 0) + 1;
+  }
+
+  _prevCollectWords = words;
+  _scheduleSave();
+};
 predictionService.applyPrediction = function (input, prediction) {
   return (input || "") + prediction;
 };
@@ -182,14 +235,38 @@ predictionService.getSuggestions = function (input, count) {
     }
   }
 
+  // ── Collect user-learned candidates from the separate user model ──
+  let userCandidates = {};
+  if (words.length >= 2) {
+    let key = words[words.length - 2] + "|" + words[words.length - 1];
+    let tri = _userTrigrams[key];
+    if (tri) {
+      for (let w in tri) {
+        userCandidates[w] = (userCandidates[w] || 0) + tri[w] * 3;
+      }
+    }
+  }
+  if (words.length >= 1) {
+    let lastWord = words[words.length - 1];
+    let bi = _userBigrams[lastWord];
+    if (bi) {
+      for (let w in bi) {
+        userCandidates[w] = (userCandidates[w] || 0) + bi[w] * 2;
+      }
+    }
+  }
+  let hasUserCandidates = Object.keys(userCandidates).length > 0;
+
   // Sort by score descending
   let sorted = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
 
-  // Filter to real tile labels and build result array
+  // Filter to real tile labels and build result array.
+  // Reserve the last slot for user-learned items when they exist.
   let results = [];
   let seen = new Set();
   // Also exclude words already in the input to avoid repeating
   let inputWords = new Set(words);
+  let baseLimit = hasUserCandidates ? desired - 1 : desired;
 
   for (let [word] of sorted) {
     if (seen.has(word)) continue;
@@ -198,14 +275,29 @@ predictionService.getSuggestions = function (input, count) {
     if (tile) {
       seen.add(word);
       results.push(tile);
-      if (results.length >= desired) break;
+      if (results.length >= baseLimit) break;
     }
   }
 
-  // If we still don't have enough, fill with top unigrams
-  if (results.length < desired) {
+  // If we still don't have enough base suggestions, fill with top unigrams
+  if (results.length < baseLimit) {
     let uniSorted = Object.entries(_unigrams).sort((a, b) => b[1] - a[1]);
     for (let [word] of uniSorted) {
+      if (seen.has(word)) continue;
+      if (inputWords.has(word) && words.length > 0) continue;
+      let tile = _tileMap.get(word);
+      if (tile) {
+        seen.add(word);
+        results.push(tile);
+        if (results.length >= baseLimit) break;
+      }
+    }
+  }
+
+  // Append user-learned suggestions at the end (most-used first among them)
+  if (hasUserCandidates) {
+    let userSorted = Object.entries(userCandidates).sort((a, b) => b[1] - a[1]);
+    for (let [word] of userSorted) {
       if (seen.has(word)) continue;
       if (inputWords.has(word) && words.length > 0) continue;
       let tile = _tileMap.get(word);
@@ -231,15 +323,13 @@ predictionService.learnWord = function (word, previousWord) {
   let w = word.toUpperCase().trim();
   if (!w) return;
 
-  // Unigram
-  _unigrams[w] = (_unigrams[w] || 0) + 1;
-
-  // Bigram
+  // Write to user-learned bigrams only (not the bootstrap base model),
+  // so personal patterns are tracked separately and shown at the end.
   if (previousWord) {
     let pw = previousWord.toUpperCase().trim();
     if (pw) {
-      if (!_bigrams[pw]) _bigrams[pw] = {};
-      _bigrams[pw][w] = (_bigrams[pw][w] || 0) + 1;
+      if (!_userBigrams[pw]) _userBigrams[pw] = {};
+      _userBigrams[pw][w] = (_userBigrams[pw][w] || 0) + 1;
     }
   }
 
@@ -257,9 +347,10 @@ predictionService.learnTrigram = function (word1, word2, word3) {
   let w3 = word3.toUpperCase().trim();
   if (!w1 || !w2 || !w3) return;
 
+  // Write to user-learned trigrams only (not the bootstrap base model).
   let key = w1 + "|" + w2;
-  if (!_trigrams[key]) _trigrams[key] = {};
-  _trigrams[key][w3] = (_trigrams[key][w3] || 0) + 1;
+  if (!_userTrigrams[key]) _userTrigrams[key] = {};
+  _userTrigrams[key][w3] = (_userTrigrams[key][w3] || 0) + 1;
 
   _scheduleSave();
 };
@@ -423,10 +514,30 @@ function _bootstrap(grids) {
 
   // Auto-discover verb tiles that exist in the grid and seed them
   let verbTiles = [
-    "EAT", "DRINK", "GO", "LISTEN", "SEE", "SMELL", "MAKE",
-    "TALK TO", "HAVE", "GIVE", "WEAR", "SLEEP", "PLAY", "BUY",
-    "VISIT", "TRAVEL", "COME", "RETURN", "THINK", "CRY", "LAUGH",
-    "DISCUSS", "CELEBRATE", "WAIT"
+    "EAT",
+    "DRINK",
+    "GO",
+    "LISTEN",
+    "SEE",
+    "SMELL",
+    "MAKE",
+    "TALK TO",
+    "HAVE",
+    "GIVE",
+    "WEAR",
+    "SLEEP",
+    "PLAY",
+    "BUY",
+    "VISIT",
+    "TRAVEL",
+    "COME",
+    "RETURN",
+    "THINK",
+    "CRY",
+    "LAUGH",
+    "DISCUSS",
+    "CELEBRATE",
+    "WAIT",
   ];
   for (let verb of verbTiles) {
     if (_tileMap.has(verb)) {
@@ -681,7 +792,13 @@ function _tokenize(text) {
 
 function _saveModel() {
   try {
-    let data = JSON.stringify({ b: _bigrams, t: _trigrams, u: _unigrams });
+    let data = JSON.stringify({
+      b: _bigrams,
+      t: _trigrams,
+      u: _unigrams,
+      ub: _userBigrams,
+      ut: _userTrigrams,
+    });
     localStorage.setItem(STORAGE_KEY, data);
   } catch (e) {
     log.warn("Failed to save n-gram model", e);
@@ -696,12 +813,16 @@ function _loadModel() {
       _bigrams = data.b || {};
       _trigrams = data.t || {};
       _unigrams = data.u || {};
+      _userBigrams = data.ub || {};
+      _userTrigrams = data.ut || {};
       log.info(
         "Loaded n-gram model: " +
           Object.keys(_bigrams).length +
           " bigrams, " +
           Object.keys(_trigrams).length +
-          " trigrams",
+          " trigrams, " +
+          Object.keys(_userBigrams).length +
+          " user bigrams",
       );
     }
   } catch (e) {
@@ -709,6 +830,8 @@ function _loadModel() {
     _bigrams = {};
     _trigrams = {};
     _unigrams = {};
+    _userBigrams = {};
+    _userTrigrams = {};
   }
 }
 
@@ -725,5 +848,11 @@ function _scheduleSave() {
 $(document).on(constants.EVENT_USER_CHANGING, () => {});
 $(document).on(constants.EVENT_USER_CHANGED, () => {});
 $(document).on(constants.EVENT_METADATA_UPDATED, () => {});
+
+// Learn from every collect-bar change (fires unconditionally after every tile
+// tap, regardless of image-mode or other conditions).
+$(document).on(constants.EVENT_COLLECT_TEXT_CHANGED, (event, text) => {
+  predictionService.learnFromInput(text || "");
+});
 
 export { predictionService };

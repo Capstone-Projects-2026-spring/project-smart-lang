@@ -55,7 +55,7 @@ export default {
           word,
         );
       }
-      collectElementService.addPredictionWord(word);
+      collectElementService.addPredictionWord(word, tile.imageUrl);
     },
     updateSuggestions() {
       let text = collectElementService.getText() || "";
