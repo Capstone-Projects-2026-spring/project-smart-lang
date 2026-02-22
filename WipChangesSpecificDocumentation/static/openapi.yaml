@@ -1,0 +1,2213 @@
+openapi: 3.0.3
+info:
+  title: Smart Lang AAC Grid API
+  version: 1.0.0
+  description: >
+    REST API for the Smart Lang Augmentative and Alternative Communication (AAC)
+    application. Provides endpoints for authentication, user and caregiver-student
+    management, communication board (grid) management, word-prediction data,
+    ARASAAC pictogram search, text-to-speech via ElevenLabs, and server health.
+
+
+    **Implementation status tags used in this spec:**
+
+    - **[EXISTS]** — endpoint or integration already exists in the codebase
+
+    - **[EXISTS-CLIENT-ONLY]** — functionality exists client-side and will be
+    exposed through the planned backend
+
+    - **[PLANNED]** — endpoint is designed but not yet implemented server-side
+  contact:
+    name: Smart Lang AAC Team
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+  - url: https://smartlang-aac.example.com/api/v1
+    description: Production server (planned)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Google OAuth authentication and session management
+  - name: Users
+    description: User profiles and caregiver-student relationship management
+  - name: Grids
+    description: Communication board (GridData) management
+  - name: Elements
+    description: Grid tile (GridElement) management within boards
+  - name: Prediction
+    description: N-gram prediction model data and usage statistics
+  - name: Pictograms
+    description: ARASAAC pictogram search and retrieval (proxy)
+  - name: TTS
+    description: Text-to-speech via ElevenLabs
+  - name: Health
+    description: Server liveness and readiness checks
+
+paths:
+
+  # ─────────────────────────────────────────
+  # Auth
+  # ─────────────────────────────────────────
+
+  /auth/google:
+    get:
+      tags: [Auth]
+      security: []
+      operationId: googleAuthRedirect
+      summary: Initiate Google OAuth login
+      description: >
+        **[PLANNED]** Redirects the user to Google's OAuth 2.0 consent screen.
+        After the user grants consent, Google redirects back to
+        `/auth/google/callback` with an authorization code.
+      responses:
+        '302':
+          description: Redirect to Google OAuth consent screen
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Google OAuth authorization URL
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/google/callback:
+    get:
+      tags: [Auth]
+      security: []
+      operationId: googleAuthCallback
+      summary: Handle Google OAuth callback
+      description: >
+        **[PLANNED]** Receives the authorization code from Google after user
+        consent. Exchanges it for user info, creates or retrieves the user
+        account, and returns a bearer token for subsequent API calls.
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code from Google
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          description: CSRF state parameter
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/google/token:
+    post:
+      tags: [Auth]
+      security: []
+      operationId: googleTokenLogin
+      summary: Exchange a Google ID token for an API session
+      description: >
+        **[PLANNED]** Alternative login flow for SPAs and mobile clients.
+        The client obtains a Google ID token via the Google Sign-In SDK and
+        sends it here. The server verifies the token and returns a bearer
+        token for the API.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idToken]
+              properties:
+                idToken:
+                  type: string
+                  description: Google ID token obtained from the Google Sign-In SDK
+            example:
+              idToken: eyJhbGciOiJSUzI1NiIsInR5cCI6...
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+        '401':
+          description: Invalid or expired Google ID token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: UNAUTHORIZED
+                message: Google ID token is invalid or expired.
+                statusCode: 401
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      summary: Log out the current user
+      description: >
+        **[PLANNED]** Invalidates the current bearer token server-side.
+      responses:
+        '204':
+          description: Logged out successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      operationId: getCurrentUser
+      summary: Get the authenticated user's profile
+      description: >
+        **[PLANNED]** Returns the profile for the currently authenticated user,
+        including their role (caregiver or student).
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ─────────────────────────────────────────
+  # Users
+  # ─────────────────────────────────────────
+
+  /users/me:
+    get:
+      tags: [Users]
+      operationId: getMyProfile
+      summary: Get current user profile
+      description: >
+        **[PLANNED]** Returns the full profile of the authenticated user
+        including role and preferences.
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [Users]
+      operationId: updateMyProfile
+      summary: Update current user profile
+      description: >
+        **[PLANNED]** Updates the authenticated user's display name or
+        preferences.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              displayName: Jane Doe
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/me/students:
+    get:
+      tags: [Users]
+      operationId: listMyStudents
+      summary: List students assigned to the current caregiver
+      description: >
+        **[PLANNED]** Returns all students linked to the authenticated
+        caregiver. Only accessible to users with the `caregiver` role.
+      responses:
+        '200':
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Users]
+      operationId: addStudent
+      summary: Add a student to the current caregiver
+      description: >
+        **[PLANNED]** Links a student account to the authenticated caregiver.
+        Only accessible to users with the `caregiver` role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [studentId]
+              properties:
+                studentId:
+                  type: string
+                  description: ID of the student to link
+            example:
+              studentId: user_stu_abc123
+      responses:
+        '201':
+          description: Student linked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaregiverStudentRelation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Student is already linked to this caregiver
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/me/students/{studentId}:
+    parameters:
+      - $ref: '#/components/parameters/StudentId'
+    delete:
+      tags: [Users]
+      operationId: removeStudent
+      summary: Remove a student from the current caregiver
+      description: >
+        **[PLANNED]** Unlinks a student from the authenticated caregiver.
+        The student account and data are not deleted.
+      responses:
+        '204':
+          description: Student unlinked successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ─────────────────────────────────────────
+  # Grids
+  # ─────────────────────────────────────────
+
+  /users/{userId}/grids:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      tags: [Grids]
+      operationId: listUserGrids
+      summary: List all grids for a user
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Returns all communication boards (GridData)
+        for the specified user. Caregivers may list grids belonging to their
+        assigned students. Returns short versions without binary image data.
+      responses:
+        '200':
+          description: List of grids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GridData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Grids]
+      operationId: createUserGrid
+      summary: Create a new grid
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Creates a new communication board for the
+        specified user. Caregivers may create grids for their assigned students.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGridRequest'
+      responses:
+        '201':
+          description: Grid created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GridData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{userId}/grids/{gridId}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/GridId'
+
+    get:
+      tags: [Grids]
+      operationId: getUserGrid
+      summary: Get a grid by ID
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Returns the full GridData for a specific
+        communication board, including all elements and binary image data.
+      responses:
+        '200':
+          description: Grid details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GridData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [Grids]
+      operationId: updateUserGrid
+      summary: Update a grid
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Replaces the full GridData for a specific
+        communication board.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GridData'
+      responses:
+        '200':
+          description: Updated grid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GridData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Grids]
+      operationId: deleteUserGrid
+      summary: Delete a grid
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Deletes a communication board and all its
+        elements for the specified user.
+      responses:
+        '204':
+          description: Grid deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{userId}/metadata:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+
+    get:
+      tags: [Grids]
+      operationId: getUserMetadata
+      summary: Get user metadata and settings
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Returns the user's MetaData including home
+        grid configuration, input settings, color scheme, text preferences,
+        and vocabulary level.
+      responses:
+        '200':
+          description: User metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [Grids]
+      operationId: updateUserMetadata
+      summary: Update user metadata and settings
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Replaces the user's MetaData configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetaData'
+      responses:
+        '200':
+          description: Updated metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ─────────────────────────────────────────
+  # Elements
+  # ─────────────────────────────────────────
+
+  /users/{userId}/grids/{gridId}/elements:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/GridId'
+
+    get:
+      tags: [Elements]
+      operationId: listGridElements
+      summary: List all tiles in a grid
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Returns all GridElement tiles in the specified
+        communication board.
+      responses:
+        '200':
+          description: List of grid elements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GridElement'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Elements]
+      operationId: addGridElement
+      summary: Add a tile to a grid
+      description: >
+        **[PLANNED]** Adds a new tile (GridElement) to the specified
+        communication board. The position (x, y) is auto-calculated if omitted.
+        Caregivers use this to add vocabulary words to a student's board.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGridElementRequest'
+      responses:
+        '201':
+          description: Element created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GridElement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{userId}/grids/{gridId}/elements/{elementId}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/GridId'
+      - $ref: '#/components/parameters/ElementId'
+
+    get:
+      tags: [Elements]
+      operationId: getGridElement
+      summary: Get a specific tile
+      description: >
+        **[EXISTS-CLIENT-ONLY]** Returns a specific GridElement tile from a
+        communication board.
+      responses:
+        '200':
+          description: Element details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GridElement'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [Elements]
+      operationId: updateGridElement
+      summary: Update a tile
+      description: >
+        **[PLANNED]** Updates an existing tile's properties such as label,
+        image, actions, position, visibility, or colors. Caregivers use this
+        to customize vocabulary for a student.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GridElement'
+      responses:
+        '200':
+          description: Updated element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GridElement'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Elements]
+      operationId: deleteGridElement
+      summary: Remove a tile from a grid
+      description: >
+        **[PLANNED]** Removes a tile from the specified communication board.
+        Caregivers use this to remove words that are not appropriate for a
+        student.
+      responses:
+        '204':
+          description: Element deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ─────────────────────────────────────────
+  # Prediction & Usage
+  # ─────────────────────────────────────────
+
+  /users/{userId}/prediction:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+
+    get:
+      tags: [Prediction]
+      operationId: getPredictionModel
+      summary: Get user's n-gram prediction model
+      description: >
+        **[PLANNED]** Returns the user's n-gram word-prediction model including
+        bigrams, trigrams, and unigrams. Caregivers can view a student's learned
+        word patterns to track communication development. The prediction model is
+        built from tile taps and uses frequency counting with recency weighting.
+      responses:
+        '200':
+          description: Prediction model data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionModel'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [Prediction]
+      operationId: updatePredictionModel
+      summary: Sync prediction model from client
+      description: >
+        **[PLANNED]** Uploads or replaces the user's n-gram prediction model.
+        The client-side prediction engine stores the model in localStorage
+        (~50 KB typical) and periodically syncs it to the server so that
+        caregivers can view the data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PredictionModel'
+      responses:
+        '200':
+          description: Prediction model updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionModel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{userId}/usage/stats:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+
+    get:
+      tags: [Prediction]
+      operationId: getUsageStats
+      summary: Get student usage statistics
+      description: >
+        **[PLANNED]** Returns usage statistics for a user, including total tile
+        taps, most frequently used words, and vocabulary growth over time.
+        Caregivers use this to monitor a student's communication progress.
+      responses:
+        '200':
+          description: Usage statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStats'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ─────────────────────────────────────────
+  # Pictograms (ARASAAC proxy)
+  # ─────────────────────────────────────────
+
+  /pictograms/{lang}/search/{searchTerm}:
+    parameters:
+      - name: lang
+        in: path
+        required: true
+        description: >
+          Language code for search (e.g. en, es, de, fr, it, pt, ca, eu, ar,
+          bg, hr, nl, he, hu, mk, pl, ro, ru, sk, uk, val, zh).
+        schema:
+          type: string
+          example: en
+      - name: searchTerm
+        in: path
+        required: true
+        description: Keyword to search for
+        schema:
+          type: string
+          example: hello
+
+    get:
+      tags: [Pictograms]
+      security: []
+      operationId: searchPictograms
+      summary: Search ARASAAC pictograms by keyword
+      description: >
+        **[EXISTS]** Proxies the ARASAAC pictogram search API at
+        `api.arasaac.org/api/pictograms/{lang}/search/{searchTerm}`.
+        Returns matching pictogram metadata including IDs that can be used
+        with the image endpoint.
+      responses:
+        '200':
+          description: Array of matching pictograms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArasaacPictogram'
+              example:
+                - _id: 38222
+                  keywords:
+                    - keyword: hello
+                      plural: hellos
+                  categories:
+                    - greeting
+        '404':
+          description: No pictograms found for the search term
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pictograms/{pictogramId}:
+    parameters:
+      - name: pictogramId
+        in: path
+        required: true
+        description: ARASAAC pictogram ID
+        schema:
+          type: integer
+          example: 38222
+
+    get:
+      tags: [Pictograms]
+      security: []
+      operationId: getPictogramImage
+      summary: Get a pictogram image by ID
+      description: >
+        **[EXISTS]** Proxies the ARASAAC pictogram image endpoint at
+        `api.arasaac.org/api/pictograms/{id}`. Returns a PNG image with
+        optional visual modifications (color, plural markers, skin tone, etc.).
+      parameters:
+        - name: color
+          in: query
+          description: Return color image (true) or black-and-white (false)
+          schema:
+            type: boolean
+            default: true
+        - name: plural
+          in: query
+          description: Show plural marker on the pictogram
+          schema:
+            type: boolean
+            default: false
+        - name: skin
+          in: query
+          description: Skin tone for human pictograms
+          schema:
+            type: string
+            enum: [white, black, assian, mulatto, aztec]
+        - name: hair
+          in: query
+          description: Hair color for human pictograms
+          schema:
+            type: string
+            enum: [blonde, brown, darkBrown, gray, darkGray, red, black]
+        - name: action
+          in: query
+          description: Verb tense indicator
+          schema:
+            type: string
+            enum: [past, future]
+        - name: identifier
+          in: query
+          description: Context identifier overlay
+          schema:
+            type: string
+            enum: [classroom, health, library, office]
+        - name: identifierPosition
+          in: query
+          description: Position of the context identifier
+          schema:
+            type: string
+            enum: [left, right]
+        - name: download
+          in: query
+          description: Whether to return as downloadable attachment
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Pictogram PNG image
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ─────────────────────────────────────────
+  # TTS (ElevenLabs)
+  # ─────────────────────────────────────────
+
+  /tts/voices:
+    get:
+      tags: [TTS]
+      operationId: listTTSVoices
+      summary: List available TTS voices
+      description: >
+        **[PLANNED]** Returns the list of voices available from the configured
+        TTS provider (ElevenLabs). Individual word clicks use browser-native
+        SpeechSynthesis; this endpoint supports the "play all" feature that
+        speaks the full collected sentence via ElevenLabs.
+      responses:
+        '200':
+          description: List of available voices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TTSVoice'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /tts/speak:
+    post:
+      tags: [TTS]
+      operationId: synthesizeSpeech
+      summary: Synthesize speech from text
+      description: >
+        **[PLANNED]** Sends text to the ElevenLabs TTS API and returns audio
+        data. Used by the "play all" feature to speak the full collected
+        sentence with natural-sounding voice synthesis.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TTSRequest'
+            example:
+              text: I want pizza please
+              voiceId: voice_abc123
+      responses:
+        '200':
+          description: Audio data
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ─────────────────────────────────────────
+  # Health
+  # ─────────────────────────────────────────
+
+  /health/live:
+    get:
+      tags: [Health]
+      security: []
+      operationId: liveness
+      summary: Liveness check
+      description: >
+        **[PLANNED]** Returns 200 if the server process is running.
+      responses:
+        '200':
+          description: Server is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /health/ready:
+    get:
+      tags: [Health]
+      security: []
+      operationId: readiness
+      summary: Readiness check
+      description: >
+        **[PLANNED]** Returns 200 if the server is ready to handle requests
+        (database connected, external services reachable).
+      responses:
+        '200':
+          description: Server is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ready
+        '503':
+          description: Server not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: SERVICE_UNAVAILABLE
+                message: Database connection not established.
+                statusCode: 503
+
+# ─────────────────────────────────────────────────────
+# Components
+# ─────────────────────────────────────────────────────
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Bearer token obtained from the Google OAuth login flow via
+        `/auth/google/callback` or `/auth/google/token`.
+        Pass as `Authorization: Bearer <token>`.
+
+  parameters:
+
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: >
+        Unique user ID. Use `me` for the authenticated user, or a specific
+        user ID when a caregiver accesses a student's data.
+      schema:
+        type: string
+        example: user_abc123
+
+    GridId:
+      name: gridId
+      in: path
+      required: true
+      description: Unique grid (communication board) ID
+      schema:
+        type: string
+        example: grid-data-1700000000000-abc
+
+    ElementId:
+      name: elementId
+      in: path
+      required: true
+      description: Unique grid element (tile) ID
+      schema:
+        type: string
+        example: grid-element-1700000000000-xyz
+
+    StudentId:
+      name: studentId
+      in: path
+      required: true
+      description: Unique student user ID
+      schema:
+        type: string
+        example: user_stu_abc123
+
+  responses:
+
+    BadRequest:
+      description: Invalid request body or parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: BAD_REQUEST
+            message: "Validation failed: label is required."
+            statusCode: 400
+
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: UNAUTHORIZED
+            message: Authentication token is missing or expired.
+            statusCode: 401
+
+    Forbidden:
+      description: Authenticated user does not have access to this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: FORBIDDEN
+            message: You do not have permission to access this resource.
+            statusCode: 403
+
+    NotFound:
+      description: Requested resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: NOT_FOUND
+            message: The requested resource could not be found.
+            statusCode: 404
+
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: INTERNAL_SERVER_ERROR
+            message: An unexpected error occurred. Please try again later.
+            statusCode: 500
+
+  schemas:
+
+    # ── Auth ──────────────────────────────
+
+    AuthSession:
+      type: object
+      description: Session information returned after successful authentication
+      properties:
+        accessToken:
+          type: string
+          description: Bearer token for authenticating subsequent API requests
+        expiresAt:
+          type: string
+          format: date-time
+          description: Token expiration timestamp
+        user:
+          $ref: '#/components/schemas/User'
+      example:
+        accessToken: eyJhbGciOiJIUzI1NiIs...
+        expiresAt: "2026-03-01T00:00:00Z"
+        user:
+          id: user_abc123
+          email: jane@example.com
+          displayName: Jane Doe
+          role: caregiver
+          createdAt: "2026-02-22T12:00:00Z"
+          updatedAt: "2026-02-22T12:00:00Z"
+
+    # ── User ──────────────────────────────
+
+    User:
+      type: object
+      description: User account profile
+      properties:
+        id:
+          type: string
+          example: user_abc123
+        email:
+          type: string
+          format: email
+          example: jane@example.com
+        displayName:
+          type: string
+          example: Jane Doe
+        role:
+          type: string
+          enum: [caregiver, student]
+          description: >
+            User role. Caregivers can manage multiple student accounts,
+            view prediction data, and configure boards. Students use the
+            AAC grid for communication.
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      description: Fields to update on the current user's profile
+      properties:
+        displayName:
+          type: string
+
+    CaregiverStudentRelation:
+      type: object
+      description: A link between a caregiver and a student
+      properties:
+        id:
+          type: string
+          example: rel_abc123
+        caregiverId:
+          type: string
+          example: user_abc123
+        studentId:
+          type: string
+          example: user_stu_abc123
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── GridData ──────────────────────────
+
+    GridData:
+      type: object
+      description: >
+        A communication board containing a grid of tiles (GridElements).
+        Each board has a layout (rows x columns) and contains elements
+        with labels, images, and actions. Derived from the GridData model
+        in src/js/model/GridData.js.
+      properties:
+        id:
+          type: string
+          description: Unique identifier (prefix grid-data-)
+          example: grid-data-1700000000000-abc
+        modelName:
+          type: string
+          enum: [GridData]
+        modelVersion:
+          type: string
+        lastUpdateTime:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds of last modification
+        isShortVersion:
+          type: boolean
+          description: >
+            If true, binary base64 image data is excluded for performance.
+            List endpoints return short versions.
+        label:
+          type: object
+          description: >
+            Locale-to-translation map for the grid name.
+            Keys are language codes (e.g. "en", "de"), values are strings.
+          additionalProperties:
+            type: string
+          example:
+            en: My Communication Board
+            de: Mein Kommunikationsbrett
+        rowCount:
+          type: integer
+          description: Number of rows in the grid layout
+          example: 3
+        minColumnCount:
+          type: integer
+          description: Minimum number of columns in the grid layout
+          example: 4
+        gridElements:
+          type: array
+          description: All tiles in this communication board
+          items:
+            $ref: '#/components/schemas/GridElement'
+        additionalFiles:
+          type: array
+          description: Extra files attached to this grid (e.g. audio)
+          items:
+            $ref: '#/components/schemas/AdditionalGridFile'
+        thumbnail:
+          type: object
+          description: Screenshot thumbnail of the grid
+          properties:
+            data:
+              type: string
+              description: Base64-encoded screenshot image
+            hash:
+              type: string
+              description: Hash of the grid state when the screenshot was taken
+        showGlobalGrid:
+          type: boolean
+          description: Whether the global grid overlay is shown
+        globalGridId:
+          type: string
+          nullable: true
+          description: ID of the global grid to display above this grid
+        keyboardMode:
+          type: string
+          nullable: true
+          enum: [KEYBOARD_ENABLED, KEYBOARD_DISABLED]
+          description: Whether on-screen keyboard input is enabled
+        backgroundColor:
+          type: string
+          description: CSS color value for the grid background
+          example: "#ffffff"
+
+    CreateGridRequest:
+      type: object
+      description: Request body for creating a new grid
+      required: [label]
+      properties:
+        label:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            en: New Board
+        rowCount:
+          type: integer
+          default: 3
+        minColumnCount:
+          type: integer
+          default: 4
+        backgroundColor:
+          type: string
+
+    # ── GridElement ────────────────────────
+
+    GridElement:
+      type: object
+      description: >
+        A single tile in a communication board. Each tile can display a
+        label, an image, and trigger one or more actions when tapped
+        (speak, navigate, predict, etc.). Derived from the GridElement
+        model in src/js/model/GridElement.js.
+      properties:
+        id:
+          type: string
+          description: Unique identifier (prefix grid-element-)
+          example: grid-element-1700000000000-xyz
+        modelName:
+          type: string
+          enum: [GridElement]
+        modelVersion:
+          type: string
+        width:
+          type: integer
+          description: Tile width in grid units
+          default: 1
+        height:
+          type: integer
+          description: Tile height in grid units
+          default: 1
+        x:
+          type: integer
+          description: Column position (0-based)
+        y:
+          type: integer
+          description: Row position (0-based)
+        label:
+          type: object
+          description: >
+            Locale-to-translation map for the tile label (the word displayed
+            on the tile). Keys are language codes, values are strings.
+          additionalProperties:
+            type: string
+          example:
+            en: pizza
+            es: pizza
+        pronunciation:
+          type: object
+          description: Locale-to-pronunciation map (if different from label)
+          additionalProperties:
+            type: string
+        wordForms:
+          type: array
+          description: Alternative grammatical forms of the word
+          items:
+            $ref: '#/components/schemas/WordForm'
+        fontSizePct:
+          type: number
+          description: Font size as percentage of default
+        fontColor:
+          type: string
+          description: CSS color for the label text
+        backgroundColor:
+          type: string
+          description: CSS color for the tile background
+        borderColor:
+          type: string
+          description: CSS color for the tile border (only used in "both" color mode)
+        colorCategory:
+          type: string
+          description: >
+            Semantic color category for color-coded vocabulary
+            (e.g. CC_NOUN, CC_VERB, CC_ADJECTIVE)
+        hidden:
+          type: boolean
+          description: Whether the tile is hidden from the student
+          default: false
+        dontCollect:
+          type: boolean
+          description: If true, tapping this tile does not add it to the collect bar
+        toggleInBar:
+          type: boolean
+          description: If true, tapping toggles this element's presence in the collect bar
+        image:
+          $ref: '#/components/schemas/GridImage'
+        actions:
+          type: array
+          description: >
+            Actions triggered when this tile is tapped. Each action has a
+            modelName discriminator (e.g. GridActionSpeak, GridActionNavigate).
+          items:
+            $ref: '#/components/schemas/GridAction'
+        type:
+          type: string
+          enum:
+            - ELEMENT_TYPE_NORMAL
+            - ELEMENT_TYPE_COLLECT
+            - ELEMENT_TYPE_PREDICTION
+            - ELEMENT_TYPE_LIVE
+            - ELEMENT_TYPE_DYNAMIC_GRID_PLACEHOLDER
+          description: >
+            Element type. NORMAL is a standard vocabulary tile. COLLECT is
+            the sentence-building bar. PREDICTION shows word predictions.
+            LIVE displays dynamic content. DYNAMIC_GRID_PLACEHOLDER marks
+            space for a global grid overlay.
+          default: ELEMENT_TYPE_NORMAL
+        vocabularyLevel:
+          type: integer
+          nullable: true
+          description: >
+            Vocabulary difficulty level. Used to progressively reveal tiles
+            as the student advances.
+        additionalProps:
+          type: object
+          description: Additional custom properties for the element
+          additionalProperties: true
+
+    CreateGridElementRequest:
+      type: object
+      description: Request body for adding a new tile to a grid
+      required: [label]
+      properties:
+        label:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            en: water
+        x:
+          type: integer
+          description: Column position (auto-calculated if omitted)
+        y:
+          type: integer
+          description: Row position (auto-calculated if omitted)
+        width:
+          type: integer
+          default: 1
+        height:
+          type: integer
+          default: 1
+        image:
+          $ref: '#/components/schemas/GridImage'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GridAction'
+        type:
+          type: string
+          enum:
+            - ELEMENT_TYPE_NORMAL
+            - ELEMENT_TYPE_COLLECT
+            - ELEMENT_TYPE_PREDICTION
+          default: ELEMENT_TYPE_NORMAL
+        backgroundColor:
+          type: string
+        hidden:
+          type: boolean
+          default: false
+        vocabularyLevel:
+          type: integer
+          nullable: true
+
+    # ── GridImage ─────────────────────────
+
+    GridImage:
+      type: object
+      description: >
+        Image data for a grid tile. Can be inline base64 data or a URL
+        (typically an ARASAAC pictogram URL). Derived from
+        src/js/model/GridImage.js.
+      properties:
+        data:
+          type: string
+          nullable: true
+          description: >
+            Base64-encoded image data (data URI format, e.g.
+            data:image/png;base64,...). Null if using a URL instead.
+        url:
+          type: string
+          nullable: true
+          description: URL to the image (e.g. ARASAAC pictogram URL)
+          example: https://api.arasaac.org/api/pictograms/38222?download=false&color=true
+        author:
+          type: string
+          nullable: true
+          description: Image author or creator name
+        authorURL:
+          type: string
+          nullable: true
+          description: URL to the author's page
+        searchProviderName:
+          type: string
+          nullable: true
+          description: Name of the image search provider used (e.g. ARASAAC)
+        searchProviderOptions:
+          type: array
+          description: Options used during the image search
+          items:
+            type: object
+
+    # ── GridActions (polymorphic) ──────────
+
+    GridAction:
+      type: object
+      description: >
+        Base action triggered when a tile is tapped. Actions are polymorphic
+        and distinguished by their modelName field. Common action types
+        include speak (TTS), navigate (go to another grid), predict (show
+        word suggestions), and collect (add to sentence bar).
+      discriminator:
+        propertyName: modelName
+        mapping:
+          GridActionSpeak: '#/components/schemas/GridActionSpeak'
+          GridActionSpeakCustom: '#/components/schemas/GridActionSpeakCustom'
+          GridActionNavigate: '#/components/schemas/GridActionNavigate'
+          GridActionPredict: '#/components/schemas/GridActionPredict'
+          GridActionCollectElement: '#/components/schemas/GridActionCollectElement'
+          GridActionAudio: '#/components/schemas/GridActionAudio'
+          GridActionChangeLang: '#/components/schemas/GridActionChangeLang'
+          GridActionOpenWebpage: '#/components/schemas/GridActionOpenWebpage'
+          GridActionHTTP: '#/components/schemas/GridActionHTTP'
+          GridActionWordForm: '#/components/schemas/GridActionWordForm'
+          GridActionSystem: '#/components/schemas/GridActionSystem'
+      oneOf:
+        - $ref: '#/components/schemas/GridActionSpeak'
+        - $ref: '#/components/schemas/GridActionSpeakCustom'
+        - $ref: '#/components/schemas/GridActionNavigate'
+        - $ref: '#/components/schemas/GridActionPredict'
+        - $ref: '#/components/schemas/GridActionCollectElement'
+        - $ref: '#/components/schemas/GridActionAudio'
+        - $ref: '#/components/schemas/GridActionChangeLang'
+        - $ref: '#/components/schemas/GridActionOpenWebpage'
+        - $ref: '#/components/schemas/GridActionHTTP'
+        - $ref: '#/components/schemas/GridActionWordForm'
+        - $ref: '#/components/schemas/GridActionSystem'
+
+    GridActionSpeak:
+      type: object
+      description: Speaks the tile's label text using text-to-speech
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionSpeak]
+        modelVersion:
+          type: string
+        speakLanguage:
+          type: string
+          nullable: true
+          description: Override language for speech (null uses default)
+
+    GridActionSpeakCustom:
+      type: object
+      description: Speaks custom text (different from the tile label)
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionSpeakCustom]
+        modelVersion:
+          type: string
+        speakLanguage:
+          type: string
+          nullable: true
+        speakText:
+          type: object
+          description: Locale-to-text map for the custom speech
+          additionalProperties:
+            type: string
+
+    GridActionNavigate:
+      type: object
+      description: Navigates to another grid, home grid, or search
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionNavigate]
+        modelVersion:
+          type: string
+        navType:
+          type: string
+          enum: [navigateToGrid, navigateToHomeGrid, navigateToLastOpenedGrid, navigateToSearch]
+          description: Type of navigation
+        toGridId:
+          type: string
+          description: Target grid ID (for navigateToGrid type)
+        addToCollectElem:
+          type: boolean
+        searchCollectedText:
+          type: boolean
+        searchText:
+          type: string
+
+    GridActionPredict:
+      type: object
+      description: Triggers word prediction suggestions based on context
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionPredict]
+        modelVersion:
+          type: string
+        dictionaryKey:
+          type: string
+          nullable: true
+          description: Dictionary to use for predictions (null for default)
+        suggestOnChange:
+          type: boolean
+          description: Whether to re-suggest when collect bar changes
+
+    GridActionCollectElement:
+      type: object
+      description: >
+        Performs an action on the collect bar (sentence-building bar), such
+        as speaking collected text, clearing it, or copying to clipboard
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionCollectElement]
+        modelVersion:
+          type: string
+        action:
+          type: string
+          enum:
+            - COLLECT_ACTION_SPEAK
+            - COLLECT_ACTION_SPEAK_CONTINUOUS
+            - COLLECT_ACTION_SPEAK_CLEAR
+            - COLLECT_ACTION_SPEAK_CONTINUOUS_CLEAR
+            - COLLECT_ACTION_CLEAR
+            - COLLECT_ACTION_REMOVE_WORD
+            - COLLECT_ACTION_REMOVE_CHAR
+            - COLLECT_ACTION_SHARE
+            - COLLECT_ACTION_COPY_IMAGE_CLIPBOARD
+            - COLLECT_ACTION_COPY_CLIPBOARD
+            - COLLECT_ACTION_APPEND_CLIPBOARD
+            - COLLECT_ACTION_CLEAR_CLIPBOARD
+            - COLLECT_ACTION_TO_YOUTUBE
+            - COLLECT_ACTION_TOGGLE_TEXT_ROTATION
+
+    GridActionAudio:
+      type: object
+      description: Plays a pre-recorded audio clip
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionAudio]
+        modelVersion:
+          type: string
+        dataBase64:
+          type: string
+          description: Base64-encoded audio data
+        mimeType:
+          type: string
+          description: Audio MIME type (e.g. audio/mp3)
+        durationMs:
+          type: integer
+          description: Audio duration in milliseconds
+        filename:
+          type: string
+
+    GridActionChangeLang:
+      type: object
+      description: Changes the active content language and voice
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionChangeLang]
+        modelVersion:
+          type: string
+        language:
+          type: string
+          description: Target language code
+        voice:
+          type: string
+          description: Target voice identifier
+
+    GridActionOpenWebpage:
+      type: object
+      description: Opens a URL in a new window or embedded frame
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionOpenWebpage]
+        modelVersion:
+          type: string
+        openURL:
+          type: string
+        timeoutSeconds:
+          type: integer
+          description: Auto-close timeout in seconds
+
+    GridActionHTTP:
+      type: object
+      description: >
+        Sends a custom HTTP request to an external REST endpoint
+        (e.g. IoT device, home automation)
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionHTTP]
+        modelVersion:
+          type: string
+        restUrl:
+          type: string
+          description: Target URL
+        method:
+          type: string
+          enum: [GET, POST, PUT, DELETE, HEAD, PATCH]
+        contentType:
+          type: string
+          default: text/plain
+        acceptHeader:
+          type: string
+        body:
+          type: string
+          description: Request body content
+        authUser:
+          type: string
+          description: Basic auth username
+        authPw:
+          type: string
+          description: Basic auth password
+        noCorsMode:
+          type: boolean
+        useCorsProxy:
+          type: boolean
+        isLiveAction:
+          type: boolean
+
+    GridActionWordForm:
+      type: object
+      description: Changes word forms (grammar) on tiles
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionWordForm]
+        modelVersion:
+          type: string
+        type:
+          type: string
+          description: Word form change mode
+        secondaryType:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        toggle:
+          type: boolean
+
+    GridActionSystem:
+      type: object
+      description: Triggers a system-level action (volume, fullscreen, etc.)
+      required: [modelName]
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+          enum: [GridActionSystem]
+        modelVersion:
+          type: string
+        action:
+          type: string
+          enum:
+            - SYS_VOLUME_UP
+            - SYS_VOLUME_DOWN
+            - SYS_VOLUME_TOGGLE_MUTE
+            - SYS_ENTER_FULLSCREEN
+            - SYS_LEAVE_FULLSCREEN
+            - SYS_UPDATE_LIVE_ELEMENTS
+        actionValue:
+          type: string
+
+    # ── Supporting types ──────────────────
+
+    WordForm:
+      type: object
+      description: An alternative grammatical form of a word
+      properties:
+        lang:
+          type: string
+          description: Language code
+        tags:
+          type: array
+          items:
+            type: string
+          description: Grammar tags (e.g. plural, past-tense)
+        value:
+          type: string
+          description: The word form text
+        pronunciation:
+          type: string
+          description: Pronunciation of this form
+
+    AdditionalGridFile:
+      type: object
+      description: An additional file attached to a grid
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+        modelVersion:
+          type: string
+        fileName:
+          type: string
+        dataBase64:
+          type: string
+          description: Base64-encoded file data
+
+    # ── MetaData ──────────────────────────
+
+    MetaData:
+      type: object
+      description: >
+        User-level configuration and settings for the AAC application.
+        Includes home grid reference, input method config, color scheme,
+        text display settings, and vocabulary level. Derived from
+        src/js/model/MetaData.js.
+      properties:
+        id:
+          type: string
+          example: meta-data-1700000000000-abc
+        modelName:
+          type: string
+          enum: [MetaData]
+        modelVersion:
+          type: string
+        homeGridId:
+          type: string
+          nullable: true
+          description: ID of the grid shown on app startup
+        toHomeAfterSelect:
+          type: boolean
+          description: Return to home grid after a tile is selected
+        lastOpenedGridId:
+          type: string
+          description: ID of the last grid the user opened
+        globalGridId:
+          type: string
+          nullable: true
+          description: ID of the global grid overlay
+        globalGridActive:
+          type: boolean
+          description: Whether the global grid overlay is active
+        firstRowHeightFactor:
+          type: number
+          description: Height multiplier for the first row (collect bar row)
+          default: 1
+        locked:
+          type: boolean
+          description: Whether the grid is locked against editing
+        fullscreen:
+          type: boolean
+          description: Whether the app is in fullscreen mode
+        inputConfig:
+          $ref: '#/components/schemas/InputConfig'
+        colorConfig:
+          $ref: '#/components/schemas/ColorConfig'
+        textConfig:
+          $ref: '#/components/schemas/TextConfig'
+        activateARASAACGrammarAPI:
+          type: boolean
+          description: Whether ARASAAC grammar correction is enabled (Spanish only)
+        vocabularyLevel:
+          type: integer
+          nullable: true
+          description: >
+            Current vocabulary difficulty level. Tiles above this level are
+            hidden from the student.
+
+    InputConfig:
+      type: object
+      description: Input method configuration (mouse, keyboard, scanning)
+      properties:
+        globalReadActive:
+          type: boolean
+        globalReadActiveRate:
+          type: number
+        globalBeepFeedback:
+          type: boolean
+        mouseclickEnabled:
+          type: boolean
+        mouseDoubleClickEnabled:
+          type: boolean
+        mouseDownInsteadClick:
+          type: boolean
+        dirEnabled:
+          type: boolean
+          description: Directional input (scanning) enabled
+        dirWrapAround:
+          type: boolean
+        dirResetToStart:
+          type: boolean
+
+    ColorConfig:
+      type: object
+      description: Color scheme and visual appearance settings
+      properties:
+        colorSchemesActivated:
+          type: boolean
+          description: Whether semantic color schemes are active
+        activeColorScheme:
+          type: string
+          description: Name of the active color scheme
+        elementBackgroundColor:
+          type: string
+          description: Default tile background color
+        elementBorderColor:
+          type: string
+        gridBackgroundColor:
+          type: string
+        borderWidth:
+          type: number
+        elementMargin:
+          type: number
+        borderRadius:
+          type: number
+        colorMode:
+          type: string
+          enum: [COLOR_MODE_BACKGROUND, COLOR_MODE_BORDER, COLOR_MODE_BOTH]
+
+    TextConfig:
+      type: object
+      description: Text display settings for tile labels
+      properties:
+        convertMode:
+          type: string
+          enum: [CONVERT_MODE_UPPERCASE, CONVERT_MODE_LOWERCASE]
+        fontFamily:
+          type: string
+        fontSizePct:
+          type: number
+        lineHeight:
+          type: number
+        maxLines:
+          type: integer
+        textPosition:
+          type: string
+          enum: [ABOVE, BELOW]
+          description: Whether text appears above or below the image
+        fontColor:
+          type: string
+
+    # ── Prediction & Usage ────────────────
+
+    PredictionModel:
+      type: object
+      description: >
+        N-gram word-prediction model built from tile taps. Contains frequency
+        tables for bigrams (word pairs), trigrams (word triples), and unigrams
+        (individual words). The client maintains this model in localStorage
+        and syncs it to the server for caregiver access. Based on
+        src/js/service/predictionService.js.
+      properties:
+        bigrams:
+          type: object
+          description: >
+            Bigram frequency map. Keys are words, values are objects mapping
+            each following word to its frequency count.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+          example:
+            I:
+              WANT: 12
+              LIKE: 8
+              NEED: 5
+            WANT:
+              PIZZA: 5
+              WATER: 3
+        trigrams:
+          type: object
+          description: >
+            Trigram frequency map. Keys are pipe-separated word pairs
+            (e.g. "I|WANT"), values are objects mapping the third word to
+            its frequency count.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+          example:
+            "I|WANT":
+              PIZZA: 5
+              WATER: 3
+              JUICE: 2
+        unigrams:
+          type: object
+          description: >
+            Unigram frequency map. Keys are words, values are total
+            frequency counts across all contexts.
+          additionalProperties:
+            type: integer
+          example:
+            I: 40
+            WANT: 25
+            PIZZA: 10
+        userBigrams:
+          type: object
+          description: >
+            Bigrams learned only from real user tile taps (not bootstrap data).
+            Same structure as bigrams.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+        userTrigrams:
+          type: object
+          description: >
+            Trigrams learned only from real user tile taps (not bootstrap data).
+            Same structure as trigrams.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+
+    UsageStats:
+      type: object
+      description: >
+        Aggregated usage statistics for a student. Caregivers use this data
+        to monitor communication progress and vocabulary development.
+      properties:
+        totalTileTaps:
+          type: integer
+          description: Total number of tile taps recorded
+          example: 1250
+        uniqueWordsUsed:
+          type: integer
+          description: Number of distinct words the student has used
+          example: 85
+        mostUsedWords:
+          type: array
+          description: Top words ranked by frequency
+          items:
+            type: object
+            properties:
+              word:
+                type: string
+              count:
+                type: integer
+          example:
+            - word: I
+              count: 200
+            - word: WANT
+              count: 150
+            - word: PIZZA
+              count: 45
+        vocabularyGrowth:
+          type: array
+          description: Unique words used over time for tracking progress
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              uniqueWords:
+                type: integer
+          example:
+            - date: "2026-02-01"
+              uniqueWords: 20
+            - date: "2026-02-15"
+              uniqueWords: 55
+            - date: "2026-02-22"
+              uniqueWords: 85
+
+    # ── ARASAAC ───────────────────────────
+
+    ArasaacPictogram:
+      type: object
+      description: Pictogram metadata from the ARASAAC database
+      properties:
+        _id:
+          type: integer
+          description: ARASAAC pictogram ID
+          example: 38222
+        keywords:
+          type: array
+          items:
+            type: object
+            properties:
+              keyword:
+                type: string
+              plural:
+                type: string
+        categories:
+          type: array
+          items:
+            type: string
+
+    # ── TTS ───────────────────────────────
+
+    TTSVoice:
+      type: object
+      description: An available text-to-speech voice from the TTS provider
+      properties:
+        id:
+          type: string
+          description: Voice identifier
+          example: voice_abc123
+        name:
+          type: string
+          description: Human-readable voice name
+          example: Rachel
+        language:
+          type: string
+          description: Language code the voice supports
+          example: en
+        provider:
+          type: string
+          description: TTS provider name
+          example: ElevenLabs
+
+    TTSRequest:
+      type: object
+      description: Request body for text-to-speech synthesis
+      required: [text]
+      properties:
+        text:
+          type: string
+          description: Text to synthesize into speech
+          example: I want pizza please
+        voiceId:
+          type: string
+          description: Voice to use (from /tts/voices). Uses default if omitted.
+          example: voice_abc123
+
+    # ── Health ────────────────────────────
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+
+    # ── Error ─────────────────────────────
+
+    ErrorResponse:
+      type: object
+      description: Standard error response returned by the API
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code
+          example: NOT_FOUND
+        message:
+          type: string
+          description: Human-readable error message
+          example: The requested resource could not be found.
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 404
+        details:
+          type: object
+          description: Additional context (optional)
+          additionalProperties: true
