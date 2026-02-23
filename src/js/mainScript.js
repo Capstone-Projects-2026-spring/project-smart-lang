@@ -45,6 +45,12 @@ async function init() {
     await importDefaultGridset();
   }
 
+  // Cache pictogram images as base64 in PouchDB for reliable offline use.
+  // Runs in the background — does not block app startup.
+  dataService
+    .cacheAllImageData()
+    .catch((e) => log.warn("Image data caching failed:", e));
+
   // Init prediction engine (loads n-gram model from localStorage)
   await predictionService.init();
   log.info("Prediction service initialized.");
