@@ -9,6 +9,19 @@
       <header-icon class="left"></header-icon>
       <div class="btn-group left"></div>
       <button
+        v-if="loggedInCaregiver"
+        tabindex="31"
+        @click="openCaregiverAdmin()"
+        class="spaced small"
+        :class="{ 'caregiver-signed-in': loggedInCaregiver }"
+        :aria-label="$t('caregiverAdmin')"
+        :title="loggedInCaregiver ? `${$t('signedInAs')} ${loggedInCaregiver.username}` : $t('caregiverAdmin')"
+      >
+        <i class="fas fa-user-nurse" />
+        <span class="hide-mobile">{{ $t("caregiverAdmin") }}</span>
+        <span v-if="loggedInCaregiver" class="signin-indicator"><i class="fas fa-check-circle"></i></span>
+      </button>
+      <button
         tabindex="32"
         @click="systemActionService.enterFullscreen()"
         class="spaced small"
@@ -41,6 +54,26 @@
     <unlock-modal
       v-if="showModal === modalTypes.MODAL_UNLOCK"
       @unlock="unlock(true)"
+      @caregiver-access="openCaregiverAuthFromUnlock"
+      @close="showModal = null"
+    />
+    <caregiver-auth-modal
+      v-if="showModal === modalTypes.MODAL_CAREGIVER_AUTH"
+      ref="caregiverAuthModal"
+      @auth-success="onCaregiverAuthSuccess"
+      @close="showModal = null"
+    />
+    <caregiver-admin-modal
+      v-if="showModal === modalTypes.MODAL_CAREGIVER_ADMIN"
+      :grid-id="gridId"
+      :metadata="metadata"
+      :caregiver-id="loggedInCaregiver ? loggedInCaregiver.id : null"
+      :current-user-id="currentUserId"
+      @word-added="onWordAdded"
+      @word-removed="onWordRemoved"
+      @word-edited="onWordEdited"
+      @student-switched="onStudentSwitched"
+      @sign-out="onCaregiverSignOut"
       @close="showModal = null"
     />
 
@@ -99,6 +132,8 @@ import { localStorageService } from "../../js/service/data/localStorageService";
 import { imageUtil } from "../../js/util/imageUtil";
 import { audioUtil } from "../../js/util/audioUtil.js";
 import UnlockModal from "../modals/unlockModal.vue";
+import CaregiverAdminModal from "../modals/caregiverAdminModal.vue";
+import CaregiverAuthModal from "../modals/caregiverAuthModal.vue";
 import { MainVue } from "../../js/vue/mainVue.js";
 import { stateService } from "../../js/service/stateService.js";
 import { systemActionService } from "../../js/service/systemActionService";
@@ -116,6 +151,8 @@ let modalTypes = {
   MODAL_MOUSE: "MODAL_MOUSE",
   MODAL_DIRECTION: "MODAL_DIRECTION",
   MODAL_UNLOCK: "MODAL_UNLOCK",
+  MODAL_CAREGIVER_AUTH: "MODAL_CAREGIVER_AUTH",
+  MODAL_CAREGIVER_ADMIN: "MODAL_CAREGIVER_ADMIN",
 };
 
 let vueConfig = {
@@ -141,12 +178,16 @@ let vueConfig = {
       highlightedElementId: null,
       systemActionService: systemActionService,
       gridUtil: gridUtil,
+      currentUserId: null,
+      loggedInCaregiver: null,
     };
   },
   components: {
     AppGridDisplay,
     PredictionBar,
     UnlockModal,
+    CaregiverAuthModal,
+    CaregiverAdminModal,
     DirectionInputModal,
     MouseModal,
     HeaderIcon,
@@ -202,6 +243,71 @@ let vueConfig = {
     },
     reloadInputMethods() {
       this.initInputMethods({ reload: true });
+    },
+    openCaregiverAdmin() {
+      // Check if caregiver is logged in
+      if (!this.loggedInCaregiver) {
+        // Show auth modal
+        this.showModal = modalTypes.MODAL_CAREGIVER_AUTH;
+      } else {
+        // Show admin modal
+        this.showModal = modalTypes.MODAL_CAREGIVER_ADMIN;
+      }
+      stopInputMethods();
+    },
+    onCaregiverAuthSuccess(eventData) {
+      // Store logged in caregiver
+      this.loggedInCaregiver = eventData.caregiver;
+      
+      // Show success message
+      const welcomeMessage = eventData.type === 'signup' 
+        ? this.$t('welcomeNewCaregiver') || 'Welcome! Your caregiver account has been created.'
+        : this.$t('welcomeBackCaregiver') || `Welcome back, ${eventData.caregiver.fullName || eventData.caregiver.username}!`;
+      
+      MainVue.setTooltip(welcomeMessage, systemActionService.getTargetId('caregiverAdminButton'));
+      
+      // Open admin modal
+      this.showModal = modalTypes.MODAL_CAREGIVER_ADMIN;
+    },
+    onCaregiverSignOut() {
+      this.loggedInCaregiver = null;
+      this.currentUserId = null;
+      this.showModal = null;
+      MainVue.setTooltip(
+        this.$t('loggedOut') || this.$t('logout') || 'Logged out',
+        systemActionService.getTargetId('caregiverAdminButton'),
+      );
+    },
+    onOpenCaregiverEntry() {
+      if (this.loggedInCaregiver) {
+        this.showModal = modalTypes.MODAL_CAREGIVER_ADMIN;
+      } else {
+        this.showModal = modalTypes.MODAL_CAREGIVER_AUTH;
+      }
+      stopInputMethods();
+    },
+    openCaregiverAuthFromUnlock() {
+      this.showModal = modalTypes.MODAL_CAREGIVER_AUTH;
+    },
+    async onWordAdded(eventData) {
+      console.log('Word added by caregiver:', eventData.word);
+      // Reload the grid to show new word
+      await this.rerenderGrid();
+    },
+    async onWordRemoved(eventData) {
+      console.log('Word removed by caregiver:', eventData.wordId);
+      // Reload the grid to reflect removal
+      await this.rerenderGrid();
+    },
+    async onWordEdited(eventData) {
+      console.log('Word edited by caregiver:', eventData.wordId);
+      // Reload the grid to reflect edits
+      await this.rerenderGrid();
+    },
+    async onStudentSwitched(eventData) {
+      console.log('Switched to student:', eventData.studentId);
+      // In a multi-student scenario, load the new student's grid
+      this.currentUserId = eventData.studentId;
     },
     async initInputMethods(options = {}) {
       options.continueInputMethods = options.continueInputMethods || false;
@@ -544,6 +650,7 @@ let vueConfig = {
     $(document).on(constants.EVENT_GRID_RESIZE, this.resizeListener);
     $(document).on(constants.EVENT_METADATA_UPDATED, this.metadataUpdated);
     $(document).on(constants.EVENT_GRID_RERENDER, this.rerenderGrid);
+    $(document).on(constants.EVENT_OPEN_CAREGIVER_ENTRY, this.onOpenCaregiverEntry);
   },
   beforeDestroy() {
     $(document).off(constants.EVENT_DB_PULL_UPDATED, this.onExternalUpdate);
@@ -557,6 +664,7 @@ let vueConfig = {
     $(document).off(constants.EVENT_GRID_RESIZE, this.resizeListener);
     $(document).off(constants.EVENT_METADATA_UPDATED, this.metadataUpdated);
     $(document).off(constants.EVENT_GRID_RERENDER, this.rerenderGrid);
+    $(document).off(constants.EVENT_OPEN_CAREGIVER_ENTRY, this.onOpenCaregiverEntry);
     stopInputMethods();
     this.setViewPropsUnlocked();
     $.contextMenu("destroy");
@@ -667,4 +775,19 @@ function initContextmenu() {
 export default vueConfig;
 </script>
 
-<style scoped></style>
+<style scoped>
+.caregiver-signed-in {
+  background-color: #4CAF50 !important;
+  color: white !important;
+}
+
+.caregiver-signed-in:hover {
+  background-color: #45a049 !important;
+}
+
+.signin-indicator {
+  margin-left: 5px;
+  font-size: 0.85em;
+  color: #fff;
+}
+</style>
