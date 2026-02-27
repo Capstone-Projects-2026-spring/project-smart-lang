@@ -144,6 +144,9 @@ MainVue.init = function () {
                 },
                 toMain() {
                     Router.toMain();
+                },
+                openCaregiverEntry() {
+                    $(document).trigger(constants.EVENT_OPEN_CAREGIVER_ENTRY);
                 }
             },
             mounted() {

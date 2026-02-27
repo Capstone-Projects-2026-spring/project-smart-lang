@@ -33,6 +33,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <div class="caregiver-login-hint">
+                            {{ $t('caregiverLoginHint') || 'Need caregiver tools? Tap Caregiver Access to sign in.' }}
+                        </div>
+                        <button class="btn-primary" @click="$emit('caregiver-access')">
+                            <i class="fas fa-user-nurse"></i> {{ $t('caregiverAccess') || 'Caregiver Access' }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -110,5 +116,11 @@
         padding: 3% 0;
         margin-right: 3%;
         font-size: 2.5em;
+    }
+    .caregiver-login-hint {
+        margin-bottom: 0.6em;
+        font-size: 0.95em;
+        text-align: center;
+        color: #666;
     }
 </style>

@@ -5,7 +5,8 @@
                 <a tabindex="20" href="javascript:void(0)" :aria-label="$t('openSidebar')" @click="openSidebar()" style="margin: 0.2em 1em 0 0.5em; color: #266697;"><i class="fas fa-2x fa-bars inline"></i></a>
                 <a tabindex="21" aria-hidden="true" href="#main" class="hide-mobile"><h1 class="inline"><img id="appIcon" src="app/img/asterics-grid-icon-raw.svg" height="40" width="121" alt="AAC Communicator"/></h1></a>
             </div>
-            <a tabindex="22" aria-hidden="true" href="#main" class="show-mobile"><h1 class="inline"><img id="appIcon" src="app/img/asterics_icon.png" alt="AAC Communicator" style="margin: 0"/></h1></a>
+            <a tabindex="22" href="javascript:void(0)" :aria-label="$t('caregiverAccess') || 'Caregiver Access'" :title="$t('caregiverAccess') || 'Caregiver Access'" @click="openCaregiverEntry()" class="caregiver-entry-icon"><i class="fas fa-user-nurse inline"></i></a>
+            <a tabindex="23" aria-hidden="true" href="#main" class="show-mobile"><h1 class="inline"><img id="appIcon" src="app/img/asterics_icon.png" alt="AAC Communicator" style="margin: 0"/></h1></a>
         </div>
     </component>
 </template>
@@ -28,6 +29,9 @@
                 $(document).trigger(constants.EVENT_SIDEBAR_OPEN);
                 this.show = false;
             },
+            openCaregiverEntry() {
+                $(document).trigger(constants.EVENT_OPEN_CAREGIVER_ENTRY);
+            },
             onOpenFn() {
                 this.show = false;
             },
@@ -49,4 +53,9 @@
 </script>
 
 <style scoped>
+.caregiver-entry-icon {
+    margin: 0.2em 0 0 0.6em;
+    color: #266697;
+    display: inline-block;
+}
 </style>
