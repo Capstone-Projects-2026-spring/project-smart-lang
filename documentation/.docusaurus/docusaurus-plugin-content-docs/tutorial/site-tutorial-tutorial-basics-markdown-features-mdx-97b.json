@@ -1,0 +1,27 @@
+{
+  "id": "tutorial-basics/markdown-features",
+  "title": "Markdown Features",
+  "description": "Docusaurus supports Markdown and a few additional features.",
+  "source": "@site/tutorial/tutorial-basics/markdown-features.mdx",
+  "sourceDirName": "tutorial-basics",
+  "slug": "/tutorial-basics/markdown-features",
+  "permalink": "/docs-dev-mode/tutorial/tutorial-basics/markdown-features",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Create a Document",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/create-a-document"
+  },
+  "next": {
+    "title": "Mermaid Diagrams (UML)",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/mermaid"
+  }
+}

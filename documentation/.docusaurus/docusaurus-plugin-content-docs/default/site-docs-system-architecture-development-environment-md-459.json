@@ -1,0 +1,28 @@
+{
+  "id": "system-architecture/development-environment",
+  "title": "Development Environment",
+  "description": "IDEs and Editors",
+  "source": "@site/docs/system-architecture/development-environment.md",
+  "sourceDirName": "system-architecture",
+  "slug": "/system-architecture/development-environment",
+  "permalink": "/docs-dev-mode/docs/system-architecture/development-environment",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/system-architecture/development-environment.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "System Architecture",
+    "permalink": "/docs-dev-mode/docs/category/system-architecture"
+  },
+  "next": {
+    "title": "Version Control",
+    "permalink": "/docs-dev-mode/docs/system-architecture/version-control"
+  }
+}

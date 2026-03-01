@@ -1,0 +1,28 @@
+{
+  "id": "system-architecture/version-control",
+  "title": "Version Control",
+  "description": "This project utilizes GitHub for version control.",
+  "source": "@site/docs/system-architecture/version-control.md",
+  "sourceDirName": "system-architecture",
+  "slug": "/system-architecture/version-control",
+  "permalink": "/docs-dev-mode/docs/system-architecture/version-control",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/system-architecture/version-control.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "sidebar_position": 5
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Development Environment",
+    "permalink": "/docs-dev-mode/docs/system-architecture/development-environment"
+  },
+  "next": {
+    "title": "Sequence Diagrams",
+    "permalink": "/docs-dev-mode/docs/system-architecture/Sequence Diagrams"
+  }
+}

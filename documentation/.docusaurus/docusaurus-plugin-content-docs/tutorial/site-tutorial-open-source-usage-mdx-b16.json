@@ -1,0 +1,20 @@
+{
+  "id": "open-source-usage",
+  "title": "Contributors & Open Source Usage",
+  "description": "This Docusaurus template was designed and Developed for the Temple University CIS Capstone course. It is built on the shoulders of students, alumni, faculty, and amazing open source software. This page is automatically generated from the package.json file and provides a list of all the open source projects and plugins that make this template possible.",
+  "source": "@site/tutorial/open-source-usage.mdx",
+  "sourceDirName": ".",
+  "slug": "/open-source-usage",
+  "permalink": "/docs-dev-mode/tutorial/open-source-usage",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "frontMatter": {},
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Inline Docs Component",
+    "permalink": "/docs-dev-mode/tutorial/custom-components/inline-docs"
+  }
+}

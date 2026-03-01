@@ -1,0 +1,28 @@
+{
+  "id": "requirements/features-and-requirements",
+  "title": "Features and Requirements",
+  "description": "Functional Requirements",
+  "source": "@site/docs/requirements/features-and-requirements.md",
+  "sourceDirName": "requirements",
+  "slug": "/requirements/features-and-requirements",
+  "permalink": "/docs-dev-mode/docs/requirements/features-and-requirements",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/requirements/features-and-requirements.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "General Requirements",
+    "permalink": "/docs-dev-mode/docs/requirements/general-requirements"
+  },
+  "next": {
+    "title": "Use-case descriptions",
+    "permalink": "/docs-dev-mode/docs/requirements/use-case-descriptions"
+  }
+}
