@@ -1,0 +1,27 @@
+{
+  "id": "tutorial-basics/deploy-your-site",
+  "title": "Deploy your site",
+  "description": "This template includes automatic deployment to GitHub Pages using GitHub Actions. Every time you push changes to the main branch, your site is automatically built and deployed!",
+  "source": "@site/tutorial/tutorial-basics/deploy-your-site.md",
+  "sourceDirName": "tutorial-basics",
+  "slug": "/tutorial-basics/deploy-your-site",
+  "permalink": "/docs-dev-mode/tutorial/tutorial-basics/deploy-your-site",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 7,
+  "frontMatter": {
+    "sidebar_position": 7
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Set Environment Variables",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/set-environment-variables"
+  },
+  "next": {
+    "title": "Congratulations!",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/congratulations"
+  }
+}

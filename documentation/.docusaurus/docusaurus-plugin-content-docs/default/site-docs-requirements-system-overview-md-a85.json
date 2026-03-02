@@ -1,0 +1,29 @@
+{
+  "id": "requirements/system-overview",
+  "title": "System Overview",
+  "description": "Conceptual Design",
+  "source": "@site/docs/requirements/system-overview.md",
+  "sourceDirName": "requirements",
+  "slug": "/requirements/system-overview",
+  "permalink": "/docs-dev-mode/docs/requirements/system-overview",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/requirements/system-overview.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "title": "System Overview"
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Requirements Specification",
+    "permalink": "/docs-dev-mode/docs/category/requirements-specification"
+  },
+  "next": {
+    "title": "System Block Diagram",
+    "permalink": "/docs-dev-mode/docs/requirements/system-block-diagram"
+  }
+}

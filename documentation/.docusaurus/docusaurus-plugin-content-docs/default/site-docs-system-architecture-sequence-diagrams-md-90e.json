@@ -1,0 +1,25 @@
+{
+  "id": "system-architecture/Sequence Diagrams",
+  "title": "Sequence Diagrams",
+  "description": "Use Case 1: Account Login",
+  "source": "@site/docs/system-architecture/Sequence Diagrams.md",
+  "sourceDirName": "system-architecture",
+  "slug": "/system-architecture/Sequence Diagrams",
+  "permalink": "/docs-dev-mode/docs/system-architecture/Sequence Diagrams",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/system-architecture/Sequence Diagrams.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "frontMatter": {},
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Version Control",
+    "permalink": "/docs-dev-mode/docs/system-architecture/version-control"
+  },
+  "next": {
+    "title": "Architecture Diagrams",
+    "permalink": "/docs-dev-mode/docs/system-architecture/architecture-diagrams"
+  }
+}

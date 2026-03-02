@@ -1,0 +1,27 @@
+{
+  "id": "tutorial-basics/set-environment-variables",
+  "title": "Set Environment Variables",
+  "description": "This guide explains how to set the PROJECTNAME and ORGNAME environment variables needed for the contributors section to work properly.",
+  "source": "@site/tutorial/tutorial-basics/set-environment-variables.md",
+  "sourceDirName": "tutorial-basics",
+  "slug": "/tutorial-basics/set-environment-variables",
+  "permalink": "/docs-dev-mode/tutorial/tutorial-basics/set-environment-variables",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 6,
+  "frontMatter": {
+    "sidebar_position": 6
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Mermaid Diagrams (UML)",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/mermaid"
+  },
+  "next": {
+    "title": "Deploy your site",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/deploy-your-site"
+  }
+}
