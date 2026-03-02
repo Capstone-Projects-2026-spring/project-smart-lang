@@ -3,7 +3,7 @@ sidebar_position: 2
 ---
 # Integration tests
 
-Integration testing was performed using Jest and React Testing Library. External dependencies such as authentication, database operations, and text-to-speech were simulated using mock objects to ensure tests ran automatically without manual input.
+Our Integration testing will be carried out using Jest and React Testing Library. Any external input will be simulated using mock objects to ensure that tests run automatically without manual entry.
 
 ### Use Case 1 - Account Login 
 
