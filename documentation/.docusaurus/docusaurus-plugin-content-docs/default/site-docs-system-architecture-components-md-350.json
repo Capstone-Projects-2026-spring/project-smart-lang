@@ -1,0 +1,29 @@
+{
+  "id": "system-architecture/components",
+  "title": "System Components",
+  "description": "This section describes the primary system components and their interfaces. Refer to the System Block Diagram for a visual overview of how these components interact within the AAC application.",
+  "source": "@site/docs/system-architecture/components.md",
+  "sourceDirName": "system-architecture",
+  "slug": "/system-architecture/components",
+  "permalink": "/docs-dev-mode/docs/system-architecture/components",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/system-architecture/components.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "frontMatter": {
+    "id": "components",
+    "title": "System Components",
+    "sidebar_label": "Components"
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Architecture Diagrams",
+    "permalink": "/docs-dev-mode/docs/system-architecture/architecture-diagrams"
+  },
+  "next": {
+    "title": "Database Diagram",
+    "permalink": "/docs-dev-mode/docs/system-architecture/database-diagram"
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "/docs-dev-mode/__docusaurus/debug-8eb": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docusaurus-debugb-38-f58"
+    }
+  },
+  "/docs-dev-mode/__docusaurus/debug/config-c8f": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docusaurus-debugb-38-f58"
+    }
+  },
+  "/docs-dev-mode/__docusaurus/debug/content-288": {
+    "__comp": "__comp---theme-debug-contentba-8-ce7",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docusaurus-debugb-38-f58"
+    },
+    "__props": "__props---docs-dev-mode-docusaurus-debug-contentc-71-353"
+  },
+  "/docs-dev-mode/__docusaurus/debug/globalData-430": {
+    "__comp": "__comp---theme-debug-global-dataede-0fa",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docusaurus-debugb-38-f58"
+    }
+  },
+  "/docs-dev-mode/__docusaurus/debug/metadata-f79": {
+    "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docusaurus-debugb-38-f58"
+    }
+  },
+  "/docs-dev-mode/__docusaurus/debug/registry-cf2": {
+    "__comp": "__comp---theme-debug-registry-679-501",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docusaurus-debugb-38-f58"
+    }
+  },
+  "/docs-dev-mode/__docusaurus/debug/routes-d5d": {
+    "__comp": "__comp---theme-debug-routes-946-699",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docusaurus-debugb-38-f58"
+    }
+  },
+  "/docs-dev-mode/api-f4d": {
+    "__comp": "__comp---theme-api-docf-0-a-77e",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-apia-68-384"
+    },
+    "specProps": "specProps---docs-dev-mode-apie-21-6f2",
+    "layoutProps": "layoutProps---docs-dev-mode-api-181-4e4"
+  },
+  "/docs-dev-mode/markdown-page-62e": {
+    "__comp": "__comp---theme-mdx-page-1-f-3-b90",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-markdown-pagea-74-ab2"
+    },
+    "content": "content---docs-dev-mode-markdown-page-393-bb9"
+  },
+  "/docs-dev-mode/docs-452": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-docsaba-3d1"
+    }
+  },
+  "/docs-dev-mode/docs-8f4": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---docs-dev-mode-docs-8-e-8-fa3"
+  },
+  "/docs-dev-mode/docs-558": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/docs-dev-mode/docs/api-specification/calculator-model-generated-ad9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-api-specification-calculator-model-generated-986-384"
+  },
+  "/docs-dev-mode/docs/api-specification/design-api-intro-a27": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-api-specification-design-api-introdb-8-624"
+  },
+  "/docs-dev-mode/docs/api-specification/openapi-spec-8d4": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-api-specification-openapi-specfb-6-99d"
+  },
+  "/docs-dev-mode/docs/category/api-specification-619": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---docs-dev-mode-docs-category-api-specificationa-98-548"
+  },
+  "/docs-dev-mode/docs/category/requirements-specification-815": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---docs-dev-mode-docs-category-requirements-specification-904-5eb"
+  },
+  "/docs-dev-mode/docs/category/system-architecture-c87": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---docs-dev-mode-docs-category-system-architecturea-9-b-b18"
+  },
+  "/docs-dev-mode/docs/category/test-procedures-69b": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---docs-dev-mode-docs-category-test-procedures-94-b-293"
+  },
+  "/docs-dev-mode/docs/intro-996": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-introf-84-f1e"
+  },
+  "/docs-dev-mode/docs/requirements/features-and-requirements-176": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-requirements-features-and-requirementsbaf-a2c"
+  },
+  "/docs-dev-mode/docs/requirements/general-requirements-e40": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-requirements-general-requirements-83-a-5c0"
+  },
+  "/docs-dev-mode/docs/requirements/system-block-diagram-876": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-requirements-system-block-diagram-5-bc-cef"
+  },
+  "/docs-dev-mode/docs/requirements/system-overview-317": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-requirements-system-overviewa-85-6d8"
+  },
+  "/docs-dev-mode/docs/requirements/use-case-descriptions-1cd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-requirements-use-case-descriptions-651-302"
+  },
+  "/docs-dev-mode/docs/system-architecture/architecture-diagrams-78c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-system-architecture-architecture-diagramsee-0-ea5"
+  },
+  "/docs-dev-mode/docs/system-architecture/components-ac5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-system-architecture-components-350-416"
+  },
+  "/docs-dev-mode/docs/system-architecture/database-diagram-1a2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-system-architecture-database-diagrama-46-c37"
+  },
+  "/docs-dev-mode/docs/system-architecture/development-environment-2f2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-system-architecture-development-environment-459-a32"
+  },
+  "/docs-dev-mode/docs/system-architecture/Sequence Diagrams-1da": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-system-architecture-sequence-diagrams-90-e-120"
+  },
+  "/docs-dev-mode/docs/system-architecture/version-control-99b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-system-architecture-version-controld-25-bab"
+  },
+  "/docs-dev-mode/docs/testing/acceptence-testing-933": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-testing-acceptence-testingfc-3-08e"
+  },
+  "/docs-dev-mode/docs/testing/integration-testing-b74": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-testing-integration-testing-9-ca-e19"
+  },
+  "/docs-dev-mode/docs/testing/unit-testing-f77": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-docs-testing-unit-testingf-85-e34"
+  },
+  "/docs-dev-mode/tutorial-80b": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-tutorial-032-85f"
+    }
+  },
+  "/docs-dev-mode/tutorial-ca3": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---docs-dev-mode-tutorial-685-c7b"
+  },
+  "/docs-dev-mode/tutorial-c62": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/docs-dev-mode/tutorial/category/custom-components-e50": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---docs-dev-mode-tutorial-category-custom-componentsf-44-a0a"
+  },
+  "/docs-dev-mode/tutorial/category/tutorial---basics-b67": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---docs-dev-mode-tutorial-category-tutorial-basics-2-d-5-2ec"
+  },
+  "/docs-dev-mode/tutorial/category/tutorial---extras-868": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---docs-dev-mode-tutorial-category-tutorial-extras-8-c-0-b1b"
+  },
+  "/docs-dev-mode/tutorial/custom-components/contributors-8fd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-custom-components-contributors-870-259"
+  },
+  "/docs-dev-mode/tutorial/custom-components/figure-1d2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-custom-components-figure-863-e21"
+  },
+  "/docs-dev-mode/tutorial/custom-components/inline-docs-554": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-custom-components-inline-docsd-70-457"
+  },
+  "/docs-dev-mode/tutorial/intro-63f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-introdeb-71e"
+  },
+  "/docs-dev-mode/tutorial/open-source-usage-bbc": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-open-source-usageb-16-538"
+  },
+  "/docs-dev-mode/tutorial/tutorial-basics/congratulations-0fd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-basics-congratulationsc-0-b-f1d"
+  },
+  "/docs-dev-mode/tutorial/tutorial-basics/create-a-document-91c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-basics-create-a-document-61-d-c78"
+  },
+  "/docs-dev-mode/tutorial/tutorial-basics/create-a-page-84e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-basics-create-a-pageecf-569"
+  },
+  "/docs-dev-mode/tutorial/tutorial-basics/deploy-your-site-f0d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-basics-deploy-your-siteb-5-f-450"
+  },
+  "/docs-dev-mode/tutorial/tutorial-basics/markdown-features-66e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-basics-markdown-features-97-b-545"
+  },
+  "/docs-dev-mode/tutorial/tutorial-basics/mermaid-335": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-basics-mermaidc-6-f-a03"
+  },
+  "/docs-dev-mode/tutorial/tutorial-basics/set-environment-variables-1ac": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-basics-set-environment-variablesce-9-263"
+  },
+  "/docs-dev-mode/tutorial/tutorial-extras/manage-docs-versions-b22": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-extras-manage-docs-versions-208-1b4"
+  },
+  "/docs-dev-mode/tutorial/tutorial-extras/translate-your-site-86b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-dev-mode-tutorial-tutorial-extras-translate-your-sitefde-311"
+  },
+  "/docs-dev-mode/-5c1": {
+    "__comp": "__comp---site-src-pages-index-jsc-4-f-f99",
+    "__context": {
+      "plugin": "plugin---docs-dev-mode-markdown-pagea-74-ab2"
+    },
+    "config": "config---docs-dev-mode-5-e-9-419"
+  }
+}

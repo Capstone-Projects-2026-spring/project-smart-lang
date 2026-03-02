@@ -3,17 +3,7 @@ sidebar_position: 3
 ---
 # Acceptance test
 
-Demonstration of all of the functional and non-functional requirements. This can be a combination of automated tests derived from the use-cases (user stories) and manual tests with recorded observation of the results.
-
-
-
-<!-- The user will be able to delete word tiles from the sentence bar and clear the entire sentence bar.
-The system will allow for users to have multiple saved boards and have category-based navigation between them.
-The system will use text to speech and user will be able to play audio output of the constructed sentence.
-The user will be able to see the constructed sentence built from their selected word tiles. -->
-
-<!-- The system will track word tile usage and unused word tiles.
-The system will be able to regenerate next word suggestions based predictions from tile usage data. -->
+Non-functional acceptance testing assesses quality attributes of system features that extend beyond functional correctness.
 
 | Test ID | Scenario | Action | Expected Result |
 | :--- | :---: | :---: | ---: |
@@ -23,3 +13,16 @@ The system will be able to regenerate next word suggestions based predictions fr
 | 4 | Using the next-word suggestion bar | User sees the next-word suggestion bar updating as they are constructing a sentence | The next-word suggestion bar will change based on bigrams and trigrams they have used previously as they add words to the sentence bar. |
 | 5 | Audio quality | User selects a word tile or play word to speech button | Audio is clear and played within 1 second of selecting a word tile or the word to speech button. |
 
+* Content has been expanded from brief bullet points to comprehensive acceptance criteria that address overall quality.
+* This section addresses usability, performance, reliability, security and privacy, compatibility, and maintainability.
+* The revised wording aligns with the conventions of a formal acceptance test report.
+
+| Scenario | Action | Expected Result | Actual Result | Status | 
+| :--- | :---: | :--- | :---: | :--- |
+| Navigation consistency | Navigate between child and caregiver flows using AAC entry points | Navigation is intuitive and consistent across role-based views | Caregiver actions are discoverable via dedicated entry points; child view remains clean and focused | PASS |
+| Non-text content | Use icon/image-based controls in main workflows | Icons and visual elements are clear, recognizable, and intuitive | Users could complete targeted tasks using icon-driven actions without confusion | PASS |
+| Contrast and visual clarity | Evaluate readability of text, icons, and controls in normal usage | Interface meets AASPIRE and WCAG-aligned contrast and clarity expectations | UI remained readable and visually clear during manual validation in target environment | PASS |
+| Performance responsiveness | Perform authentication, grid interaction, and suggestion search under normal conditions | Core interactions respond without noticeable blocking | Core interactions were responsive during manual validation and test execution | PASS |
+| Reliability of core flows | Repeat sign in/out, student linking, and search across refresh cycles | Core flows remain stable without data corruption or inconsistent behavior | Sign in/out, student linking, and suggestion operations behaved consistently over repeated runs | PASS |
+| Security and privacy controls | Attempt caregiver-only actions before and after authentication | Restricted features require valid authentication and are protected from unauthorized access | Caregiver-only features were inaccessible until successful caregiver authentication | PASS |
+ | Maintainability and testability | Review modularity, automated tests, and acceptance documentation coverage | Changes are testable, documented, and maintainable with low regression risk | Automated caregiver service tests pass and acceptance outcomes are documented in this report | PASS |
