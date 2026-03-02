@@ -24,7 +24,7 @@ Assertions:
 
 
 ### Use Case 2 - Offline Accessibility
-<i>Testing Offline mode successfully loading cached data and opening the homepage. Mocking Service worker./i>
+<i>Testing Offline mode successfully loading cached data and opening the homepage. Mocking Service worker.</i>
 
 Steps:
 1. The user opens the Smart Lang app and continues in offline mode, which is displayed on the landing page.
