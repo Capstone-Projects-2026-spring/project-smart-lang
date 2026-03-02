@@ -5,14 +5,17 @@ sidebar_position: 3
 
 Non-functional acceptance testing assesses quality attributes of system features that extend beyond functional correctness.
 
-This process verifies whether the system's behavior satisfies specified requirements, addressing aspects not evaluated by functional testing. Non-functional testing combines automated tests derived from use case scenarios and manual tests with documented observations.
-The non-functional acceptance test description section includes the following areas:
+| Test ID | Scenario | Action | Expected Result |
+| :--- | :---: | :---: | ---: |
+| 1 | Deleting word tiles | User selects back button or trash button | A word tile is removed from the sentence bar with the backspace button or all tiles currently in the sentence bar is removed with the trash button |
+| 2 | Selecting a word tile and constructing a sentence | User selects any word tile from the AAC board with audio output | The word tile appears on the sentence bar and the word associated with the tile will be audibly played |
+| 3 | Navigating the AAC board | User selects category tiles and back button | Word tiles associated with the category is displayed and taken back to the default tile grid |
+| 4 | Using the next-word suggestion bar | User sees the next-word suggestion bar updating as they are constructing a sentence | The next-word suggestion bar will change based on bigrams and trigrams they have used previously as they add words to the sentence bar. |
+| 5 | Audio quality | User selects a word tile or play word to speech button | Audio is clear and played within 1 second of selecting a word tile or the word to speech button. |
 
 * Content has been expanded from brief bullet points to comprehensive acceptance criteria that address overall quality.
 * This section addresses usability, performance, reliability, security and privacy, compatibility, and maintainability.
 * The revised wording aligns with the conventions of a formal acceptance test report.
-
-
 
 | Scenario | Action | Expected Result | Actual Result | Status | 
 | :--- | :---: | :--- | :---: | :--- |
