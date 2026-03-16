@@ -1,6 +1,27 @@
 ---
 sidebar_position: 2
 ---
+
 # Integration tests
 
-Tests to demonstrate each use-case based on the use-case descriptions and the sequence diagrams. External input should be provided via mock objects and results verified via mock objects. Integration tests should not require manual entry of data nor require manual interpretation of results.
+Integration tests validate behavior across module boundaries, especially where state, storage, and service adapters interact.
+
+## Scope
+
+- Login/session flow with superlogin client adapter
+- Board loading and persistence with PouchDB-backed services
+- Speech pipeline from sentence builder to selected speech provider
+- Service worker and cached asset behavior under offline conditions
+
+## Guidelines
+
+- Validate end-to-end use-case slices from `use-case-descriptions.md`.
+- Use controlled fixtures for boards, metadata, and prediction data.
+- Stub external services when verifying client integration logic.
+- Keep test output machine-verifiable and avoid manual interpretation in CI.
+
+## Priority Scenarios
+
+- Sign in, sync metadata, and load user board
+- Build sentence, update prediction context, and trigger speech output
+- Execute an HTTP action and surface response to live elements

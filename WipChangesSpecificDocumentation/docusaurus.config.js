@@ -10,15 +10,6 @@
  */
 const logo = 'https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg';
 
-const main_template_jira_scripts = () => {
-  if (process.env.ORG_NAME === 'ApplebaumIan'){
-    return [    'https://temple-cis-projects-in-cs.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/azc3hx/b/8/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=50af7ec2',
-      'https://temple-cis-projects-in-cs.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/azc3hx/b/8/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=160e88a6',]
-  } else {
-    return []
-  }
-}
-
 // Fallback value if PROJECT_NAME is not defined:
 const rawProjectName = process.env.PROJECT_NAME || 'docs-dev-mode';
 
@@ -38,9 +29,8 @@ const baseUrl = process.env.PROJECT_NAME || "docs-dev-mode";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  /*TODO: Change to your project's title and tagline*/
   title: title,
-  tagline: 'Owls are cool',
+  tagline: 'Offline-first AAC communication platform',
   /*Unless you move this website to a seperate repo don't change url and baseurl.*/
   url: 'https://'+process.env.ORG_NAME+'.github.io/',
   baseUrl: '/'+baseUrl+'/',
@@ -102,7 +92,7 @@ const config = {
         specs: [
           {
             id: 'using-single-yaml',
-            spec: 'static/openapi.yml.yaml',
+            spec: 'static/openapi.yaml',
             route: '/api/',
           },
         ],
@@ -126,7 +116,6 @@ const config = {
         isCloseable: false,
       }} : {}),
       navbar: {
-        /*TODO: Change to your project's title*/
         title: title,
         logo: {
           alt: 'My Site Logo',
@@ -138,11 +127,6 @@ const config = {
             docId: 'intro',
             position: 'left',
             label: 'Documentation',
-          },{
-            to: '/tutorial/Intro',
-            label: 'Docusaurus Tutorial',
-            position: 'left',
-            activeBaseRegex: `/tutorial/`,
           },
           {
             href: 'https://github.com/'+process.env.ORG_NAME+'/'+process.env.PROJECT_NAME,
@@ -189,10 +173,6 @@ const config = {
               {
                 label: 'GitHub',
                 href: 'https://github.com/'+process.env.ORG_NAME+'/'+process.env.PROJECT_NAME,
-              },
-              {
-                label:"Template Contributors",
-                to:"/tutorial/open-source-usage"
               }
             ],
           },
@@ -221,36 +201,12 @@ const config = {
     }),
   plugins: [
     [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'tutorial',
-        path: 'tutorial',
-        routeBasePath: 'tutorial',
-        showLastUpdateAuthor: true,
-        sidebarPath: require.resolve('./sidebars.js'),
-        // ... other options
-      },
-    ],
-    [
       "docusaurus2-dotenv-2",
       {
         systemvars: true,
       },
     ],
     'plugin-image-zoom',
-    ...(process.env.ORG_NAME !== 'ApplebaumIan' ? [[
-      'docusaurus-plugin-remote-content',
-      {
-        name: 'open-source-usage',
-        sourceBaseUrl: 'https://applebaumian.github.io/tu-cis-4398-docs-template/',
-        outDir: 'tutorial',
-        documents: ['open-source-usage.mdx'],
-      },
-    ]] : []),
-  ],
-  scripts:['https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js',
-      ...main_template_jira_scripts()
   ],
 };
-console.log(config.scripts)
 module.exports = config;

@@ -52,7 +52,9 @@
     "release": "cp scripts/release.sh scripts/release.tmp.sh && sh scripts/release.tmp.sh && rm scripts/release.tmp.sh",
     "release-latest": "cp scripts/releaseLatest.sh scripts/releaseLatest.tmp.sh && sh scripts/releaseLatest.tmp.sh && rm scripts/releaseLatest.tmp.sh",
     "release-beta": "sh scripts/releaseBeta.sh",
-    "test": "jest",
+    "test": "jest --coverage",
+    "test:coverage:project": "jest --coverage --collectCoverageFrom=\"src/js/**/*.js\" --collectCoverageFrom=\"src/vue-components/**/*.js\" --collectCoverageFrom=\"!src/js/**/*.test.js\" --collectCoverageFrom=\"!src/vue-components/**/*.test.js\" --collectCoverageFrom=\"!src/js/externals/**\"",
+    "test:coverage:project:report": "jest --config jest.project-coverage.config.cjs --coverage",
     "stats": "webpack --config webpack.config.js --env.production --env.nolog --profile --json > stats.json && webpack-bundle-analyzer stats.json app/build",
     "stats-dev": "webpack --config webpack.config.js --env.nolog --profile --json > stats.json && webpack-bundle-analyzer stats.json app/build",
     "prepare": "husky install"
@@ -74,6 +76,19 @@
     "testEnvironment": "jsdom",
     "transform": {
       "^.+\\.[t|j]sx?$": "babel-jest"
+    },
+    "collectCoverageFrom": [
+      "src/js/util/dataUtil.js",
+      "src/js/util/voiceUtil.js",
+      "src/js/util/MapCache.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
     }
   }
 }

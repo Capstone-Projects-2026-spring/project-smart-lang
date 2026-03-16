@@ -1,5 +1,29 @@
 ---
 sidebar_position: 1
 ---
+
 # Introduction
 
+Smart Lang AAC is an augmentative and alternative communication (AAC) web application designed to help users build and speak phrases using configurable symbol grids.
+
+The project is implemented as an offline-first progressive web application (PWA):
+
+- The UI is built with Vue and custom grid components.
+- Local data persistence is handled with PouchDB.
+- Optional cloud sync is supported through CouchDB and `superlogin-client`.
+- Speech output is provided through browser SpeechSynthesis and ResponsiveVoice.
+
+This documentation set describes the current implementation and planned extensions. When a feature is not yet implemented, it is explicitly marked as planned.
+
+## What Is Covered
+
+- Requirements and use cases for end users and caregivers
+- System architecture and component responsibilities
+- API specification for current/planned integration points
+- Testing strategy and validation workflow
+
+## Documentation Scope Notes
+
+- This folder is intended to merge into the main `documentation/` folder.
+- Template-only material has been removed or rewritten to match this AAC project.
+- Off-topic examples from generic course templates are intentionally excluded.

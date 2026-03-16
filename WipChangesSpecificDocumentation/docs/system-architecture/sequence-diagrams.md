@@ -1,3 +1,10 @@
+---
+id: sequence-diagrams
+title: Sequence Diagrams
+sidebar_label: Sequence Diagrams
+sidebar_position: 3
+---
+
 ### Use Case 1: Account Login
 
 ```mermaid
@@ -31,7 +38,6 @@ sequenceDiagram
 4. superlogin validates the credentials against the CouchDB user database.
 5. If valid, a session token is returned and the app syncs local PouchDB data with the remote CouchDB server.
 6. The user is directed to the homepage and can access the AAC board. If credentials are invalid, the user is notified that login failed.
-
 
 ### Use Case 2: Offline Accessibility
 
@@ -74,6 +80,7 @@ sequenceDiagram
     App->>TTS: Send Complete Sentence
     TTS-->>User: Read Sentence Aloud
 ```
+
 1. The user views words from the AAC board on the homepage.
 2. The user selects a word.
 3. The system adds the selected word to the speech box.
@@ -155,7 +162,6 @@ sequenceDiagram
 7. The user presses the Speak button.
 8. The system reads the updated sentence using text-to-speech.
 
-
 ### Use Case 6: Caregiver Adds Vocabulary (Without Suggestion)
 
 ```mermaid
@@ -178,6 +184,7 @@ sequenceDiagram
     VM->>App: Update AAC Board
     App-->>Caregiver: Display Updated Board
 ```
+
 1. The caregiver clicks on the Caregiver page.
 2. The system displays the caregiver page and the vocabulary management button.
 3. The caregiver clicks on the vocabulary management button.
@@ -210,6 +217,7 @@ sequenceDiagram
     VM->>App: Update AAC Board
     App-->>Caregiver: Display Updated Board
 ```
+
 1. The caregiver clicks on the Caregiver page.
 2. The system displays the caregiver page and the vocabulary management button.
 3. The caregiver clicks on the vocabulary management button.
@@ -242,6 +250,7 @@ sequenceDiagram
     VM->>App: Update AAC Board
     App-->>Caregiver: Display Updated Board
 ```
+
 1. The caregiver clicks on the Caregiver page.
 2. The system displays the caregiver page and the vocabulary management button.
 3. The caregiver clicks on the vocabulary management button.
@@ -251,4 +260,3 @@ sequenceDiagram
 7. The caregiver clicks and submits the selected word to remove.
 8. The system saves and removes the word from the database.
 9. The system updates the AAC board with the removed vocabulary word.
-
