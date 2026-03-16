@@ -8,36 +8,35 @@
  * The URL or reference to your projects logo!
  * @type {string}
  */
-const logo = 'https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg';
+const logo =
+  "https://upload.wikimedia.org/wikipedia/commons/1/17/Temple_T_logo.svg";
 
 // Fallback value if PROJECT_NAME is not defined:
-const rawProjectName = process.env.PROJECT_NAME || 'docs-dev-mode';
+const rawProjectName = process.env.PROJECT_NAME || "docs-dev-mode";
 
 // Transform PROJECT_NAME (or fallback) to a title-like string:
 const title = rawProjectName
-  .replaceAll('-', ' ')
-  .split(' ')
-  .map(word => {
+  .replaceAll("-", " ")
+  .split(" ")
+  .map((word) => {
     // Make sure the word has at least one character
-    return word.length > 0
-      ? word[0].toUpperCase() + word.substring(1)
-      : '';
+    return word.length > 0 ? word[0].toUpperCase() + word.substring(1) : "";
   })
-  .join(' ');
+  .join(" ");
 
 const baseUrl = process.env.PROJECT_NAME || "docs-dev-mode";
 
-/** @type {import('@docusaurus/types').Config} */
+/** @type {Record<string, any>} */
 const config = {
   title: title,
-  tagline: 'Offline-first AAC communication platform',
+  tagline: "Offline-first AAC communication platform",
   /*Unless you move this website to a seperate repo don't change url and baseurl.*/
-  url: 'https://'+process.env.ORG_NAME+'.github.io/',
-  baseUrl: '/'+baseUrl+'/',
+  url: "https://" + process.env.ORG_NAME + ".github.io/",
+  baseUrl: "/" + baseUrl + "/",
   trailingSlash: false,
-  onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  onBrokenLinks: "warn",
+  onBrokenMarkdownLinks: "warn",
+  favicon: "img/favicon.ico",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -48,29 +47,32 @@ const config = {
   // metadata like html lang. For example, if your site is Chinese, you may want
   // to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
   markdown: {
     mermaid: true,
   },
-  themes: ['@docusaurus/theme-live-codeblock','@docusaurus/theme-mermaid'],
+  themes: ["@docusaurus/theme-live-codeblock", "@docusaurus/theme-mermaid"],
   presets: [
     [
-      'classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
+      "classic",
+      /** @type {Record<string, any>} */
       ({
         docs: {
           showLastUpdateAuthor: true,
-          sidebarPath: require.resolve('./sidebars.js'),
-          routeBasePath: 'docs',
-          path: 'docs',
+          sidebarPath: require.resolve("./sidebars.js"),
+          routeBasePath: "docs",
+          path: "docs",
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/'+process.env.ORG_NAME+'/'+process.env.PROJECT_NAME+'/edit/main/documentation/',
+            "https://github.com/" +
+            process.env.ORG_NAME +
+            "/" +
+            process.env.PROJECT_NAME +
+            "/edit/main/documentation/",
           // remarkPlugins: [require('mdx-mermaid')],
-
         },
         // tutorials: {
         //   sidebarPath: require.resolve('./tutorialSidebars.js'),
@@ -81,72 +83,80 @@ const config = {
         // },
 
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: require.resolve("./src/css/custom.css"),
         },
       }),
     ],
     [
-      'redocusaurus',
+      "redocusaurus",
       {
         // Plugin Options for loading OpenAPI files
         specs: [
           {
-            id: 'using-single-yaml',
-            spec: 'static/openapi.yaml',
-            route: '/api/',
+            id: "using-single-yaml",
+            spec: "static/openapi.yaml",
+            route: "/api/",
           },
         ],
         // Theme Options for modifying how redoc renders them
         theme: {
           // Change with your site colors
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: require.resolve("./src/css/custom.css"),
         },
       },
     ],
   ],
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+    /** @type {Record<string, any>} */
     ({
-      ...(process.env.NODE_ENV === 'development' ? {announcementBar : {
-        id: 'dev_mode',
-        content:
-            'You are currently working on a local development version of your docs. This is <b>NOT</b> the live site.',
-        backgroundColor: '#ffca00',
-        textColor: '#091E42',
-        isCloseable: false,
-      }} : {}),
+      ...(process.env.NODE_ENV === "development"
+        ? {
+            announcementBar: {
+              id: "dev_mode",
+              content:
+                "You are currently working on a local development version of your docs. This is <b>NOT</b> the live site.",
+              backgroundColor: "#ffca00",
+              textColor: "#091E42",
+              isCloseable: false,
+            },
+          }
+        : {}),
       navbar: {
         title: title,
         logo: {
-          alt: 'My Site Logo',
+          alt: "My Site Logo",
           src: logo,
         },
         items: [
           {
-            type: 'doc',
-            docId: 'intro',
-            position: 'left',
-            label: 'Documentation',
+            type: "doc",
+            docId: "intro",
+            position: "left",
+            label: "Documentation",
           },
           {
-            href: 'https://github.com/'+process.env.ORG_NAME+'/'+process.env.PROJECT_NAME,
-            label: 'GitHub',
-            position: 'right',
+            href:
+              "https://github.com/" +
+              process.env.ORG_NAME +
+              "/" +
+              process.env.PROJECT_NAME,
+            label: "GitHub",
+            position: "right",
           },
         ],
       },
       footer: {
         logo: {
-          alt: 'My Site Logo',
+          alt: "My Site Logo",
           src: logo,
         },
         links: [
           {
-            title: 'Docs',
+            title: "Docs",
             items: [
               {
-                label: 'Documentation',
-                to: '/docs/intro',
+                label: "Documentation",
+                to: "/docs/intro",
               },
             ],
           },
@@ -168,12 +178,16 @@ const config = {
           //   ],
           // },
           {
-            title: 'More',
+            title: "More",
             items: [
               {
-                label: 'GitHub',
-                href: 'https://github.com/'+process.env.ORG_NAME+'/'+process.env.PROJECT_NAME,
-              }
+                label: "GitHub",
+                href:
+                  "https://github.com/" +
+                  process.env.ORG_NAME +
+                  "/" +
+                  process.env.PROJECT_NAME,
+              },
             ],
           },
         ],
@@ -185,19 +199,18 @@ const config = {
       // },
       imageZoom: {
         // CSS selector to apply the plugin to, defaults to '.markdown img'
-        selector: '.markdown img',
+        selector: ".markdown img",
         // Optional medium-zoom options
         // see: https://www.npmjs.com/package/medium-zoom#options
         options: {
           margin: 24,
-          zIndex:100,
-          background: 'white',
+          zIndex: 100,
+          background: "white",
           // scrollOffset: 10,
           // container: '#zoom-container',
           // template: '#zoom-template',
         },
       },
-
     }),
   plugins: [
     [
@@ -206,7 +219,7 @@ const config = {
         systemvars: true,
       },
     ],
-    'plugin-image-zoom',
+    "plugin-image-zoom",
   ],
 };
 module.exports = config;
