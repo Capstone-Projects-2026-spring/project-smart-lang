@@ -53,9 +53,16 @@ const BOOTSTRAP_KEY = "aac_ngram_bootstrapped_v1";
 const SAVE_DEBOUNCE_MS = 2000;
 let _saveTimer = null;
 
+// ── Vocabulary expansion config ──────────────────────────────────────
+const EXPANSION_SLOTS = 2; // Number of suggestion slots reserved for expansion
+const EXPANSION_ENABLED = true; // Master toggle for vocabulary expansion
+
 // ── Tile cache ──────────────────────────────────────────────────────
-// lowercase label → { label, imageUrl, backgroundColor }
+// lowercase label → { label, imageUrl, backgroundColor, colorCategory }
 let _tileMap = new Map();
+
+// Category → child tile labels. Built during bootstrap, used for expansion suggestions.
+let _categoryChildren = new Map();
 
 // Default tiles shown when the collect bar is empty (in priority order).
 // This list is used directly by getSuggestions() and bypasses unigram scores,
@@ -91,14 +98,15 @@ predictionService.learnFromInput = function (text) {
   }
 
   // A new word was appended at the end.
-  let newWord  = words[words.length - 1];
+  let newWord = words[words.length - 1];
   let prevWord = words.length >= 2 ? words[words.length - 2] : null;
-  let prev2    = words.length >= 3 ? words[words.length - 3] : null;
+  let prev2 = words.length >= 3 ? words[words.length - 3] : null;
 
   // Bigram: prevWord → newWord
   if (prevWord) {
     if (!_userBigrams[prevWord]) _userBigrams[prevWord] = {};
-    _userBigrams[prevWord][newWord] = (_userBigrams[prevWord][newWord] || 0) + 1;
+    _userBigrams[prevWord][newWord] =
+      (_userBigrams[prevWord][newWord] || 0) + 1;
   }
 
   // Trigram: prev2 | prevWord → newWord
@@ -162,6 +170,7 @@ predictionService.buildTileLabels = async function () {
             label: label,
             imageUrl: imageUrl,
             backgroundColor: bgColor || "#ffffff",
+            colorCategory: elem.colorCategory || null,
           });
         }
       }
@@ -184,6 +193,8 @@ predictionService.buildTileLabels = async function () {
 /**
  * Given the collect-bar text, return up to `count` tile objects
  * ranked by how likely they are to come next.
+ * Each tile object includes `isExpansion: boolean` to indicate
+ * vocabulary expansion suggestions.
  */
 predictionService.getSuggestions = function (input, count) {
   let desired = count || 6;
@@ -197,45 +208,37 @@ predictionService.getSuggestions = function (input, count) {
     for (let label of _defaultSuggestionLabels) {
       let tile = _tileMap.get(label);
       if (tile) {
-        results.push(tile);
+        results.push({ ...tile, isExpansion: false });
         if (results.length >= desired) break;
       }
     }
     return results;
   }
 
-  let candidates = {}; // word -> score
+  // ── 1. Score candidates from bootstrap model ──
+  let bootstrapCandidates = {};
 
-  // 1) Trigram lookup: last two words
   if (words.length >= 2) {
     let key = words[words.length - 2] + "|" + words[words.length - 1];
     let tri = _trigrams[key];
     if (tri) {
       for (let w in tri) {
-        candidates[w] = (candidates[w] || 0) + tri[w] * 3; // trigrams weighted 3x
+        bootstrapCandidates[w] = (bootstrapCandidates[w] || 0) + tri[w] * 3;
       }
     }
   }
 
-  // 2) Bigram lookup: last word
   if (words.length >= 1) {
     let lastWord = words[words.length - 1];
     let bi = _bigrams[lastWord];
     if (bi) {
       for (let w in bi) {
-        candidates[w] = (candidates[w] || 0) + bi[w] * 2; // bigrams weighted 2x
+        bootstrapCandidates[w] = (bootstrapCandidates[w] || 0) + bi[w] * 2;
       }
     }
   }
 
-  // 3) If nothing yet (empty bar or no learned context), use unigram frequencies
-  if (Object.keys(candidates).length === 0) {
-    for (let w in _unigrams) {
-      candidates[w] = _unigrams[w];
-    }
-  }
-
-  // ── Collect user-learned candidates from the separate user model ──
+  // ── 2. Score candidates from user model ──
   let userCandidates = {};
   if (words.length >= 2) {
     let key = words[words.length - 2] + "|" + words[words.length - 1];
@@ -255,32 +258,44 @@ predictionService.getSuggestions = function (input, count) {
       }
     }
   }
-  let hasUserCandidates = Object.keys(userCandidates).length > 0;
 
-  // Sort by score descending
-  let sorted = Object.entries(candidates).sort((a, b) => b[1] - a[1]);
+  // ── 3. Merge bootstrap + user for core ranking ──
+  let combined = {};
+  for (let w in bootstrapCandidates) {
+    combined[w] = bootstrapCandidates[w];
+  }
+  for (let w in userCandidates) {
+    combined[w] = (combined[w] || 0) + userCandidates[w];
+  }
 
-  // Filter to real tile labels and build result array.
-  // Reserve the last slot for user-learned items when they exist.
-  let results = [];
-  let seen = new Set();
-  // Also exclude words already in the input to avoid repeating
+  // If nothing from n-grams, fall back to unigrams
+  if (Object.keys(combined).length === 0) {
+    for (let w in _unigrams) {
+      combined[w] = _unigrams[w];
+    }
+  }
+
   let inputWords = new Set(words);
-  let baseLimit = hasUserCandidates ? desired - 1 : desired;
+  let seen = new Set();
 
-  for (let [word] of sorted) {
+  // ── 4. Build core suggestions (top-ranked by combined score) ──
+  let coreLimit = EXPANSION_ENABLED ? desired - EXPANSION_SLOTS : desired;
+  let coreSorted = Object.entries(combined).sort((a, b) => b[1] - a[1]);
+  let coreResults = [];
+
+  for (let [word] of coreSorted) {
     if (seen.has(word)) continue;
     if (inputWords.has(word) && words.length > 0) continue;
     let tile = _tileMap.get(word);
     if (tile) {
       seen.add(word);
-      results.push(tile);
-      if (results.length >= baseLimit) break;
+      coreResults.push({ ...tile, isExpansion: false });
+      if (coreResults.length >= coreLimit) break;
     }
   }
 
-  // If we still don't have enough base suggestions, fill with top unigrams
-  if (results.length < baseLimit) {
+  // Fill remaining core slots with unigram fallback
+  if (coreResults.length < coreLimit) {
     let uniSorted = Object.entries(_unigrams).sort((a, b) => b[1] - a[1]);
     for (let [word] of uniSorted) {
       if (seen.has(word)) continue;
@@ -288,29 +303,149 @@ predictionService.getSuggestions = function (input, count) {
       let tile = _tileMap.get(word);
       if (tile) {
         seen.add(word);
-        results.push(tile);
-        if (results.length >= baseLimit) break;
+        coreResults.push({ ...tile, isExpansion: false });
+        if (coreResults.length >= coreLimit) break;
       }
     }
   }
 
-  // Append user-learned suggestions at the end (most-used first among them)
-  if (hasUserCandidates) {
-    let userSorted = Object.entries(userCandidates).sort((a, b) => b[1] - a[1]);
-    for (let [word] of userSorted) {
+  // ── 5. Build expansion suggestions ──
+  let expansionResults = [];
+  if (EXPANSION_ENABLED && Object.keys(bootstrapCandidates).length > 0) {
+    expansionResults = _getExpansionSuggestions(
+      bootstrapCandidates,
+      userCandidates,
+      seen,
+      inputWords,
+      words,
+      EXPANSION_SLOTS,
+    );
+  }
+
+  // If expansion didn't fill all slots, give them back to core
+  let remaining = desired - coreResults.length - expansionResults.length;
+  if (remaining > 0) {
+    for (let [word] of coreSorted) {
       if (seen.has(word)) continue;
       if (inputWords.has(word) && words.length > 0) continue;
       let tile = _tileMap.get(word);
       if (tile) {
         seen.add(word);
-        results.push(tile);
-        if (results.length >= desired) break;
+        coreResults.push({ ...tile, isExpansion: false });
+        remaining--;
+        if (remaining <= 0) break;
       }
     }
   }
 
-  return results;
+  // Return core first, then expansion at the end
+  return [...coreResults, ...expansionResults];
 };
+
+// ── Vocabulary expansion helpers ─────────────────────────────────────
+
+/**
+ * Find vocabulary expansion candidates: words that are contextually valid
+ * (present in bootstrap model) but rarely or never used by this user.
+ *
+ * Uses weighted random sampling so expansion suggestions rotate on each
+ * refresh, exposing the user to a variety of vocabulary over time.
+ */
+function _getExpansionSuggestions(
+  bootstrapCandidates,
+  userCandidates,
+  seen,
+  inputWords,
+  words,
+  count,
+) {
+  // If the user has used a word more than this many times in this context,
+  // it is no longer "expansion" material — they have already learned it.
+  const USER_FREQUENCY_THRESHOLD = 2;
+
+  // Semantic affinity: what word categories make sense after a given category
+  const CATEGORY_AFFINITY = {
+    CC_VERB: ["CC_NOUN", "CC_PRONOUN_PERSON_NAME", "CC_PLACE"],
+    CC_PRONOUN_PERSON_NAME: [
+      "CC_VERB",
+      "CC_DESCRIPTOR",
+      "CC_SOCIAL_EXPRESSIONS",
+    ],
+    CC_NOUN: ["CC_VERB", "CC_DESCRIPTOR", "CC_ADJECTIVE"],
+    CC_DESCRIPTOR: ["CC_NOUN", "CC_PRONOUN_PERSON_NAME"],
+  };
+
+  let eligible = [];
+
+  for (let word in bootstrapCandidates) {
+    if (seen.has(word)) continue;
+    if (inputWords.has(word) && words.length > 0) continue;
+    if (userCandidates[word] && userCandidates[word] > USER_FREQUENCY_THRESHOLD)
+      continue;
+    let tile = _tileMap.get(word);
+    if (!tile) continue;
+
+    eligible.push({
+      word: word,
+      tile: tile,
+      bootstrapScore: bootstrapCandidates[word],
+    });
+  }
+
+  if (eligible.length === 0) return [];
+
+  // Boost candidates whose colorCategory has semantic affinity
+  // with the last word in the input
+  let lastWordTile = _tileMap.get(words[words.length - 1]);
+  let lastWordCategory = lastWordTile ? lastWordTile.colorCategory : null;
+
+  if (lastWordCategory && CATEGORY_AFFINITY[lastWordCategory]) {
+    let preferred = new Set(CATEGORY_AFFINITY[lastWordCategory]);
+    for (let item of eligible) {
+      let cc = item.tile.colorCategory;
+      if (cc && preferred.has(cc)) {
+        item.bootstrapScore *= 1.5;
+      }
+    }
+  }
+
+  let selected = _weightedRandomSample(eligible, count);
+
+  for (let item of selected) {
+    seen.add(item.word);
+  }
+
+  return selected.map((item) => ({
+    ...item.tile,
+    isExpansion: true,
+  }));
+}
+
+/**
+ * Weighted random sample without replacement.
+ * Each item's weight is item.bootstrapScore.
+ */
+function _weightedRandomSample(items, count) {
+  let result = [];
+  let remaining = [...items];
+
+  for (let i = 0; i < count && remaining.length > 0; i++) {
+    let totalWeight = remaining.reduce((sum, it) => sum + it.bootstrapScore, 0);
+    let r = Math.random() * totalWeight;
+    let cumulative = 0;
+
+    for (let j = 0; j < remaining.length; j++) {
+      cumulative += remaining[j].bootstrapScore;
+      if (r <= cumulative) {
+        result.push(remaining[j]);
+        remaining.splice(j, 1);
+        break;
+      }
+    }
+  }
+
+  return result;
+}
 
 // ── Learn ────────────────────────────────────────────────────────────
 
@@ -385,7 +520,7 @@ function _bootstrap(grids) {
   }
 
   // Walk navigate actions: parent tile → children on destination grid
-  let categoryChildren = new Map();
+  _categoryChildren = new Map();
   for (let grid of grids) {
     for (let elem of grid.gridElements || []) {
       if (!elem.actions) continue;
@@ -400,8 +535,8 @@ function _bootstrap(grids) {
           let children = gridLabels.get(action.toGridId) || [];
           if (children.length > 0) {
             let key = parentLabel.toUpperCase().trim();
-            let existing = categoryChildren.get(key) || [];
-            categoryChildren.set(key, existing.concat(children));
+            let existing = _categoryChildren.get(key) || [];
+            _categoryChildren.set(key, existing.concat(children));
           }
         }
       }
@@ -492,7 +627,7 @@ function _bootstrap(grids) {
 
   for (let tmpl of templates) {
     for (let catName of tmpl.cats) {
-      let children = categoryChildren.get(catName);
+      let children = _categoryChildren.get(catName);
       if (!children || children.length === 0) continue;
       for (let child of children) {
         for (let starter of tmpl.starters) {
@@ -506,7 +641,7 @@ function _bootstrap(grids) {
   }
 
   // Category tile → its children (FOOD → PIZZA, BREAD, ...)
-  for (let [catName, children] of categoryChildren) {
+  for (let [catName, children] of _categoryChildren) {
     for (let child of children) {
       _learnBigram(catName, child, 3);
     }
@@ -707,19 +842,19 @@ function _bootstrap(grids) {
   _learnTrigram("I", "AM", "SICK", 2);
 
   // After "IT HURTS" → body parts (trigram IT|HURTS)
-  let bodyParts = categoryChildren.get("BODY") || [];
+  let bodyParts = _categoryChildren.get("BODY") || [];
   for (let part of bodyParts) {
     if (part !== "IT HURTS") _learnTrigram("IT", "HURTS", part, 2);
   }
 
   // After "TALK TO" → people (trigram TALK|TO)
-  let people = categoryChildren.get("PEOPLE") || [];
+  let people = _categoryChildren.get("PEOPLE") || [];
   for (let person of people) {
     _learnTrigram("TALK", "TO", person, 2);
   }
 
   // After "GO TO" → places (trigram GO|TO)
-  let places = categoryChildren.get("PLACES") || [];
+  let places = _categoryChildren.get("PLACES") || [];
   for (let place of places) {
     _learnTrigram("GO", "TO", place, 2);
   }
@@ -727,7 +862,7 @@ function _bootstrap(grids) {
   // ── Follow-up bigrams after category children ────────────────────
   // After tapping a food/drink item → suggest continuation words
   for (let catName of ["FOOD", "DRINKS"]) {
-    let children = categoryChildren.get(catName) || [];
+    let children = _categoryChildren.get(catName) || [];
     for (let child of children) {
       _learnBigram(child, "MORE", 1);
       _learnBigram(child, "YES", 1);
@@ -798,6 +933,7 @@ function _saveModel() {
       u: _unigrams,
       ub: _userBigrams,
       ut: _userTrigrams,
+      cc: Object.fromEntries(_categoryChildren),
     });
     localStorage.setItem(STORAGE_KEY, data);
   } catch (e) {
@@ -815,6 +951,7 @@ function _loadModel() {
       _unigrams = data.u || {};
       _userBigrams = data.ub || {};
       _userTrigrams = data.ut || {};
+      _categoryChildren = new Map(Object.entries(data.cc || {}));
       log.info(
         "Loaded n-gram model: " +
           Object.keys(_bigrams).length +
@@ -832,6 +969,7 @@ function _loadModel() {
     _unigrams = {};
     _userBigrams = {};
     _userTrigrams = {};
+    _categoryChildren = new Map();
   }
 }
 
