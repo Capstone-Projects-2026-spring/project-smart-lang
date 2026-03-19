@@ -1,0 +1,28 @@
+{
+  "id": "requirements/general-requirements",
+  "title": "General Requirements",
+  "description": "* Desktop, laptop, or mobile device",
+  "source": "@site/docs/requirements/general-requirements.md",
+  "sourceDirName": "requirements",
+  "slug": "/requirements/general-requirements",
+  "permalink": "/docs-dev-mode/docs/requirements/general-requirements",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/requirements/general-requirements.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "System Block Diagram",
+    "permalink": "/docs-dev-mode/docs/requirements/system-block-diagram"
+  },
+  "next": {
+    "title": "Features and Requirements",
+    "permalink": "/docs-dev-mode/docs/requirements/features-and-requirements"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "system-architecture/database-diagram",
+  "title": "Database Diagram",
+  "description": "Entity-Relationship Diagram",
+  "source": "@site/docs/system-architecture/database_diagram.md",
+  "sourceDirName": "system-architecture",
+  "slug": "/system-architecture/database-diagram",
+  "permalink": "/docs-dev-mode/docs/system-architecture/database-diagram",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/system-architecture/database_diagram.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "frontMatter": {
+    "id": "database-diagram",
+    "title": "Database Diagram",
+    "sidebar_label": "Database Diagram"
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Components",
+    "permalink": "/docs-dev-mode/docs/system-architecture/components"
+  },
+  "next": {
+    "title": "API Specification",
+    "permalink": "/docs-dev-mode/docs/category/api-specification"
+  }
+}

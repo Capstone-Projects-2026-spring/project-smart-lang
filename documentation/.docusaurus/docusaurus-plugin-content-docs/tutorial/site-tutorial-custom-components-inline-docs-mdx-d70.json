@@ -1,0 +1,28 @@
+{
+  "id": "custom-components/inline-docs",
+  "title": "Inline Docs Component",
+  "description": "How to use the <InlineDocs /> component to embed generated HTML documentation.",
+  "source": "@site/tutorial/custom-components/inlineDocs.mdx",
+  "sourceDirName": "custom-components",
+  "slug": "/custom-components/inline-docs",
+  "permalink": "/docs-dev-mode/tutorial/custom-components/inline-docs",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "frontMatter": {
+    "id": "inline-docs",
+    "title": "Inline Docs Component",
+    "description": "How to use the <InlineDocs /> component to embed generated HTML documentation."
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Figure Component",
+    "permalink": "/docs-dev-mode/tutorial/custom-components/figure"
+  },
+  "next": {
+    "title": "Contributors & Open Source Usage",
+    "permalink": "/docs-dev-mode/tutorial/open-source-usage"
+  }
+}

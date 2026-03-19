@@ -1,0 +1,24 @@
+{
+  "id": "custom-components/contributors",
+  "title": "Contributors Component",
+  "description": "This component uses contrib.rocks to display a list of contributors for the project. By default it uses the repository specified by the environment variables ORGNAME and PROJECTNAME set at build time by GitHub Actions in the docusaurus.config.js file, but you can also specify a different repository.",
+  "source": "@site/tutorial/custom-components/contributors.mdx",
+  "sourceDirName": "custom-components",
+  "slug": "/custom-components/contributors",
+  "permalink": "/docs-dev-mode/tutorial/custom-components/contributors",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "frontMatter": {},
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Custom Components",
+    "permalink": "/docs-dev-mode/tutorial/category/custom-components"
+  },
+  "next": {
+    "title": "Figure Component",
+    "permalink": "/docs-dev-mode/tutorial/custom-components/figure"
+  }
+}

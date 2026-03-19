@@ -1,0 +1,28 @@
+{
+  "id": "tutorial-basics/mermaid",
+  "title": "Mermaid Diagrams (UML)",
+  "description": "Using Mermaid to create diagrams and visualizations directly in Docusaurus offers significant advantages over static images. With Mermaid, your diagrams are written as code, making them easy to version control, review, and update alongside your documentation. This approach ensures your diagrams always stay in sync with your project, reduces maintenance overhead, and eliminates the hassle of regenerating and uploading new images for every change. As your project evolves, updating a diagram is as simple as editing a few lines of text, making your documentation more agile, consistent, and future-proof.",
+  "source": "@site/tutorial/tutorial-basics/mermaid.md",
+  "sourceDirName": "tutorial-basics",
+  "slug": "/tutorial-basics/mermaid",
+  "permalink": "/docs-dev-mode/tutorial/tutorial-basics/mermaid",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "title": "Mermaid Diagrams (UML)",
+    "sidebar_position": 5
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Markdown Features",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/markdown-features"
+  },
+  "next": {
+    "title": "Set Environment Variables",
+    "permalink": "/docs-dev-mode/tutorial/tutorial-basics/set-environment-variables"
+  }
+}

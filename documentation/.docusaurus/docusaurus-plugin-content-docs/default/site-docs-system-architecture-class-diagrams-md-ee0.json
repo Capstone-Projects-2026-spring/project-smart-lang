@@ -1,0 +1,29 @@
+{
+  "id": "system-architecture/architecture-diagrams",
+  "title": "Architecture Diagrams",
+  "description": "This section documents the key architectural diagrams for the AAC system. These diagrams provide both a structural and conceptual view of how the frontend and domain model are organized.",
+  "source": "@site/docs/system-architecture/class_diagrams.md",
+  "sourceDirName": "system-architecture",
+  "slug": "/system-architecture/architecture-diagrams",
+  "permalink": "/docs-dev-mode/docs/system-architecture/architecture-diagrams",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/undefined/undefined/edit/main/documentation/docs/system-architecture/class_diagrams.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "frontMatter": {
+    "id": "architecture-diagrams",
+    "title": "Architecture Diagrams",
+    "sidebar_label": "Architecture Diagrams"
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Sequence Diagrams",
+    "permalink": "/docs-dev-mode/docs/system-architecture/Sequence Diagrams"
+  },
+  "next": {
+    "title": "Components",
+    "permalink": "/docs-dev-mode/docs/system-architecture/components"
+  }
+}

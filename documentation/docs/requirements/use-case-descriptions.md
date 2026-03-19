@@ -106,7 +106,16 @@ sidebar_position: 5
 8. The system saves and removes the word from the database.
 9. The system updates the AAC board with the removed vocabulary word.
 
+### Use Case 9 - Caregiver Gives Suggestions Manually
+<i> As a caregiver, I want to suggest a new vocab word manually while the student uses the AAC board, so I can motivate the user to select the new vocab words. </i>
+<i>Triggering Event: Caregiver realizes the user would benefit from a new vocab word while the student uses the AAC board and goes to add the word to their board manually through the vocabulary management page.</i>
 
-
-
+1. The Caregiver opens the Vocabulary Management page while the student is using the AAC board.
+2. The system displays vocabulary management options.
+3. The Caregiver selects Add Word(real-time) 
+4. The system displays vocab words from the board.
+5. The caregiver views and searches for vocab words from the library.
+6. The caregiver clicks and submits the selected word.
+7. The system saves the new word to the database.
+8. The system updates the AAC board in real time with the new vocabulary word.
 

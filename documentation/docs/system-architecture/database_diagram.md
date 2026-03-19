@@ -1,7 +1,7 @@
 ---
 id: database-diagram
 title: Database Diagram
-sidebar_label: Database Diagrams
+sidebar_label: Database Diagram
 ---
 
 # AAC Database - Document Model
