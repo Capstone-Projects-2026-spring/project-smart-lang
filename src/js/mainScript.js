@@ -15,9 +15,7 @@ import { dataService } from "./service/data/dataService";
 import { predictionService } from "./service/predictionService";
 
 const TARGET_GRIDSET_FILENAME = "Global-Core_Communicator_ARASAAC_EN.grd.json";
-// TODO: replace with self-hosted board repository URL
-const GRIDSET_URL =
-  "https://asterics.github.io/AsTeRICS-Grid-Boards/communicators/Global-Core%20Communicator%20ARASAAC/en/Global-Core_Communicator_ARASAAC_EN.grd.json";
+const GRIDSET_URL = "app/gridsets/" + TARGET_GRIDSET_FILENAME;
 const AAC_USERNAME = "aac-user";
 
 async function init() {
@@ -46,6 +44,12 @@ async function init() {
     log.info("No grids found, importing default gridset...");
     await importDefaultGridset();
   }
+
+  // Cache pictogram images as base64 in PouchDB for reliable offline use.
+  // Runs in the background — does not block app startup.
+  dataService
+    .cacheAllImageData()
+    .catch((e) => log.warn("Image data caching failed:", e));
 
   // Init prediction engine (loads n-gram model from localStorage)
   await predictionService.init();

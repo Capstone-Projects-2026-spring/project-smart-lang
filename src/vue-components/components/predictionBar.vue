@@ -5,12 +5,24 @@
         v-for="(tile, index) in suggestions"
         :key="index"
         class="prediction-tile"
-        :style="{ backgroundColor: tile.backgroundColor || '#ffffff' }"
+        :class="{ 'expansion-tile': tile.isExpansion }"
+        :style="{ backgroundColor: '#ffffff' }"
         @click="selectTile(tile)"
-        :aria-label="'Predicted tile: ' + tile.label"
+        :aria-label="
+          (tile.isExpansion
+            ? 'New vocabulary suggestion: '
+            : 'Predicted tile: ') + tile.label
+        "
         role="button"
         tabindex="0"
       >
+        <div
+          class="expansion-indicator"
+          v-if="tile.isExpansion"
+          title="New vocabulary"
+        >
+          &#10024;
+        </div>
         <div class="tile-img-container" v-if="tile.imageUrl">
           <img :src="tile.imageUrl" :alt="tile.label" class="tile-img" />
         </div>
@@ -55,7 +67,7 @@ export default {
           word,
         );
       }
-      collectElementService.addPredictionWord(word);
+      collectElementService.addPredictionWord(word, tile.imageUrl);
     },
     updateSuggestions() {
       let text = collectElementService.getText() || "";
@@ -93,14 +105,15 @@ export default {
   background: #e8ecf0;
   border-bottom: 2px solid #bbb;
   flex-shrink: 0;
-  min-height: 80px;
-  max-height: 100px;
+  min-height: 150px;
+  max-height: 150px;
   align-items: stretch;
   overflow-x: auto;
   overflow-y: hidden;
 }
 
 .prediction-tile {
+  position: relative;
   flex: 1 1 0;
   min-width: 70px;
   max-width: 140px;
@@ -135,7 +148,7 @@ export default {
 }
 
 .tile-img {
-  max-height: 55px;
+  max-height: 100px;
   max-width: 100%;
   object-fit: contain;
 }
@@ -160,5 +173,20 @@ export default {
   font-size: 0.95em;
   padding: 6px 0;
   align-self: center;
+}
+
+.expansion-tile {
+  border-color: #4a90d9;
+  border-style: dashed;
+  background-color: #f0f7ff !important;
+}
+
+.expansion-indicator {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.65em;
+  color: #4a90d9;
+  pointer-events: none;
 }
 </style>

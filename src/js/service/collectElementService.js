@@ -1,5 +1,6 @@
 import $ from "../externals/jquery.js";
 import { GridElement } from "../model/GridElement";
+import { GridImage } from "../model/GridImage.js";
 import { speechService } from "./speechService";
 import { constants } from "./../util/constants";
 import { util } from "./../util/util";
@@ -52,22 +53,30 @@ collectElementService.getText = function () {
  * Adds a predicted word to the collect bar (sentence bar).
  * Replaces partial typed word if prediction is a completion, else appends.
  */
-collectElementService.addPredictionWord = function (word) {
+collectElementService.addPredictionWord = function (word, imageUrl) {
   if (!word) return;
   predictionService.applyPrediction(getPrintText(), word, dictionaryKey);
-  let lastElem = getLastElement();
-  let lastLabel = getLabel(lastElem);
-  let lastWord = lastLabel ? lastLabel.split(" ").pop() : "";
-  if (
-    lastElem &&
-    lastElem.onlyText &&
-    word.toLowerCase().startsWith(lastWord.toLowerCase())
-  ) {
-    let parts = lastLabel.split(" ");
-    parts[parts.length - 1] = word;
-    setLabel(lastElem, parts.join(" ") + " ");
+  if (imageUrl) {
+    let newElem = new GridElement({
+      label: i18nService.getTranslationObject(word),
+      image: new GridImage({ url: imageUrl }),
+    });
+    collectedElements.push(newElem);
   } else {
-    addTextElem(word + " ");
+    let lastElem = getLastElement();
+    let lastLabel = getLabel(lastElem);
+    let lastWord = lastLabel ? lastLabel.split(" ").pop() : "";
+    if (
+      lastElem &&
+      lastElem.onlyText &&
+      word.toLowerCase().startsWith(lastWord.toLowerCase())
+    ) {
+      let parts = lastLabel.split(" ");
+      parts[parts.length - 1] = word;
+      setLabel(lastElem, parts.join(" ") + " ");
+    } else {
+      addTextElem(word + " ");
+    }
   }
   updateCollectElements();
 };
@@ -387,9 +396,9 @@ async function updateCollectElements(isSecondTry) {
     );
     let darkMode =
       metadata.colorConfig.elementBackgroundColor ===
-      constants.DEFAULT_ELEMENT_BACKGROUND_COLOR_DARK;
+      constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR;
     let backgroundColor = darkMode
-      ? constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR_DARK
+      ? constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR
       : constants.DEFAULT_COLLECT_ELEMENT_BACKGROUND_COLOR;
     let textColor = darkMode
       ? constants.DEFAULT_ELEMENT_FONT_COLOR_DARK

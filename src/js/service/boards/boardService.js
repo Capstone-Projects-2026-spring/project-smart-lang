@@ -6,9 +6,9 @@ import { constants } from '../../util/constants';
 let boardService = {};
 
 // TODO: replace with self-hosted board repository
-let BASE_URL = "https://asterics.github.io/AsTeRICS-Grid-Boards/";
+let BASE_URL = "";
 // TODO: replace with self-hosted board repository
-let GITHUB_BASE_URL = "https://github.com/asterics/AsTeRICS-Grid-Boards/tree/main/";
+let GITHUB_BASE_URL = "";
 let METADATA_URL = constants.IS_ENVIRONMENT_PROD ? BASE_URL + "live_metadata.json" : BASE_URL + "live_metadata_beta.json";
 let ownResults = [];
 let searchTermsMap = new Map();
@@ -50,7 +50,7 @@ boardService.query = async function (searchTerm = '', options = {}) {
 };
 
 /**
- * returns the preview for a given filename for the results coming from AsTeRICS-Grid-Boards
+ * returns the preview for a given filename from the board repository
  * @param filename
  * @return {*|string}
  */
@@ -69,6 +69,11 @@ async function init() {
 init();
 
 async function fetchData() {
+    if (!BASE_URL) {
+        log.info("Board repository not configured, skipping metadata fetch");
+        initResolve();
+        return;
+    }
     let response = await fetch(METADATA_URL);
     let data = await response.json();
     ownResults = data.map(object => new GridPreview(object, { baseUrl: BASE_URL, githubEditable: true, githubBaseUrl: GITHUB_BASE_URL }));

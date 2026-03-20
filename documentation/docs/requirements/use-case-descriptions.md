@@ -4,17 +4,17 @@ sidebar_position: 5
 
 # Use-case descriptions
 
-### Use Case 1 - Account Login 
+### Use Case 1 - Account Login
 
 <i>As a user, I want to log into the Smart Lang app so that I can save my data and use my account across different devices.</i>
 <i>Triggering Event: User opens Smart Lang app and clicks Login</i>
 
-1. The user opens the Smart Lang app, and account login is displayed on the landing page.
-2. The user clicks on the login button.
-3. The system redirects the user to Google’s authentication page.
-4. The user enters their Google email and password.
-5. The system creates a user profile in the database if the user is new.
-6. If the credentials are validated and authenticated, then the user is directed to the homepage and can access the ACC board. If not, the user is notified that the credentials are invalid and login failed. 
+1. The user opens the Smart Lang app, and login options are displayed on the landing page.
+2. The user enters their username and password (or uses the app without registration in offline mode).
+3. The app sends credentials to the superlogin authentication service.
+4. superlogin validates the credentials against the CouchDB user database.
+5. If valid, a session token is returned and the app syncs local PouchDB data with the remote CouchDB server.
+6. The user is directed to the homepage and can access the AAC board. If credentials are invalid, the user is notified that login failed.
 
 ### Use Case 2 - Offline Accessibility
 <i>As a user, I want to access the Smart Lang app when I have no internet connection </i>
@@ -24,30 +24,30 @@ sidebar_position: 5
 2. The system loads any cached data stored by the Service Worker.
 3. The user is directed to the homepage and can access the AAC board.
 
-### Use Case 3 - Sentence Creation (without suggestion) 
-<i>As a user, I want to create a message using just the vocabulary displayed on the AAC device. </i> 
-<i>Triggering Event: User clicks on a vocab word to add to the speech box from the board </i> 
+### Use Case 3 - Sentence Creation (without suggestion)
+<i>As a user, I want to create a message using just the vocabulary displayed on the AAC device. </i>
+<i>Triggering Event: User clicks on a vocab word to add to the speech box from the board </i>
 
 1. The user views words from the AAC board on the homepage.
-2. The user selects a word. 
+2. The user selects a word.
 3. The system adds the selected word to the speech box.
 4. The user searches for the next word on the board.
 5. The user adds more words to the speech box.
-6. The system continues to add each word to the speech box after the last selected word. 
+6. The system continues to add each word to the speech box after the last selected word.
 7. The user presses the Speak button.
 8. The system reads the complete sentence using text-to-speech.
 
 ### Use Case 4 - Sentence Creation (with suggestion)
-<i>As a user, I want to create a message using the suggested words feature displayed on the AAC device. </i> 
-<i>Triggering Event: User clicks on a suggested vocab word to add to the speech box from the board </i> 
+<i>As a user, I want to create a message using the suggested words feature displayed on the AAC device. </i>
+<i>Triggering Event: User clicks on a suggested vocab word to add to the speech box from the board </i>
 
 1. The user views words from the AAC board on the homepage.
-2. The user selects a word. 
+2. The user selects a word.
 3. The system adds the selected word to the speech box.
 4. The user searches for the next word on the board.
 5. The user views suggested words on the “Suggested Words Box” displayed on the AAC board.
 6. The user clicks and adds a word from the suggested words box.
-7. The system continues to add each word to the speech box after the last selected word. 
+7. The system continues to add each word to the speech box after the last selected word.
 8. The user presses the Speak button.
 9. The system reads the complete sentence using text-to-speech.
 
@@ -56,10 +56,10 @@ sidebar_position: 5
 <i>Triggering Event: User deletes a vocab word from the speech box on the board </i>
 
 1. The user views the sentence on the speech box from the AAC board on the homepage.
-2. User removes a word using the backspace deletion button.
-3. The system updates the speech box to reflect the deletion.
+2. The user selects a word to be deleted.
+3. The system deletes the selected word from the speech box.
 4. The user views and searches for the next word on the board.
-5. The user selects a word. 
+5. The user selects a word.
 6. The system adds the selected word to the speech box.
 7. The user presses the Speak button.
 8. The system reads the updated sentence using text-to-speech.
@@ -92,7 +92,7 @@ sidebar_position: 5
 8. The system saves the new word to the database.
 9. The system updates the AAC board with the new vocabulary word.
 
-### Use Case 8 - Caregiver Removes Vocabulary Word 
+### Use Case 8 - Caregiver Removes Vocabulary Word
 <i> As a caregiver, I want to remove unused vocabulary words so that the user has a simple board. </i>
 <i>Triggering Event: Caregiver realizes user doesn't use a vocab word and goes to remove it through the vocabulary management page. </i>
 
