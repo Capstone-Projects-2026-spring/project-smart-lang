@@ -6,7 +6,9 @@
 [![Documentation Website Link](https://img.shields.io/badge/-Documentation%20Website-brightgreen)](https://capstone-projects-2026-spring.github.io/project-smart-lang/)
 [![Completed Jira Tickets](https://img.shields.io/badge/Completed_Tickets-Jira-blue)](https://temple-cis-projects-in-cs.atlassian.net/jira/software/c/projects/LE/list?filter=StatusCategory%20%3D%20%27Complete%27)
 
+## Online Hosting
 
+You can access this app online without having to run or install anything at https://smartlangaac.netlify.app/
 
 </div>
 
