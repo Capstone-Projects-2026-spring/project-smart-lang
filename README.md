@@ -4,6 +4,8 @@
 [![Report Issue on Jira](https://img.shields.io/badge/Report%20Issues-Jira-0052CC?style=flat&logo=jira-software)](https://temple-cis-projects-in-cs.atlassian.net/jira/software/c/projects/DT/issues)
 [![Deploy Docs](https://github.com/ApplebaumIan/tu-cis-4398-docs-template/actions/workflows/deploy.yml/badge.svg)](https://github.com/ApplebaumIan/tu-cis-4398-docs-template/actions/workflows/deploy.yml)
 [![Documentation Website Link](https://img.shields.io/badge/-Documentation%20Website-brightgreen)](https://capstone-projects-2026-spring.github.io/project-smart-lang/)
+[![Completed Jira Tickets](https://img.shields.io/badge/Completed_Tickets-Jira-blue)]([https://temple-cis-projects-in-cs.atlassian.net/jira/software/c/projects/DT/issues](https://temple-cis-projects-in-cs.atlassian.net/jira/software/c/projects/LE/list?filter=StatusCategory%20%3D%20%27Complete%27))
+
 
 
 </div>
