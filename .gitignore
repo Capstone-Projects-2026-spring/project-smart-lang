@@ -10,3 +10,4 @@ backup/
 
 .env
 coverage
+package-lock.json
