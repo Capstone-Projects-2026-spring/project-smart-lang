@@ -24,10 +24,16 @@ Smart Lang AAC is an augmentative and alternative communication (AAC) web applic
 - Optional cloud sync is supported through CouchDB and superlogin-client.
 - Speech output is provided through browser SpeechSynthesis and ResponsiveVoice.
 
-## Running the Application:
+## Running the Application Locally:
 1. Download and extract the zip file
 2. Install yarn `npm install --global yarn` if necessary
 3. In a terminal within the project folder, type `yarn install` followed by `yarn run start`
+It might take a bit to start up. Just give it a few minutes.
+
+## Testing
+To run tests:
+1. Install dependencies if you haven't with `yarn install`
+2. In a terminal within the project folder, type `yarn test`
 
 ## Collaborators
 
