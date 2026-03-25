@@ -171,10 +171,10 @@
                     tabindex="4"
                     href="javascript:void(0)"
                     @click="showManageStudents(); closeSidebar();"
-                    :aria-label="'Manage Students'"
+                    :aria-label="$t('manageStudents')"
                   ><button tabindex="-1">
                     <i class="fas fa-2x fa-users"></i
-                    ><span class="hide-mobile">Manage Students</span>
+                    ><span class="hide-mobile">{{ $t('manageStudents') }}</span>
                   </button></a>
                 </li>
               </ul>
@@ -188,10 +188,10 @@
                     tabindex="5"
                     href="javascript:void(0)"
                     @click="logout()"
-                    :aria-label="'Logout'"
+                    :aria-label="$t('logout')"
                   ><button tabindex="-1" style="background: #f44336; color: white;">
                     <i class="fas fa-2x fa-sign-out-alt"></i
-                    ><span class="hide-mobile">Logout</span>
+                    ><span class="hide-mobile">{{ $t('logout') }}</span>
                   </button></a>
                 </li>
               </ul>

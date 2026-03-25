@@ -41,11 +41,13 @@ authService.logout = function () {
 
 authService.generateStudentId = function () {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let id = "ST-";
-  for (let i = 0; i < 6; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  // Use lower bits of timestamp + random to reduce collision probability
+  const base = (Date.now() & 0xfffff).toString(36).toUpperCase().padStart(4, "0").slice(-4);
+  let rand = "";
+  for (let i = 0; i < 2; i++) {
+    rand += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return id;
+  return "ST-" + base + rand;
 };
 
 export { authService };
