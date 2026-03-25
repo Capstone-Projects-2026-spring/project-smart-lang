@@ -1138,5 +1138,11 @@
   "firstRowHeightFactor": "Height factor for first row",
   "manageTiles": "Manage Tiles",
   "searchTiles": "Search tiles",
-  "folder": "Folder"
+  "folder": "Folder",
+  "manageStudents": "Manage Students",
+  "signInWithGoogle": "Sign in with Google",
+  "selectRole": "Select your role",
+  "student": "Student",
+  "caregiver": "Caregiver",
+  "studentId": "Student ID"
 }

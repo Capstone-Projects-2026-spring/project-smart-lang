@@ -13,6 +13,7 @@ import { keyboardShortcuts } from "./service/keyboardShortcuts";
 import { notificationService } from "./service/notificationService.js";
 import { dataService } from "./service/data/dataService";
 import { predictionService } from "./service/predictionService";
+import { authService } from "./service/authService.js";
 
 const TARGET_GRIDSET_FILENAME = "Global-Core_Communicator_ARASAAC_EN.grd.json";
 const GRIDSET_URL = "app/gridsets/" + TARGET_GRIDSET_FILENAME;
@@ -27,6 +28,19 @@ async function init() {
   notificationService.init();
   await MainVue.init();
 
+  if (!authService.isLoggedIn()) {
+    MainVue.showLoginView();
+    $(document).one(authService.EVENT_AUTH_CHANGED, async () => {
+      if (authService.isLoggedIn()) {
+        await initAppSession();
+      }
+    });
+  } else {
+    await initAppSession();
+  }
+}
+
+async function initAppSession() {
   let autologinUser = localStorageService.getAutologinUser();
 
   if (autologinUser) {

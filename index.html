@@ -72,6 +72,10 @@
         v-if="showModal === modalTypes.MODAL_TILE_VISIBILITY"
         @close="showModal = null;"
       ></tile-visibility-modal>
+      <manage-students-modal
+        v-if="showModal === modalTypes.MODAL_MANAGE_STUDENTS"
+        @close="showModal = null;"
+      ></manage-students-modal>
       <div class="grid-container grid-mask" v-if="false">
         <i class="fas fa-4x fa-spinner fa-spin" style="top: 40%"></i>
         <div
@@ -86,6 +90,7 @@
           <span>loading...</span>
         </div>
       </div>
+      <login-view v-if="showLoginView" @loggedIn="showLoginView = false"></login-view>
       <div class="holy-grail-body" v-cloak>
         <div
           class="holy-grail-sidebar-1 hg-sidebar no-print"
@@ -154,11 +159,40 @@
                     href="javascript:void(0)"
                     @click="showModal = modalTypes.MODAL_TILE_VISIBILITY; closeSidebar();"
                     :aria-label="$t('manageTiles')"
+                    v-if="currentAuthUser && currentAuthUser.role === 'caregiver'"
                     ><button tabindex="-1">
                       <i class="fas fa-2x fa-eye"></i
                       ><span class="hide-mobile">{{ $t('manageTiles') }}</span>
                     </button></a
                   >
+                </li>
+                <li v-if="currentAuthUser && currentAuthUser.role === 'caregiver'">
+                  <a
+                    tabindex="4"
+                    href="javascript:void(0)"
+                    @click="showManageStudents(); closeSidebar();"
+                    :aria-label="'Manage Students'"
+                  ><button tabindex="-1">
+                    <i class="fas fa-2x fa-users"></i
+                    ><span class="hide-mobile">Manage Students</span>
+                  </button></a>
+                </li>
+              </ul>
+              <div v-if="currentAuthUser && currentAuthUser.role === 'student'" style="padding: 0.5em 1em; font-size: 0.85em; color: #555; border-top: 1px solid #eee; margin-top: 0.5em;">
+                <i class="fas fa-id-card"></i>
+                <span class="hide-mobile"> Student ID: <strong>{{ currentAuthUser.studentId }}</strong></span>
+              </div>
+              <ul>
+                <li style="margin-top: 1em;">
+                  <a
+                    tabindex="5"
+                    href="javascript:void(0)"
+                    @click="logout()"
+                    :aria-label="'Logout'"
+                  ><button tabindex="-1" style="background: #f44336; color: white;">
+                    <i class="fas fa-2x fa-sign-out-alt"></i
+                    ><span class="hide-mobile">Logout</span>
+                  </button></a>
                 </li>
               </ul>
             </div>

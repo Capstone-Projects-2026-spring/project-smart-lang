@@ -14,7 +14,10 @@ import ProgressBarModal from "../../vue-components/modals/progressBarModal.vue";
 import SearchModal from "../../vue-components/modals/searchModal.vue";
 import MessageBox from "../../vue-components/modals/messageBox.vue";
 import TileVisibilityModal from "../../vue-components/modals/tileVisibilityModal.vue";
+import ManageStudentsModal from "../../vue-components/modals/manageStudentsModal.vue";
+import LoginView from "../../vue-components/views/loginView.vue";
 import { systemActionService } from "../service/systemActionService";
+import { authService } from "../service/authService.js";
 
 let MainVue = {};
 let app = null;
@@ -23,6 +26,11 @@ let modalTypes = {
   MODAL_PROGRESSBAR: "MODAL_PROGRESSBAR",
   MODAL_MESSAGEBOX: "MODAL_MESSAGEBOX",
   MODAL_TILE_VISIBILITY: "MODAL_TILE_VISIBILITY",
+  MODAL_MANAGE_STUDENTS: "MODAL_MANAGE_STUDENTS",
+};
+
+MainVue.showLoginView = function () {
+  app.showLoginView = true;
 };
 
 MainVue.setViewComponent = function (component, properties) {
@@ -122,6 +130,8 @@ MainVue.init = function () {
         SearchModal,
         MessageBox,
         TileVisibilityModal,
+        ManageStudentsModal,
+        LoginView,
       },
       data() {
         return {
@@ -143,6 +153,8 @@ MainVue.init = function () {
           modalTypes: modalTypes,
           showModal: null,
           modalOptions: {},
+          currentAuthUser: authService.getCurrentUser(),
+          showLoginView: false,
         };
       },
       methods: {
@@ -159,6 +171,13 @@ MainVue.init = function () {
         },
         toMain() {
           Router.toMain();
+        },
+        logout() {
+          authService.logout();
+          this.showLoginView = true;
+        },
+        showManageStudents() {
+          this.showModal = modalTypes.MODAL_MANAGE_STUDENTS;
         },
       },
       mounted() {
@@ -228,6 +247,10 @@ MainVue.init = function () {
         $(document).on(constants.EVENT_UI_LOCKED, () => {
           this.uiLocked = true;
           MainVue.clearTooltip();
+        });
+        $(document).on(authService.EVENT_AUTH_CHANGED, () => {
+          thiz.currentAuthUser = authService.getCurrentUser();
+          thiz.showLoginView = !authService.isLoggedIn();
         });
         thiz.syncState = dataService.getSyncState();
         window.addEventListener("resize", () => {
