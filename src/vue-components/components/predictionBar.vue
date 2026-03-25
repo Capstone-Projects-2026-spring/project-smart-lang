@@ -1,8 +1,8 @@
 <template>
   <div class="prediction-bar-wrapper" role="region" aria-label="Word suggestions">
     <div class="prediction-bar-header">
-      <span class="prediction-bar-title">
-        <span class="prediction-bar-icon" aria-hidden="true">&#128161;</span>
+      <span class="prediction-bar-title" aria-label="Suggestions">
+        <span class="prediction-bar-icon" aria-hidden="true">💡</span>
         Suggestions
       </span>
       <span class="prediction-bar-hint">Tap a word to add it to your sentence</span>
@@ -28,7 +28,7 @@
             v-if="tile.isExpansion"
             title="New vocabulary"
           >
-            &#10024;
+            ✨
           </div>
           <div class="tile-img-container" v-if="tile.imageUrl">
             <img :src="tile.imageUrl" :alt="tile.label" class="tile-img" />
