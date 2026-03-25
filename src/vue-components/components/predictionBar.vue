@@ -1,37 +1,45 @@
 <template>
-  <div class="prediction-bar">
-    <template v-if="suggestions.length > 0">
-      <div
-        v-for="(tile, index) in suggestions"
-        :key="index"
-        class="prediction-tile"
-        :class="{ 'expansion-tile': tile.isExpansion }"
-        :style="{ backgroundColor: '#ffffff' }"
-        @click="selectTile(tile)"
-        :aria-label="
-          (tile.isExpansion
-            ? 'New vocabulary suggestion: '
-            : 'Predicted tile: ') + tile.label
-        "
-        role="button"
-        tabindex="0"
-      >
+  <div class="prediction-bar-wrapper" role="region" aria-label="Word suggestions">
+    <div class="prediction-bar-header">
+      <span class="prediction-bar-title">
+        <span class="prediction-bar-icon" aria-hidden="true">&#128161;</span>
+        Suggestions
+      </span>
+      <span class="prediction-bar-hint">Tap a word to add it to your sentence</span>
+    </div>
+    <div class="prediction-bar">
+      <template v-if="suggestions.length > 0">
         <div
-          class="expansion-indicator"
-          v-if="tile.isExpansion"
-          title="New vocabulary"
+          v-for="(tile, index) in suggestions"
+          :key="index"
+          class="prediction-tile"
+          :class="{ 'expansion-tile': tile.isExpansion }"
+          @click="selectTile(tile)"
+          :aria-label="
+            (tile.isExpansion
+              ? 'New vocabulary suggestion: '
+              : 'Predicted word: ') + tile.label
+          "
+          role="button"
+          tabindex="0"
         >
-          &#10024;
+          <div
+            class="expansion-indicator"
+            v-if="tile.isExpansion"
+            title="New vocabulary"
+          >
+            &#10024;
+          </div>
+          <div class="tile-img-container" v-if="tile.imageUrl">
+            <img :src="tile.imageUrl" :alt="tile.label" class="tile-img" />
+          </div>
+          <div class="tile-label">{{ tile.label }}</div>
         </div>
-        <div class="tile-img-container" v-if="tile.imageUrl">
-          <img :src="tile.imageUrl" :alt="tile.label" class="tile-img" />
-        </div>
-        <div class="tile-label">{{ tile.label }}</div>
-      </div>
-    </template>
-    <span v-else class="prediction-placeholder"
-      >Tap tiles to see suggestions</span
-    >
+      </template>
+      <span v-else class="prediction-placeholder"
+        >Tap tiles to see suggestions</span
+      >
+    </div>
   </div>
 </template>
 
@@ -98,15 +106,55 @@ export default {
 </script>
 
 <style scoped>
+/* ── Outer wrapper ────────────────────────────────────────────────── */
+.prediction-bar-wrapper {
+  flex-shrink: 0;
+  background: #1a6bbf;
+  border-bottom: 3px solid #0e4a8a;
+}
+
+/* ── Header label strip ───────────────────────────────────────────── */
+.prediction-bar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px 2px;
+  gap: 8px;
+}
+
+.prediction-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78em;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.prediction-bar-icon {
+  font-size: 1.1em;
+}
+
+.prediction-bar-hint {
+  font-size: 0.72em;
+  color: #c8dff7;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Tiles row ────────────────────────────────────────────────────── */
 .prediction-bar {
   display: flex;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #e8ecf0;
-  border-bottom: 2px solid #bbb;
+  gap: 6px;
+  padding: 4px 8px 6px;
+  background: #1a6bbf;
   flex-shrink: 0;
-  min-height: 150px;
-  max-height: 150px;
+  min-height: 140px;
+  max-height: 140px;
   align-items: stretch;
   overflow-x: auto;
   overflow-y: hidden;
@@ -121,20 +169,22 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3px 4px;
-  border: 2px solid #888;
-  border-radius: 8px;
+  padding: 4px 5px;
+  background: #ffffff;
+  border: 2px solid #5fa8e8;
+  border-radius: 10px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
 }
 
 .prediction-tile:hover,
 .prediction-tile:active {
-  transform: scale(1.05);
-  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
-  border-color: #333;
+  transform: scale(1.06);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  background: #e8f3ff;
+  border-color: #1a6bbf;
 }
 
 .tile-img-container {
@@ -148,27 +198,27 @@ export default {
 }
 
 .tile-img {
-  max-height: 100px;
+  max-height: 90px;
   max-width: 100%;
   object-fit: contain;
 }
 
 .tile-label {
   flex: 0 0 auto;
-  font-size: 0.7em;
+  font-size: 0.72em;
   font-weight: 700;
   text-align: center;
-  line-height: 1.1;
-  color: #222;
+  line-height: 1.15;
+  color: #0d3d73;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
-  padding-top: 1px;
+  padding-top: 2px;
 }
 
 .prediction-placeholder {
-  color: #999;
+  color: #c8dff7;
   font-style: italic;
   font-size: 0.95em;
   padding: 6px 0;
@@ -176,9 +226,15 @@ export default {
 }
 
 .expansion-tile {
-  border-color: #4a90d9;
+  border-color: #f0a500;
   border-style: dashed;
-  background-color: #f0f7ff !important;
+  background-color: #fffbea !important;
+}
+
+.expansion-tile:hover,
+.expansion-tile:active {
+  background-color: #fff3c0 !important;
+  border-color: #c27d00;
 }
 
 .expansion-indicator {
@@ -186,7 +242,6 @@ export default {
   top: 2px;
   right: 4px;
   font-size: 0.65em;
-  color: #4a90d9;
   pointer-events: none;
 }
 </style>
