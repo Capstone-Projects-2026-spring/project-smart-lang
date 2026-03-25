@@ -72,6 +72,11 @@
         v-if="showModal === modalTypes.MODAL_TILE_VISIBILITY"
         @close="showModal = null;"
       ></tile-visibility-modal>
+      <manage-students-modal
+        v-if="showModal === modalTypes.MODAL_MANAGE_STUDENTS"
+        @close="showModal = null;"
+        @view-student-board="showModal = null"
+      ></manage-students-modal>
       <div class="grid-container grid-mask" v-if="false">
         <i class="fas fa-4x fa-spinner fa-spin" style="top: 40%"></i>
         <div
@@ -89,7 +94,7 @@
       <div class="holy-grail-body" v-cloak>
         <div
           class="holy-grail-sidebar-1 hg-sidebar no-print"
-          v-show="showSidebar"
+          v-show="showSidebar && authRole === 'caregiver'"
         >
           <div style="flex: 0 0 auto">
             <div class="show-mobile">
@@ -157,6 +162,34 @@
                     ><button tabindex="-1">
                       <i class="fas fa-2x fa-eye"></i
                       ><span class="hide-mobile">{{ $t('manageTiles') }}</span>
+                    </button></a
+                  >
+                </li>
+                <li>
+                  <a
+                    tabindex="4"
+                    href="javascript:void(0)"
+                    @click="showModal = modalTypes.MODAL_MANAGE_STUDENTS; closeSidebar();"
+                    aria-label="Manage Students"
+                    ><button tabindex="-1">
+                      <i class="fas fa-2x fa-users"></i
+                      ><span class="hide-mobile">Manage Students</span>
+                    </button></a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div style="margin-top: auto; padding: 0.5em 0;">
+              <ul>
+                <li>
+                  <a
+                    tabindex="5"
+                    href="javascript:void(0)"
+                    @click="logout()"
+                    aria-label="Log Out"
+                    ><button tabindex="-1" style="color: #e74c3c;">
+                      <i class="fas fa-2x fa-sign-out-alt"></i
+                      ><span class="hide-mobile">Log Out</span>
                     </button></a
                   >
                 </li>

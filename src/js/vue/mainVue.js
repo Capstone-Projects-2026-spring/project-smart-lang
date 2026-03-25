@@ -9,11 +9,13 @@ import { dataService } from "../service/data/dataService";
 import { databaseService } from "../service/data/databaseService";
 import { localStorageService } from "../service/data/localStorageService";
 import { Router } from "../router";
+import { authService } from "../service/authService";
 import NotificationBar from "../../vue-components/components/notificationBar.vue";
 import ProgressBarModal from "../../vue-components/modals/progressBarModal.vue";
 import SearchModal from "../../vue-components/modals/searchModal.vue";
 import MessageBox from "../../vue-components/modals/messageBox.vue";
 import TileVisibilityModal from "../../vue-components/modals/tileVisibilityModal.vue";
+import ManageStudentsModal from "../../vue-components/modals/manageStudentsModal.vue";
 import { systemActionService } from "../service/systemActionService";
 
 let MainVue = {};
@@ -23,6 +25,7 @@ let modalTypes = {
   MODAL_PROGRESSBAR: "MODAL_PROGRESSBAR",
   MODAL_MESSAGEBOX: "MODAL_MESSAGEBOX",
   MODAL_TILE_VISIBILITY: "MODAL_TILE_VISIBILITY",
+  MODAL_MANAGE_STUDENTS: "MODAL_MANAGE_STUDENTS",
 };
 
 MainVue.setViewComponent = function (component, properties) {
@@ -79,6 +82,10 @@ MainVue.showTileVisibilityModal = function () {
   app.showModal = modalTypes.MODAL_TILE_VISIBILITY;
 };
 
+MainVue.showManageStudentsModal = function () {
+  app.showModal = modalTypes.MODAL_MANAGE_STUDENTS;
+};
+
 MainVue.showMessageBox = function (options) {
   if (!app) {
     return Promise.resolve(false);
@@ -122,6 +129,7 @@ MainVue.init = function () {
         SearchModal,
         MessageBox,
         TileVisibilityModal,
+        ManageStudentsModal,
       },
       data() {
         return {
@@ -143,6 +151,8 @@ MainVue.init = function () {
           modalTypes: modalTypes,
           showModal: null,
           modalOptions: {},
+          authRole: authService.getRole(),
+          authService: authService,
         };
       },
       methods: {
@@ -159,6 +169,11 @@ MainVue.init = function () {
         },
         toMain() {
           Router.toMain();
+        },
+        logout() {
+          authService.logout();
+          window.location.hash = '';
+          window.location.reload();
         },
       },
       mounted() {

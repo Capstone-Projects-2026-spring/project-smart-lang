@@ -17,6 +17,12 @@
         <i class="fas fa-expand" />
         <span class="hide-mobile">{{ $t("fullscreen") }}</span>
       </button>
+      <span
+        v-if="studentId"
+        class="student-id-badge"
+        :title="'Your Student ID: ' + studentId"
+        aria-label="Student ID"
+      >ID: {{ studentId }}</span>
     </header>
     <div class="srow content text-content" v-show="!renderGridData">
       <div class="grid-container grid-mask">
@@ -109,6 +115,7 @@ import { collectElementService } from "../../js/service/collectElementService";
 import { predictionService } from "../../js/service/predictionService";
 import { liveElementService } from "../../js/service/liveElementService";
 import { GridElement } from "../../js/model/GridElement";
+import { authService } from "../../js/service/authService";
 
 let vueApp = null;
 let UNLOCK_COUNT = 8;
@@ -141,6 +148,7 @@ let vueConfig = {
       highlightedElementId: null,
       systemActionService: systemActionService,
       gridUtil: gridUtil,
+      studentId: authService.isStudent() ? authService.getStudentId() : null,
     };
   },
   components: {
@@ -667,4 +675,19 @@ function initContextmenu() {
 export default vueConfig;
 </script>
 
-<style scoped></style>
+<style scoped>
+.student-id-badge {
+  margin-left: auto;
+  margin-right: 0.5em;
+  font-size: 0.72em;
+  color: #aaa;
+  font-family: monospace;
+  letter-spacing: 0.05em;
+  padding: 0.2em 0.5em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+  user-select: all;
+  cursor: default;
+}
+</style>

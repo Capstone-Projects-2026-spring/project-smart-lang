@@ -4,12 +4,14 @@ import Navigo from "navigo";
 import { dataService } from "./service/data/dataService.js";
 
 import GridView from "../vue-components/views/gridView.vue";
+import LoginView from "../vue-components/views/loginView.vue";
 import { databaseService } from "./service/data/databaseService";
 import { localStorageService } from "./service/data/localStorageService";
 import { MainVue } from "./vue/mainVue";
 import { constants } from "./util/constants.js";
 import { urlParamService } from "./service/urlParamService";
 import { i18nService } from "./service/i18nService";
+import { authService } from "./service/authService";
 
 let Router = {};
 let navigoInstance = null;
@@ -24,6 +26,7 @@ let _locked = false;
 
 Router.VIEWS = {
   GridView: GridView,
+  LoginView: LoginView,
 };
 
 Router.init = function (injectIdParam, initialHash) {
@@ -34,6 +37,9 @@ Router.init = function (injectIdParam, initialHash) {
   injectId = injectIdParam;
   navigoInstance = new Navigo(null, true);
   navigoInstance.on({
+    login: function () {
+      loadVueView(LoginView, {}, "#login");
+    },
     main: function () {
       toMainInternal();
     },
@@ -72,7 +78,7 @@ Router.init = function (injectIdParam, initialHash) {
       let hash = location.hash;
       $(document).trigger(constants.EVENT_NAVIGATE);
       let validForLocked =
-        hash.startsWith("#main") || hash.startsWith("#grid/");
+        hash.startsWith("#main") || hash.startsWith("#grid/") || hash.startsWith("#login");
       if (_locked && !validForLocked) {
         done(constants.IS_SAFARI ? undefined : false);
         if (constants.IS_SAFARI) {
@@ -180,8 +186,7 @@ Router.toEditGrid = function (gridId) {
 };
 
 Router.toLogin = function () {
-  // No login page in stripped app — just go to main
-  Router.toMain();
+  Router.to("#login");
 };
 
 Router.getCurrentView = function () {
@@ -212,7 +217,7 @@ Router.toLastGrid = function () {
 };
 
 function getValidHash() {
-  return location.hash || "#main";
+  return location.hash || "#login";
 }
 
 function getHash() {
@@ -248,6 +253,10 @@ function setMenuItemSelected(hash) {
 
 function toMainInternal() {
   if (!routingEndabled) {
+    return;
+  }
+  if (!authService.isLoggedIn()) {
+    loadVueView(LoginView, {}, "#login");
     return;
   }
   dataService.getMetadata().then((metadata) => {
