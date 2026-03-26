@@ -17,12 +17,21 @@
         <i class="fas fa-expand" />
         <span class="hide-mobile">{{ $t("fullscreen") }}</span>
       </button>
-      <span
-        v-if="studentId"
-        class="student-id-badge"
-        :title="'Your Student ID: ' + studentId"
-        aria-label="Student ID"
-      >ID: {{ studentId }}</span>
+      <div v-if="studentId" class="student-header-group">
+        <span
+          class="student-id-badge"
+          :title="'Your Student ID: ' + studentId"
+          aria-label="Student ID"
+        >ID: {{ studentId }}</span>
+        <button
+          class="student-logout-btn"
+          @click="studentLogout"
+          :aria-label="$t('logout')"
+          :title="$t('logout')"
+        >
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
     </header>
     <div class="srow content text-content" v-show="!renderGridData">
       <div class="grid-container grid-mask">
@@ -160,6 +169,11 @@ let vueConfig = {
     HeaderIcon,
   },
   methods: {
+    studentLogout() {
+      authService.logout();
+      window.location.hash = '';
+      window.location.reload();
+    },
     openModal(modalType) {
       this.showModal = modalType;
       stopInputMethods();
@@ -676,9 +690,15 @@ export default vueConfig;
 </script>
 
 <style scoped>
-.student-id-badge {
+.student-header-group {
+  display: flex;
+  align-items: center;
   margin-left: auto;
   margin-right: 0.5em;
+  gap: 0.4em;
+}
+
+.student-id-badge {
   font-size: 0.72em;
   color: #aaa;
   font-family: monospace;
@@ -689,5 +709,30 @@ export default vueConfig;
   background: #f9f9f9;
   user-select: all;
   cursor: default;
+}
+
+.student-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3em 0.5em;
+  font-size: 0.85em;
+  color: #e74c3c;
+  background: transparent;
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.student-logout-btn:hover,
+.student-logout-btn:focus {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.student-logout-btn:focus {
+  outline: 2px solid #c0392b;
+  outline-offset: 2px;
 }
 </style>

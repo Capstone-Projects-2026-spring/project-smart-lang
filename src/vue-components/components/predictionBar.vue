@@ -115,8 +115,9 @@ export default {
 /* ── Outer wrapper ────────────────────────────────────────────────── */
 .prediction-bar-wrapper {
   flex-shrink: 0;
-  background: #6d6d6d;
-  border-bottom: 3px solid #1d1d1d;
+  background: linear-gradient(to bottom, #f5f5f5, #e8e8e8);
+  border-bottom: 2px solid #c0c0c0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* ── Header label strip ───────────────────────────────────────────── */
@@ -124,19 +125,20 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 10px 2px;
+  padding: 6px 12px 4px;
   gap: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .prediction-bar-title {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.78em;
-  font-weight: 800;
-  letter-spacing: 0.06em;
+  gap: 6px;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #ffffff;
+  color: #4a5568;
 }
 
 .prediction-bar-icon {
@@ -145,7 +147,7 @@ export default {
 
 .prediction-bar-hint {
   font-size: 0.72em;
-  color: #e7e7e7;
+  color: #718096;
   font-style: italic;
   white-space: nowrap;
   overflow: hidden;
@@ -155,9 +157,9 @@ export default {
 /* ── Tiles row ────────────────────────────────────────────────────── */
 .prediction-bar {
   display: flex;
-  gap: 6px;
-  padding: 4px 8px 6px;
-  background: #8d8787;
+  gap: 8px;
+  padding: 8px 10px 10px;
+  background: transparent;
   flex-shrink: 0;
   min-height: 140px;
   max-height: 140px;
@@ -175,22 +177,27 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px 5px;
+  padding: 6px 8px;
   background: #ffffff;
-  border: 2px solid #1d1d1d;
-  border-radius: 10px;
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .prediction-tile:hover,
 .prediction-tile:active {
-  transform: scale(1.06);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-  background: #e8f3ff;
-  border-color: #1d1d1d;
+  transform: scale(1.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+  background: #f0f7ff;
+}
+
+.prediction-tile:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 .tile-img-container {
@@ -211,20 +218,20 @@ export default {
 
 .tile-label {
   flex: 0 0 auto;
-  font-size: 0.72em;
-  font-weight: 700;
+  font-size: 0.75em;
+  font-weight: 600;
   text-align: center;
-  line-height: 1.15;
-  color: #0d3d73;
+  line-height: 1.2;
+  color: #1e3a5f;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
-  padding-top: 2px;
+  padding-top: 4px;
 }
 
 .prediction-placeholder {
-  color: #c8dff7;
+  color: #9ca3af;
   font-style: italic;
   font-size: 0.95em;
   padding: 6px 0;
@@ -232,22 +239,22 @@ export default {
 }
 
 .expansion-tile {
-  border-color: #f0a500;
+  border-color: #f59e0b;
   border-style: dashed;
-  background-color: #fffbea !important;
+  background-color: #fffbeb !important;
 }
 
 .expansion-tile:hover,
 .expansion-tile:active {
-  background-color: #fff3c0 !important;
-  border-color: #c27d00;
+  background-color: #fef3c7 !important;
+  border-color: #d97706;
 }
 
 .expansion-indicator {
   position: absolute;
-  top: 2px;
-  right: 4px;
-  font-size: 0.65em;
+  top: 3px;
+  right: 5px;
+  font-size: 0.7em;
   pointer-events: none;
 }
 </style>
