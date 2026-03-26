@@ -115,8 +115,8 @@ export default {
 /* ── Outer wrapper ────────────────────────────────────────────────── */
 .prediction-bar-wrapper {
   flex-shrink: 0;
-  background: #1a6bbf;
-  border-bottom: 3px solid #0e4a8a;
+  background: #6d6d6d;
+  border-bottom: 3px solid #1d1d1d;
 }
 
 /* ── Header label strip ───────────────────────────────────────────── */
@@ -145,7 +145,7 @@ export default {
 
 .prediction-bar-hint {
   font-size: 0.72em;
-  color: #c8dff7;
+  color: #e7e7e7;
   font-style: italic;
   white-space: nowrap;
   overflow: hidden;
@@ -157,7 +157,7 @@ export default {
   display: flex;
   gap: 6px;
   padding: 4px 8px 6px;
-  background: #1a6bbf;
+  background: #8d8787;
   flex-shrink: 0;
   min-height: 140px;
   max-height: 140px;
@@ -177,7 +177,7 @@ export default {
   justify-content: center;
   padding: 4px 5px;
   background: #ffffff;
-  border: 2px solid #5fa8e8;
+  border: 2px solid #1d1d1d;
   border-radius: 10px;
   cursor: pointer;
   user-select: none;
@@ -190,7 +190,7 @@ export default {
   transform: scale(1.06);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
   background: #e8f3ff;
-  border-color: #1a6bbf;
+  border-color: #1d1d1d;
 }
 
 .tile-img-container {
