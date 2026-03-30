@@ -39,9 +39,28 @@
             <div v-if="loadedStudent" class="loaded-student-info">
               <div class="student-info-header">
                 <i class="fas fa-user-graduate"></i>
-                <span>Student: <strong>{{ loadedStudent.name }}</strong></span>
+                <span v-if="!editingName">Student: <strong>{{ loadedStudent.name }}</strong></span>
+                <input
+                  v-else
+                  v-model="editNameInput"
+                  type="text"
+                  class="edit-name-input"
+                  placeholder="Enter student name"
+                  @keydown.enter="saveName"
+                  @keydown.esc="cancelEdit"
+                  ref="editNameInput"
+                />
               </div>
               <div class="student-actions">
+                <button v-if="!editingName" class="action-btn edit-btn" @click="startEditName">
+                  <i class="fas fa-pencil-alt"></i> Edit Name
+                </button>
+                <button v-if="editingName" class="action-btn save-btn" @click="saveName">
+                  <i class="fas fa-check"></i> Save
+                </button>
+                <button v-if="editingName" class="action-btn cancel-btn" @click="cancelEdit">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
                 <button class="action-btn primary-btn" @click="viewBoard">
                   <i class="fas fa-th"></i> View Tile Board
                 </button>
@@ -51,10 +70,54 @@
             <div class="recent-students" v-if="recentStudents.length > 0">
               <h3>Recently Accessed</h3>
               <ul class="recent-list">
-                <li v-for="s in recentStudents" :key="s.id" @click="selectRecent(s)">
-                  <i class="fas fa-user-graduate"></i>
-                  <span>{{ s.name }}</span>
-                  <span class="recent-id">{{ s.id }}</span>
+                <li v-for="s in recentStudents" :key="s.id">
+                  <div class="recent-student-main" @click="selectRecent(s)">
+                    <i class="fas fa-user-graduate"></i>
+                    <span v-if="editingRecentId !== s.id">{{ s.name }}</span>
+                    <input
+                      v-else
+                      v-model="editRecentNameInput"
+                      type="text"
+                      class="edit-recent-name-input"
+                      placeholder="Enter student name"
+                      @keydown.enter="saveRecentName(s)"
+                      @keydown.esc="cancelRecentEdit"
+                      @click.stop
+                      ref="editRecentNameInput"
+                    />
+                    <span 
+                      class="recent-id clickable-id"
+                      @click.stop="copyIdToClipboard(s.id)"
+                      :title="copiedId === s.id ? 'Copied!' : 'Click to copy'"
+                    >
+                      {{ s.id }}
+                      <i :class="copiedId === s.id ? 'fas fa-check' : 'fas fa-copy'" class="copy-icon"></i>
+                    </span>
+                  </div>
+                  <button
+                    v-if="editingRecentId !== s.id"
+                    class="edit-recent-btn"
+                    @click.stop="startEditRecentName(s)"
+                    title="Edit Name"
+                  >
+                    <i class="fas fa-pencil-alt"></i>
+                  </button>
+                  <button
+                    v-if="editingRecentId === s.id"
+                    class="save-recent-btn"
+                    @click.stop="saveRecentName(s)"
+                    title="Save"
+                  >
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button
+                    v-if="editingRecentId === s.id"
+                    class="cancel-recent-btn"
+                    @click.stop="cancelRecentEdit"
+                    title="Cancel"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -85,6 +148,11 @@ export default {
             loadedStudent: null,
             error: null,
             recentStudents: [],
+            editingName: false,
+            editNameInput: '',
+            editingRecentId: null,
+            editRecentNameInput: '',
+            copiedId: null,
         };
     },
     mounted() {
@@ -95,6 +163,16 @@ export default {
         }
     },
     methods: {
+        copyIdToClipboard(studentId) {
+            navigator.clipboard.writeText(studentId).then(() => {
+                this.copiedId = studentId;
+                setTimeout(() => {
+                    this.copiedId = null;
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy student ID:', err);
+            });
+        },
         loadStudent() {
             this.error = null;
             this.loadedStudent = null;
@@ -135,6 +213,69 @@ export default {
                 // For now, emit an event and close the modal.
                 this.$emit('view-student-board', this.loadedStudent);
                 this.$emit('close');
+            }
+        },
+        startEditName() {
+            this.editingName = true;
+            this.editNameInput = this.loadedStudent.name;
+            this.$nextTick(() => {
+                if (this.$refs.editNameInput) {
+                    this.$refs.editNameInput.focus();
+                }
+            });
+        },
+        saveName() {
+            const newName = this.editNameInput.trim();
+            if (newName && this.loadedStudent) {
+                this.loadedStudent.name = newName;
+                this.updateRecentStudent(this.loadedStudent);
+            }
+            this.editingName = false;
+        },
+        cancelEdit() {
+            this.editingName = false;
+            this.editNameInput = '';
+        },
+        startEditRecentName(student) {
+            this.editingRecentId = student.id;
+            this.editRecentNameInput = student.name;
+            this.$nextTick(() => {
+                if (this.$refs.editRecentNameInput) {
+                    const input = Array.isArray(this.$refs.editRecentNameInput)
+                        ? this.$refs.editRecentNameInput[0]
+                        : this.$refs.editRecentNameInput;
+                    if (input) input.focus();
+                }
+            });
+        },
+        saveRecentName(student) {
+            const newName = this.editRecentNameInput.trim();
+            if (newName) {
+                student.name = newName;
+                this.saveRecentStudents();
+                if (this.loadedStudent && this.loadedStudent.id === student.id) {
+                    this.loadedStudent.name = newName;
+                }
+            }
+            this.editingRecentId = null;
+            this.editRecentNameInput = '';
+        },
+        cancelRecentEdit() {
+            this.editingRecentId = null;
+            this.editRecentNameInput = '';
+        },
+        updateRecentStudent(student) {
+            const idx = this.recentStudents.findIndex(s => s.id === student.id);
+            if (idx !== -1) {
+                this.recentStudents[idx].name = student.name;
+                this.saveRecentStudents();
+            }
+        },
+        saveRecentStudents() {
+            try {
+                localStorage.setItem(RECENT_KEY, JSON.stringify(this.recentStudents));
+            } catch (e) {
+                // ignore
             }
         },
     },
@@ -251,25 +392,151 @@ export default {
     margin: 0;
 }
 
-.recent-list li {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    padding: 0.4em 0.5em;
-    cursor: pointer;
-    border-radius: 4px;
-    color: #444;
-    font-size: 0.95em;
-}
-
-.recent-list li:hover {
-    background: #f0f0f0;
-}
-
 .recent-id {
     margin-left: auto;
     color: #999;
     font-family: monospace;
     font-size: 0.9em;
+}
+
+.clickable-id {
+    cursor: pointer;
+    padding: 0.3em 0.5em;
+    border-radius: 4px;
+    transition: background-color 0.15s, color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.clickable-id:hover {
+    background: #e8f4fd;
+    color: #3498db;
+}
+
+.copy-icon {
+    font-size: 0.85em;
+    opacity: 0.7;
+}
+
+.clickable-id:hover .copy-icon {
+    opacity: 1;
+}
+
+.edit-name-input {
+    flex: 1;
+    padding: 0.3em 0.5em;
+    border: 2px solid #3498db;
+    border-radius: 4px;
+    font-size: 1em;
+    margin-left: 0.3em;
+}
+
+.edit-name-input:focus {
+    outline: none;
+    border-color: #2980b9;
+}
+
+.edit-btn {
+    background: #f39c12;
+    color: white;
+}
+
+.edit-btn:hover {
+    background: #d68910;
+}
+
+.save-btn {
+    background: #27ae60;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #219a52;
+}
+
+.cancel-btn {
+    background: #95a5a6;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #7f8c8d;
+}
+
+.recent-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.4em 0.5em;
+    border-radius: 4px;
+    color: #444;
+    font-size: 0.95em;
+}
+
+.recent-student-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    flex: 1;
+    cursor: pointer;
+}
+
+.recent-student-main:hover {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.edit-recent-name-input {
+    flex: 1;
+    padding: 0.2em 0.4em;
+    border: 2px solid #3498db;
+    border-radius: 4px;
+    font-size: 0.9em;
+    max-width: 140px;
+}
+
+.edit-recent-name-input:focus {
+    outline: none;
+    border-color: #2980b9;
+}
+
+.edit-recent-btn,
+.save-recent-btn,
+.cancel-recent-btn {
+    padding: 0.3em 0.5em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    display: flex;
+    align-items: center;
+}
+
+.edit-recent-btn {
+    background: #f39c12;
+    color: white;
+}
+
+.edit-recent-btn:hover {
+    background: #d68910;
+}
+
+.save-recent-btn {
+    background: #27ae60;
+    color: white;
+}
+
+.save-recent-btn:hover {
+    background: #219a52;
+}
+
+.cancel-recent-btn {
+    background: #95a5a6;
+    color: white;
+}
+
+.cancel-recent-btn:hover {
+    background: #7f8c8d;
 }
 </style>

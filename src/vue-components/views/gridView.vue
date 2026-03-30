@@ -20,9 +20,13 @@
       <div v-if="studentId" class="student-header-group">
         <span
           class="student-id-badge"
-          :title="'Your Student ID: ' + studentId"
-          aria-label="Student ID"
-        >ID: {{ studentId }}</span>
+          @click="copyStudentId"
+          :title="studentIdCopyTooltip"
+          :aria-label="'Copy Student ID: ' + studentId"
+        >
+          ID: {{ studentId }}
+          <i :class="studentIdCopied ? 'fas fa-check' : 'fas fa-copy'" class="copy-icon"></i>
+        </span>
         <button
           class="student-logout-btn"
           @click="studentLogout"
@@ -158,6 +162,7 @@ let vueConfig = {
       systemActionService: systemActionService,
       gridUtil: gridUtil,
       studentId: authService.isStudent() ? authService.getStudentId() : null,
+      studentIdCopied: false,
     };
   },
   components: {
@@ -168,7 +173,24 @@ let vueConfig = {
     MouseModal,
     HeaderIcon,
   },
+  computed: {
+    studentIdCopyTooltip() {
+      return this.studentIdCopied ? 'Copied!' : 'Copy Student ID';
+    },
+  },
   methods: {
+    copyStudentId() {
+      if (this.studentId) {
+        navigator.clipboard.writeText(this.studentId).then(() => {
+          this.studentIdCopied = true;
+          setTimeout(() => {
+            this.studentIdCopied = false;
+          }, 1500);
+        }).catch(err => {
+          console.error('Failed to copy student ID:', err);
+        });
+      }
+    },
     studentLogout() {
       authService.logout();
       window.location.hash = '';
@@ -699,16 +721,35 @@ export default vueConfig;
 }
 
 .student-id-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
   font-size: 0.72em;
-  color: #aaa;
+  color: #666;
   font-family: monospace;
   letter-spacing: 0.05em;
-  padding: 0.2em 0.5em;
+  padding: 0.35em 0.6em;
   border: 1px solid #ddd;
   border-radius: 4px;
   background: #f9f9f9;
-  user-select: all;
-  cursor: default;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.student-id-badge:hover {
+  background: #e8f4fd;
+  border-color: #3498db;
+  color: #3498db;
+}
+
+.student-id-badge .copy-icon {
+  font-size: 0.9em;
+  opacity: 0.6;
+}
+
+.student-id-badge:hover .copy-icon {
+  opacity: 1;
 }
 
 .student-logout-btn {

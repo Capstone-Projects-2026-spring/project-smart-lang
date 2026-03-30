@@ -95,10 +95,8 @@ export default {
     $(document).on(constants.EVENT_COLLECT_TEXT_CHANGED + ".predbar", () => {
       this.$nextTick(() => this.updateSuggestions());
     });
-    // Refresh suggestions when navigating between grids
-    $(document).on(constants.EVENT_GRID_LOADED + ".predbar", () => {
-      this.$nextTick(() => this.updateSuggestions());
-    });
+    // Note: Removed EVENT_GRID_LOADED handler - suggestions should only change
+    // when tiles are added/removed from the sentence, not when navigating folders
     // Build tile cache + bootstrap, then show initial suggestions
     predictionService.buildTileLabels().then(() => {
       this.updateSuggestions();
