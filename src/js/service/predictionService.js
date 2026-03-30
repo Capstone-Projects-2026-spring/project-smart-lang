@@ -405,25 +405,18 @@ const SEMANTIC_CONTEXT_MAP = {
 
   // BE → feelings, descriptions, places, people, concepts (I am happy, I am at home, I want to be a teacher)
   BE: ["FEELINGS", "PLACES", "DESCRIPTION", "CONCEPTS"],
-  AM: ["FEELINGS", "PLACES", "HOME", "SCHOOL", "PEOPLE", "CONCEPTS"],
-  IS: ["FEELINGS", "ANIMALS", "OBJECTS", "PEOPLE", "DESCRIPTION"],
-  ARE: ["FEELINGS", "PEOPLE", "ANIMALS", "DESCRIPTION"],
 
   // EAT → food
   EAT: ["FOOD"],
-  EATING: ["FOOD"],
 
   // DRINK → drinks
   DRINK: ["DRINKS"],
-  DRINKING: ["DRINKS"],
 
   // GO → places, transports, home, people (go to places, go home, go to someone)
   GO: ["PLACES", "TRANSPORTS"],
-  GOING: ["PLACES", "TRANSPORTS", "HOME", "SCHOOL", "PEOPLE"],
 
   // LISTEN → people, leisure (music), animals (sounds), objects (devices)
   LISTEN: ["PEOPLE", "ANIMALS"],
-  LISTENING: ["PEOPLE", "LEISURE", "OBJECTS"],
 
   // SEE → people, animals, objects, colors, transports, plants, places
   SEE: [
@@ -436,20 +429,16 @@ const SEMANTIC_CONTEXT_MAP = {
     "PLACES",
     "EVENTS",
   ],
-  SEEING: ["PEOPLE", "ANIMALS", "OBJECTS", "PLACES"],
 
   // SMELL → food, drinks, plants, animals
   SMELL: ["FOOD", "DRINKS", "PLANTS", "ANIMALS"],
-  SMELLING: ["FOOD", "PLANTS"],
 
   // MAKE → objects, food, crafts, concepts (make things, make food, make friends)
   MAKE: ["OBJECTS", "FOOD", "TOYS", "COLORS", "PEOPLE", "CONCEPTS"],
-  MAKING: ["OBJECTS", "FOOD", "TOYS", "PEOPLE"],
 
   // TALK TO → people
   "TALK TO": ["PEOPLE"],
   TALK: ["PEOPLE"],
-  TALKING: ["PEOPLE"],
 
   // HAVE → objects, toys, animals, people, food, drinks (possessions and relationships)
   HAVE: [
@@ -462,160 +451,58 @@ const SEMANTIC_CONTEXT_MAP = {
     "CLOTHES",
     "FEELINGS",
   ],
-  HAVING: ["OBJECTS", "FOOD", "DRINKS", "FEELINGS"],
 
   // GIVE → objects, food, drinks, toys, people (give to someone, give objects)
   GIVE: ["PEOPLE", "OBJECTS", "FOOD", "DRINKS", "TOYS", "CLOTHES"],
-  GIVING: ["PEOPLE", "OBJECTS", "FOOD", "TOYS"],
 
   // WEAR → clothes
   WEAR: ["CLOTHES"],
-  WEARING: ["CLOTHES"],
 
   // SLEEP → feelings (tired), home, objects (bed)
   SLEEP: ["FEELINGS", "HOME", "OBJECTS"],
-  SLEEPING: ["FEELINGS", "HOME"],
 
   // PLAY → toys, leisure, sports, people (play with)
   PLAY: ["TOYS", "LEISURE", "SPORTS", "PEOPLE"],
-  PLAYING: ["TOYS", "LEISURE", "SPORTS"],
 
   // BUY → objects, food, drinks, toys, clothes (things you can buy)
   BUY: ["OBJECTS", "FOOD", "DRINKS", "TOYS", "CLOTHES"],
-  BUYING: ["OBJECTS", "FOOD", "CLOTHES"],
 
   // VISIT → places, people
   VISIT: ["PLACES", "PEOPLE", "HOME", "SCHOOL"],
-  VISITING: ["PLACES", "PEOPLE"],
 
   // TRAVEL → places, transports
   TRAVEL: ["PLACES", "TRANSPORTS"],
-  TRAVELING: ["PLACES", "TRANSPORTS"],
 
   // COME → places, home, people (come to)
   COME: ["PLACES", "HOME", "PEOPLE", "EVENTS"],
-  COMING: ["PLACES", "HOME", "EVENTS"],
 
   // RETURN → places, home, school
   RETURN: ["PLACES", "HOME", "SCHOOL"],
-  RETURNING: ["PLACES", "HOME"],
 
   // THINK → concepts, people, feelings, events (think about ideas, people, how you feel)
   THINK: ["CONCEPTS", "PEOPLE", "FEELINGS", "EVENTS", "OBJECTS"],
-  THINKING: ["CONCEPTS", "PEOPLE", "FEELINGS"],
 
   // CRY → feelings
   CRY: ["FEELINGS"],
-  CRYING: ["FEELINGS"],
 
   // LAUGH → feelings, people, leisure
   LAUGH: ["FEELINGS", "PEOPLE", "LEISURE"],
-  LAUGHING: ["FEELINGS", "PEOPLE"],
 
   // DISCUSS → people, concepts, school
   DISCUSS: ["PEOPLE", "CONCEPTS", "SCHOOL"],
-  DISCUSSING: ["PEOPLE", "SCHOOL"],
 
   // CELEBRATE → events, people, food
   CELEBRATE: ["EVENTS", "PEOPLE", "FOOD"],
-  CELEBRATING: ["EVENTS", "PEOPLE"],
 
   // WAIT → places, people, time
   WAIT: ["PLACES", "PEOPLE", "TIME"],
-  WAITING: ["PLACES", "PEOPLE"],
 
   // ═══════════════════════════════════════════════════════════════════════
   // ADDITIONAL COMMON WORDS AND THEIR CONTEXTS
   // ═══════════════════════════════════════════════════════════════════════
 
-  // Food-related descriptors
-  HUNGRY: ["FOOD"],
-  COOK: ["FOOD", "APPLIANCES"],
-  TASTE: ["FOOD", "DRINKS"],
-  BREAKFAST: ["FOOD"],
-  LUNCH: ["FOOD"],
-  DINNER: ["FOOD"],
-  SNACK: ["FOOD"],
-
-  // Drink-related descriptors
-  THIRSTY: ["DRINKS"],
-  SIP: ["DRINKS"],
-
-  // Play-related
-  FUN: ["TOYS", "LEISURE", "SPORTS"],
-  GAME: ["TOYS", "LEISURE"],
-  TOY: ["TOYS"],
-
   // Clothing-related
-  DRESS: ["CLOTHES"],
-  PUT: ["CLOTHES", "OBJECTS"],
   UNDRESS: ["CLOTHES"],
-  SHIRT: ["CLOTHES"],
-  PANTS: ["CLOTHES"],
-
-  // Movement-related - add people (go with someone)
-  DRIVE: ["TRANSPORTS", "PLACES", "PEOPLE"],
-  RIDE: ["TRANSPORTS", "SPORTS", "ANIMALS", "PLACES"],
-  WALK: ["PLACES", "PEOPLE", "ANIMALS"],
-  RUN: ["SPORTS", "PLACES", "PEOPLE"],
-
-  // Communication/people-related
-  CALL: ["PEOPLE"],
-  MEET: ["PEOPLE", "PLACES"],
-  HUG: ["PEOPLE"],
-  KISS: ["PEOPLE"],
-  LOVE: ["PEOPLE", "FEELINGS"],
-  MISS: ["PEOPLE", "FEELINGS"],
-  FRIEND: ["PEOPLE"],
-  FAMILY: ["PEOPLE"],
-
-  // Body/health-related
-  HURTS: ["BODY"],
-  HURT: ["BODY"],
-  PAIN: ["BODY"],
-  SICK: ["BODY", "FEELINGS"],
-  WASH: ["BODY", "HYGIENE"],
-  SHOWER: ["HYGIENE"],
-  BATH: ["HYGIENE"],
-  BRUSH: ["BODY", "HYGIENE"],
-  TOILET: ["HYGIENE"],
-  POTTY: ["HYGIENE"],
-  CLEAN: ["HYGIENE", "HOME"],
-
-  // Rest/sleep-related
-  TIRED: ["FEELINGS"],
-  REST: ["FEELINGS", "HOME"],
-  NAP: ["FEELINGS", "HOME"],
-  BED: ["OBJECTS", "HOME"],
-
-  // Looking/seeing-related - prioritize people and animals
-  LOOK: ["PEOPLE", "ANIMALS", "OBJECTS", "COLORS", "PLACES"],
-  WATCH: ["PEOPLE", "ANIMALS", "LEISURE", "SPORTS", "EVENTS"],
-  WATCHING: ["PEOPLE", "LEISURE", "SPORTS", "ANIMALS"],
-
-  // Listening/sounds-related - prioritize people first
-  HEAR: ["PEOPLE", "ANIMALS", "LEISURE", "OBJECTS"],
-  MUSIC: ["LEISURE", "PEOPLE"],
-  SING: ["LEISURE", "PEOPLE"],
-
-  // Reading/learning-related
-  READ: ["SCHOOL", "LEISURE"],
-  READING: ["SCHOOL"],
-  LEARN: ["SCHOOL"],
-  STUDY: ["SCHOOL"],
-  WRITE: ["SCHOOL", "OBJECTS"],
-  BOOK: ["SCHOOL"],
-
-  // Feelings
-  FEEL: ["FEELINGS", "PEOPLE", "OBJECTS"],
-  FEELING: ["FEELINGS", "PEOPLE"],
-  HAPPY: ["FEELINGS", "PEOPLE", "EVENTS"],
-  SAD: ["FEELINGS", "PEOPLE"],
-  ANGRY: ["FEELINGS", "PEOPLE"],
-  SCARED: ["FEELINGS", "PEOPLE", "ANIMALS"],
-  EXCITED: ["FEELINGS", "EVENTS", "PEOPLE"],
-  BORED: ["FEELINGS", "LEISURE"],
-  WORRIED: ["FEELINGS", "PEOPLE", "EVENTS"],
 
   // Wanting/needing - prioritize people, objects, concepts before food
   WANT: [
@@ -645,36 +532,31 @@ const SEMANTIC_CONTEXT_MAP = {
   // Help
   HELP: ["HELP", "PEOPLE"],
 
-  // Creating
-  DRAW: ["COLORS", "SCHOOL"],
-  PAINT: ["COLORS"],
-  BUILD: ["TOYS", "OBJECTS"],
+  // Reading/learning-related
+  READ: ["SCHOOL", "LEISURE"],
+  WRITE: ["SCHOOL", "OBJECTS"],
+  BOOK: ["SCHOOL"],
+
+  // Feelings
+  HAPPY: ["FEELINGS", "PEOPLE", "EVENTS"],
+  SAD: ["FEELINGS", "PEOPLE"],
+  ANGRY: ["FEELINGS", "PEOPLE"],
+  SICK: ["BODY", "FEELINGS"],
 
   // Shopping
   SHOPPING: ["CLOTHES", "FOOD", "TOYS"],
-  STORE: ["PLACES", "FOOD"],
-
-  // Animals
-  PET: ["ANIMALS"],
-  FEED: ["ANIMALS", "FOOD"],
-  DOG: ["ANIMALS"],
-  CAT: ["ANIMALS"],
-  ANIMAL: ["ANIMALS"],
 
   // Weather/outdoors
   OUTSIDE: ["PLACES", "WEATHER"],
   RAIN: ["WEATHER"],
   SUN: ["WEATHER"],
-  COLD: ["WEATHER", "FEELINGS", "CLOTHES"],
-  HOT: ["WEATHER", "FEELINGS", "DRINKS"],
   WEATHER: ["WEATHER"],
+  WATCH: ["PEOPLE", "ANIMALS", "LEISURE", "SPORTS", "EVENTS"],
 
   // Time-related
   BIRTHDAY: ["EVENTS", "FOOD", "TOYS", "PEOPLE"],
   PARTY: ["EVENTS", "FOOD", "PEOPLE"],
   CHRISTMAS: ["EVENTS", "TOYS", "FOOD"],
-  HOLIDAY: ["EVENTS", "PLACES"],
-  EVENT: ["EVENTS"],
   TIME: ["TIME"],
   TODAY: ["TIME"],
   TOMORROW: ["TIME"],
@@ -682,34 +564,16 @@ const SEMANTIC_CONTEXT_MAP = {
 
   // Home locations
   HOME: ["HOME"],
-  HOUSE: ["HOME"],
-  ROOM: ["HOME"],
+  BED: ["OBJECTS", "HOME"],
   KITCHEN: ["HOME", "APPLIANCES", "FOOD"],
   BEDROOM: ["HOME"],
   BATHROOM: ["HOME", "HYGIENE"],
 
   // School
   SCHOOL: ["SCHOOL"],
-  CLASS: ["SCHOOL"],
   TEACHER: ["SCHOOL", "PEOPLE"],
 
-  // Colors
-  COLOR: ["COLORS"],
-  RED: ["COLORS"],
-  BLUE: ["COLORS"],
-  GREEN: ["COLORS"],
-  YELLOW: ["COLORS"],
-
-  // Numbers
-  NUMBER: ["NUMBERS"],
-  COUNT: ["NUMBERS"],
-
   // Sports
-  SPORT: ["SPORTS"],
-  SWIM: ["SPORTS"],
-  KICK: ["SPORTS"],
-  THROW: ["SPORTS"],
-  CATCH: ["SPORTS"],
   BALL: ["SPORTS", "TOYS"],
 };
 

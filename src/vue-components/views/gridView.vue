@@ -191,10 +191,18 @@ let vueConfig = {
         });
       }
     },
-    studentLogout() {
-      authService.logout();
-      window.location.hash = '';
-      window.location.reload();
+    async studentLogout() {
+      const confirmed = await MainVue.showConfirmBox(
+        'Are you sure you want to log-out?',
+        {
+          buttonPreset: constants.BUTTONS_YES_NO
+        }
+      );
+      if (confirmed) {
+        authService.logout();
+        window.location.hash = '';
+        window.location.reload();
+      }
     },
     openModal(modalType) {
       this.showModal = modalType;
