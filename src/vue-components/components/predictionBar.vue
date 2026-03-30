@@ -1,37 +1,51 @@
 <template>
-  <div class="prediction-bar">
-    <template v-if="suggestions.length > 0">
-      <div
-        v-for="(tile, index) in suggestions"
-        :key="index"
-        class="prediction-tile"
-        :class="{ 'expansion-tile': tile.isExpansion }"
-        :style="{ backgroundColor: '#ffffff' }"
-        @click="selectTile(tile)"
-        :aria-label="
-          (tile.isExpansion
-            ? 'New vocabulary suggestion: '
-            : 'Predicted tile: ') + tile.label
-        "
-        role="button"
-        tabindex="0"
+  <div
+    class="prediction-bar-wrapper"
+    role="region"
+    aria-label="Word suggestions"
+  >
+    <div class="prediction-bar-header">
+      <span class="prediction-bar-title" aria-label="Suggestions">
+        <span class="prediction-bar-icon" aria-hidden="true">💡</span>
+        Suggestions
+      </span>
+      <span class="prediction-bar-hint"
+        >Tap a word to add it to your sentence</span
       >
+    </div>
+    <div class="prediction-bar">
+      <template v-if="suggestions.length > 0">
         <div
-          class="expansion-indicator"
-          v-if="tile.isExpansion"
-          title="New vocabulary"
+          v-for="(tile, index) in suggestions"
+          :key="index"
+          class="prediction-tile"
+          :class="{ 'expansion-tile': tile.isExpansion }"
+          @click="selectTile(tile)"
+          :aria-label="
+            (tile.isExpansion
+              ? 'New vocabulary suggestion: '
+              : 'Predicted word: ') + tile.label
+          "
+          role="button"
+          tabindex="0"
         >
-          &#10024;
+          <div
+            class="expansion-indicator"
+            v-if="tile.isExpansion"
+            title="New vocabulary"
+          >
+            ✨
+          </div>
+          <div class="tile-img-container" v-if="tile.imageUrl">
+            <img :src="tile.imageUrl" :alt="tile.label" class="tile-img" />
+          </div>
+          <div class="tile-label">{{ tile.label }}</div>
         </div>
-        <div class="tile-img-container" v-if="tile.imageUrl">
-          <img :src="tile.imageUrl" :alt="tile.label" class="tile-img" />
-        </div>
-        <div class="tile-label">{{ tile.label }}</div>
-      </div>
-    </template>
-    <span v-else class="prediction-placeholder"
-      >Tap tiles to see suggestions</span
-    >
+      </template>
+      <span v-else class="prediction-placeholder"
+        >Tap tiles to see suggestions</span
+      >
+    </div>
   </div>
 </template>
 
@@ -81,10 +95,8 @@ export default {
     $(document).on(constants.EVENT_COLLECT_TEXT_CHANGED + ".predbar", () => {
       this.$nextTick(() => this.updateSuggestions());
     });
-    // Refresh suggestions when navigating between grids
-    $(document).on(constants.EVENT_GRID_LOADED + ".predbar", () => {
-      this.$nextTick(() => this.updateSuggestions());
-    });
+    // Note: Removed EVENT_GRID_LOADED handler - suggestions should only change
+    // when tiles are added/removed from the sentence, not when navigating folders
     // Build tile cache + bootstrap, then show initial suggestions
     predictionService.buildTileLabels().then(() => {
       this.updateSuggestions();
@@ -98,15 +110,57 @@ export default {
 </script>
 
 <style scoped>
+/* ── Outer wrapper ────────────────────────────────────────────────── */
+.prediction-bar-wrapper {
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #f5f5f5, #e8e8e8);
+  border-bottom: 2px solid #c0c0c0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Header label strip ───────────────────────────────────────────── */
+.prediction-bar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px 4px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.prediction-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #4a5568;
+}
+
+.prediction-bar-icon {
+  font-size: 1.1em;
+}
+
+.prediction-bar-hint {
+  font-size: 0.72em;
+  color: #718096;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Tiles row ────────────────────────────────────────────────────── */
 .prediction-bar {
   display: flex;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #e8ecf0;
-  border-bottom: 2px solid #bbb;
+  gap: 8px;
+  padding: 8px 10px 10px;
+  background: transparent;
   flex-shrink: 0;
-  min-height: 150px;
-  max-height: 150px;
+  min-height: 140px;
+  max-height: 140px;
   align-items: stretch;
   overflow-x: auto;
   overflow-y: hidden;
@@ -121,20 +175,27 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3px 4px;
-  border: 2px solid #888;
-  border-radius: 8px;
+  padding: 6px 8px;
+  background: #ffffff;
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .prediction-tile:hover,
 .prediction-tile:active {
-  transform: scale(1.05);
-  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
-  border-color: #333;
+  transform: scale(1.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+  background: #f0f7ff;
+}
+
+.prediction-tile:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 .tile-img-container {
@@ -148,27 +209,27 @@ export default {
 }
 
 .tile-img {
-  max-height: 100px;
+  max-height: 90px;
   max-width: 100%;
   object-fit: contain;
 }
 
 .tile-label {
   flex: 0 0 auto;
-  font-size: 0.7em;
-  font-weight: 700;
+  font-size: 0.75em;
+  font-weight: 600;
   text-align: center;
-  line-height: 1.1;
-  color: #222;
+  line-height: 1.2;
+  color: #1e3a5f;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
-  padding-top: 1px;
+  padding-top: 4px;
 }
 
 .prediction-placeholder {
-  color: #999;
+  color: #9ca3af;
   font-style: italic;
   font-size: 0.95em;
   padding: 6px 0;
@@ -176,17 +237,22 @@ export default {
 }
 
 .expansion-tile {
-  border-color: #4a90d9;
+  border-color: #f59e0b;
   border-style: dashed;
-  background-color: #f0f7ff !important;
+  background-color: #fffbeb !important;
+}
+
+.expansion-tile:hover,
+.expansion-tile:active {
+  background-color: #fef3c7 !important;
+  border-color: #d97706;
 }
 
 .expansion-indicator {
   position: absolute;
-  top: 2px;
-  right: 4px;
-  font-size: 0.65em;
-  color: #4a90d9;
+  top: 3px;
+  right: 5px;
+  font-size: 0.7em;
   pointer-events: none;
 }
 </style>

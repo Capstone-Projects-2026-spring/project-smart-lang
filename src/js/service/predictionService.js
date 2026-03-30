@@ -268,10 +268,36 @@ predictionService.getSuggestions = function (input, count) {
     combined[w] = (combined[w] || 0) + userCandidates[w];
   }
 
-  // If nothing from n-grams, fall back to unigrams
+  // ── 3b. Apply semantic context boosting and fallback ──
+  // Determine semantic context from input words
+  let semanticCategories = _getSemanticContext(words);
+  let categoryChildLabels =
+    semanticCategories.size > 0
+      ? _getCategoryChildLabels(semanticCategories)
+      : new Set();
+
+  // If no n-gram candidates but we have semantic context, seed from category children
+  if (Object.keys(combined).length === 0 && categoryChildLabels.size > 0) {
+    for (let label of categoryChildLabels) {
+      if (_tileMap.has(label)) {
+        combined[label] = 1; // Base score
+      }
+    }
+  }
+
+  // If still nothing from n-grams or semantic, fall back to unigrams
   if (Object.keys(combined).length === 0) {
     for (let w in _unigrams) {
       combined[w] = _unigrams[w];
+    }
+  }
+
+  // Boost items that match the semantic context
+  if (categoryChildLabels.size > 0) {
+    for (let w in combined) {
+      if (categoryChildLabels.has(w)) {
+        combined[w] *= 3.0;
+      }
     }
   }
 
@@ -310,10 +336,24 @@ predictionService.getSuggestions = function (input, count) {
   }
 
   // ── 5. Build expansion suggestions ──
+  // Use semantic context candidates if no bootstrap candidates available
+  let expansionCandidates = bootstrapCandidates;
+  if (
+    Object.keys(expansionCandidates).length === 0 &&
+    categoryChildLabels.size > 0
+  ) {
+    expansionCandidates = {};
+    for (let label of categoryChildLabels) {
+      if (_tileMap.has(label) && !seen.has(label)) {
+        expansionCandidates[label] = 1;
+      }
+    }
+  }
+
   let expansionResults = [];
-  if (EXPANSION_ENABLED && Object.keys(bootstrapCandidates).length > 0) {
+  if (EXPANSION_ENABLED && Object.keys(expansionCandidates).length > 0) {
     expansionResults = _getExpansionSuggestions(
-      bootstrapCandidates,
+      expansionCandidates,
       userCandidates,
       seen,
       inputWords,
@@ -345,11 +385,206 @@ predictionService.getSuggestions = function (input, count) {
 // ── Vocabulary expansion helpers ─────────────────────────────────────
 
 /**
+ * Semantic context mapping: maps trigger words to relevant category names.
+ * When these words appear in the input, expansion suggestions should
+ * strongly prefer items from the mapped categories.
+ *
+ * IMPORTANT: Category names must match the actual navigation tile labels
+ * in the grid (e.g., "FOOD", "DRINKS", "TOYS", "CLOTHES", "LEISURE", etc.)
+ *
+ * This makes "random" suggestions sensible — e.g., "I WANT EAT" suggests food.
+ *
+ * Verbs from VERBS category: BE, EAT, DRINK, GO, LISTEN, SEE, SMELL, MAKE,
+ * TALK TO, HAVE, GIVE, WEAR, SLEEP, PLAY, BUY, VISIT, TRAVEL, COME, RETURN,
+ * THINK, CRY, LAUGH, DISCUSS, CELEBRATE, WAIT
+ */
+const SEMANTIC_CONTEXT_MAP = {
+  // ═══════════════════════════════════════════════════════════════════════
+  // VERBS FROM THE VERBS CATEGORY - comprehensive mappings
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // BE → feelings, descriptions, places, people, concepts (I am happy, I am at home, I want to be a teacher)
+  BE: ["FEELINGS", "PLACES", "DESCRIPTION", "CONCEPTS"],
+
+  // EAT → food
+  EAT: ["FOOD"],
+
+  // DRINK → drinks
+  DRINK: ["DRINKS"],
+
+  // GO → places, transports, home, people (go to places, go home, go to someone)
+  GO: ["PLACES", "TRANSPORTS"],
+
+  // LISTEN → people, leisure (music), animals (sounds), objects (devices)
+  LISTEN: ["PEOPLE", "ANIMALS"],
+
+  // SEE → people, animals, objects, colors, transports, plants, places
+  SEE: [
+    "PEOPLE",
+    "ANIMALS",
+    "OBJECTS",
+    "COLORS",
+    "TRANSPORTS",
+    "PLANTS",
+    "PLACES",
+    "EVENTS",
+  ],
+
+  // SMELL → food, drinks, plants, animals
+  SMELL: ["FOOD", "DRINKS", "PLANTS", "ANIMALS"],
+
+  // MAKE → objects, food, crafts, concepts (make things, make food, make friends)
+  MAKE: ["OBJECTS", "FOOD", "TOYS", "COLORS", "PEOPLE", "CONCEPTS"],
+
+  // TALK TO → people
+  "TALK TO": ["PEOPLE"],
+  TALK: ["PEOPLE"],
+
+  // HAVE → objects, toys, animals, people, food, drinks (possessions and relationships)
+  HAVE: [
+    "OBJECTS",
+    "TOYS",
+    "ANIMALS",
+    "PEOPLE",
+    "FOOD",
+    "DRINKS",
+    "CLOTHES",
+    "FEELINGS",
+  ],
+
+  // GIVE → objects, food, drinks, toys, people (give to someone, give objects)
+  GIVE: ["PEOPLE", "OBJECTS", "FOOD", "DRINKS", "TOYS", "CLOTHES"],
+
+  // WEAR → clothes
+  WEAR: ["CLOTHES"],
+
+  // SLEEP → feelings (tired), home, objects (bed)
+  SLEEP: ["FEELINGS", "HOME", "OBJECTS"],
+
+  // PLAY → toys, leisure, sports, people (play with)
+  PLAY: ["TOYS", "LEISURE", "SPORTS", "PEOPLE"],
+
+  // BUY → objects, food, drinks, toys, clothes (things you can buy)
+  BUY: ["OBJECTS", "FOOD", "DRINKS", "TOYS", "CLOTHES"],
+
+  // VISIT → places, people
+  VISIT: ["PLACES", "PEOPLE", "HOME", "SCHOOL"],
+
+  // TRAVEL → places, transports
+  TRAVEL: ["PLACES", "TRANSPORTS"],
+
+  // COME → places, home, people (come to)
+  COME: ["PLACES", "HOME", "PEOPLE", "EVENTS"],
+
+  // RETURN → places, home, school
+  RETURN: ["PLACES", "HOME", "SCHOOL"],
+
+  // THINK → concepts, people, feelings, events (think about ideas, people, how you feel)
+  THINK: ["CONCEPTS", "PEOPLE", "FEELINGS", "EVENTS", "OBJECTS"],
+
+  // CRY → feelings
+  CRY: ["FEELINGS"],
+
+  // LAUGH → feelings, people, leisure
+  LAUGH: ["FEELINGS", "PEOPLE", "LEISURE"],
+
+  // DISCUSS → people, concepts, school
+  DISCUSS: ["PEOPLE", "CONCEPTS", "SCHOOL"],
+
+  // CELEBRATE → events, people, food
+  CELEBRATE: ["EVENTS", "PEOPLE", "FOOD"],
+
+  // WAIT → places, people, time
+  WAIT: ["PLACES", "PEOPLE", "TIME"],
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ADDITIONAL COMMON WORDS AND THEIR CONTEXTS
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Clothing-related
+  UNDRESS: ["CLOTHES"],
+
+  // Wanting/needing - prioritize people, objects, concepts before food
+  WANT: [
+    "PEOPLE",
+    "OBJECTS",
+    "TOYS",
+    "CONCEPTS",
+    "PLACES",
+    "FOOD",
+    "DRINKS",
+    "LEISURE",
+    "CLOTHES",
+    "ANIMALS",
+  ],
+  NEED: ["PEOPLE", "OBJECTS", "HELP", "CONCEPTS", "FOOD", "DRINKS", "CLOTHES"],
+  LIKE: [
+    "PEOPLE",
+    "ANIMALS",
+    "FOOD",
+    "DRINKS",
+    "TOYS",
+    "LEISURE",
+    "SPORTS",
+    "OBJECTS",
+  ],
+
+  // Help
+  HELP: ["HELP", "PEOPLE"],
+
+  // Reading/learning-related
+  READ: ["SCHOOL", "LEISURE"],
+  WRITE: ["SCHOOL", "OBJECTS"],
+  BOOK: ["SCHOOL"],
+
+  // Feelings
+  HAPPY: ["FEELINGS", "PEOPLE", "EVENTS"],
+  SAD: ["FEELINGS", "PEOPLE"],
+  ANGRY: ["FEELINGS", "PEOPLE"],
+  SICK: ["BODY", "FEELINGS"],
+
+  // Shopping
+  SHOPPING: ["CLOTHES", "FOOD", "TOYS"],
+
+  // Weather/outdoors
+  OUTSIDE: ["PLACES", "WEATHER"],
+  RAIN: ["WEATHER"],
+  SUN: ["WEATHER"],
+  WEATHER: ["WEATHER"],
+  WATCH: ["PEOPLE", "ANIMALS", "LEISURE", "SPORTS", "EVENTS"],
+
+  // Time-related
+  BIRTHDAY: ["EVENTS", "FOOD", "TOYS", "PEOPLE"],
+  PARTY: ["EVENTS", "FOOD", "PEOPLE"],
+  CHRISTMAS: ["EVENTS", "TOYS", "FOOD"],
+  TIME: ["TIME"],
+  TODAY: ["TIME"],
+  TOMORROW: ["TIME"],
+  YESTERDAY: ["TIME"],
+
+  // Home locations
+  HOME: ["HOME"],
+  BED: ["OBJECTS", "HOME"],
+  KITCHEN: ["HOME", "APPLIANCES", "FOOD"],
+  BEDROOM: ["HOME"],
+  BATHROOM: ["HOME", "HYGIENE"],
+
+  // School
+  SCHOOL: ["SCHOOL"],
+  TEACHER: ["SCHOOL", "PEOPLE"],
+
+  // Sports
+  BALL: ["SPORTS", "TOYS"],
+};
+
+/**
  * Find vocabulary expansion candidates: words that are contextually valid
  * (present in bootstrap model) but rarely or never used by this user.
  *
  * Uses weighted random sampling so expansion suggestions rotate on each
  * refresh, exposing the user to a variety of vocabulary over time.
+ *
+ * Now includes semantic context awareness — e.g., "EAT" triggers food suggestions.
  */
 function _getExpansionSuggestions(
   bootstrapCandidates,
@@ -363,7 +598,7 @@ function _getExpansionSuggestions(
   // it is no longer "expansion" material — they have already learned it.
   const USER_FREQUENCY_THRESHOLD = 2;
 
-  // Semantic affinity: what word categories make sense after a given category
+  // Grammatical affinity: what word categories make sense after a given category
   const CATEGORY_AFFINITY = {
     CC_VERB: ["CC_NOUN", "CC_PRONOUN_PERSON_NAME", "CC_PLACE"],
     CC_PRONOUN_PERSON_NAME: [
@@ -374,6 +609,9 @@ function _getExpansionSuggestions(
     CC_NOUN: ["CC_VERB", "CC_DESCRIPTOR", "CC_ADJECTIVE"],
     CC_DESCRIPTOR: ["CC_NOUN", "CC_PRONOUN_PERSON_NAME"],
   };
+
+  // Determine semantic context from all words in the input
+  let semanticCategories = _getSemanticContext(words);
 
   let eligible = [];
 
@@ -394,8 +632,20 @@ function _getExpansionSuggestions(
 
   if (eligible.length === 0) return [];
 
-  // Boost candidates whose colorCategory has semantic affinity
-  // with the last word in the input
+  // Apply semantic context boosting (strongest effect)
+  if (semanticCategories.size > 0) {
+    let categoryChildLabels = _getCategoryChildLabels(semanticCategories);
+
+    for (let item of eligible) {
+      if (categoryChildLabels.has(item.word)) {
+        // Strong boost for items that match the semantic context
+        item.bootstrapScore *= 5.0;
+      }
+    }
+  }
+
+  // Boost candidates whose colorCategory has grammatical affinity
+  // with the last word in the input (secondary effect)
   let lastWordTile = _tileMap.get(words[words.length - 1]);
   let lastWordCategory = lastWordTile ? lastWordTile.colorCategory : null;
 
@@ -422,29 +672,66 @@ function _getExpansionSuggestions(
 }
 
 /**
- * Weighted random sample without replacement.
- * Each item's weight is item.bootstrapScore.
+ * Analyze all words in the input to determine semantic context.
+ * Returns a Set of category names that are relevant to the input.
  */
-function _weightedRandomSample(items, count) {
-  let result = [];
-  let remaining = [...items];
+function _getSemanticContext(words) {
+  let categories = new Set();
 
-  for (let i = 0; i < count && remaining.length > 0; i++) {
-    let totalWeight = remaining.reduce((sum, it) => sum + it.bootstrapScore, 0);
-    let r = Math.random() * totalWeight;
-    let cumulative = 0;
-
-    for (let j = 0; j < remaining.length; j++) {
-      cumulative += remaining[j].bootstrapScore;
-      if (r <= cumulative) {
-        result.push(remaining[j]);
-        remaining.splice(j, 1);
-        break;
+  for (let word of words) {
+    let upperWord = word.toUpperCase();
+    if (SEMANTIC_CONTEXT_MAP[upperWord]) {
+      for (let cat of SEMANTIC_CONTEXT_MAP[upperWord]) {
+        categories.add(cat);
       }
     }
   }
 
-  return result;
+  return categories;
+}
+
+/**
+ * Get all tile labels that belong to the given category names.
+ * Uses the _categoryChildren map built during bootstrap.
+ */
+function _getCategoryChildLabels(categoryNames) {
+  let labels = new Set();
+
+  for (let catName of categoryNames) {
+    let children = _categoryChildren.get(catName);
+    if (children) {
+      for (let child of children) {
+        labels.add(child);
+      }
+    }
+    // Also try uppercase version
+    let upperCat = catName.toUpperCase();
+    children = _categoryChildren.get(upperCat);
+    if (children) {
+      for (let child of children) {
+        labels.add(child);
+      }
+    }
+  }
+
+  return labels;
+}
+
+/**
+ * Deterministic top-N selection based on scores.
+ * Items are sorted by bootstrapScore (descending) and top N are returned.
+ * This ensures suggestions are stable and don't change on every refresh.
+ */
+function _weightedRandomSample(items, count) {
+  // Sort by score descending, then alphabetically for stability
+  let sorted = [...items].sort((a, b) => {
+    if (b.bootstrapScore !== a.bootstrapScore) {
+      return b.bootstrapScore - a.bootstrapScore;
+    }
+    return a.word.localeCompare(b.word);
+  });
+
+  return sorted.slice(0, count);
 }
 
 // ── Learn ────────────────────────────────────────────────────────────
@@ -620,9 +907,177 @@ function _bootstrap(grids) {
       starters: [["IT", "HURTS"]],
       cats: ["BODY"],
     },
-    // EAT/DRINK → specific items
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ALL VERBS FROM VERBS CATEGORY with their relevant category mappings
+    // Verbs: BE, EAT, DRINK, GO, LISTEN, SEE, SMELL, MAKE, TALK TO, HAVE,
+    //        GIVE, WEAR, SLEEP, PLAY, BUY, VISIT, TRAVEL, COME, RETURN,
+    //        THINK, CRY, LAUGH, DISCUSS, CELEBRATE, WAIT
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // EAT → food
     { starters: [["EAT"]], cats: ["FOOD"] },
+    { starters: [["I", "EAT"]], cats: ["FOOD"] },
+    { starters: [["I", "WANT", "EAT"]], cats: ["FOOD"] },
+
+    // DRINK → drinks
     { starters: [["DRINK"]], cats: ["DRINKS"] },
+    { starters: [["I", "DRINK"]], cats: ["DRINKS"] },
+    { starters: [["I", "WANT", "DRINK"]], cats: ["DRINKS"] },
+
+    // GO → places, transports
+    { starters: [["GO"]], cats: ["PLACES", "TRANSPORTS", "HOME", "SCHOOL"] },
+    { starters: [["GO", "TO"]], cats: ["PLACES", "HOME", "SCHOOL"] },
+    { starters: [["I", "GO"]], cats: ["PLACES", "TRANSPORTS"] },
+    {
+      starters: [["I", "WANT", "GO"]],
+      cats: ["PLACES", "TRANSPORTS", "EVENTS"],
+    },
+
+    // LISTEN → leisure
+    { starters: [["LISTEN"]], cats: ["PEOPLE"] },
+    { starters: [["LISTEN", "TO"]], cats: ["PEOPLE", "PEOPLE"] },
+    { starters: [["I", "LISTEN"]], cats: ["PEOPLE"] },
+    { starters: [["I", "WANT", "LISTEN"]], cats: ["PEOPLE"] },
+
+    // SEE → animals, colors, transports, plants, people
+    {
+      starters: [["SEE"]],
+      cats: ["ANIMALS", "COLORS", "TRANSPORTS", "PLANTS", "PEOPLE"],
+    },
+    {
+      starters: [["I", "SEE"]],
+      cats: ["ANIMALS", "COLORS", "TRANSPORTS", "PLANTS"],
+    },
+    { starters: [["I", "WANT", "SEE"]], cats: ["ANIMALS", "PEOPLE", "PLACES"] },
+
+    // SMELL → food, plants
+    { starters: [["SMELL"]], cats: ["FOOD", "PLANTS", "ANIMALS"] },
+    { starters: [["I", "SMELL"]], cats: ["FOOD", "PLANTS"] },
+    { starters: [["I", "WANT", "SMELL"]], cats: ["FOOD", "PLANTS"] },
+
+    // MAKE → objects, food
+    { starters: [["MAKE"]], cats: ["FOOD", "OBJECTS", "TOYS"] },
+    { starters: [["I", "MAKE"]], cats: ["FOOD", "OBJECTS"] },
+    { starters: [["I", "WANT", "MAKE"]], cats: ["FOOD", "OBJECTS", "TOYS"] },
+
+    // TALK TO → people
+    { starters: [["TALK", "TO"]], cats: ["PEOPLE"] },
+    { starters: [["TALK"]], cats: ["PEOPLE"] },
+    { starters: [["I", "TALK"]], cats: ["PEOPLE"] },
+    { starters: [["I", "WANT", "TALK"]], cats: ["PEOPLE"] },
+
+    // HAVE → objects, food, drinks, animals
+    {
+      starters: [["HAVE"]],
+      cats: ["OBJECTS", "FOOD", "DRINKS", "TOYS", "ANIMALS"],
+    },
+    { starters: [["I", "HAVE"]], cats: ["OBJECTS", "FOOD", "TOYS", "ANIMALS"] },
+    { starters: [["I", "WANT", "HAVE"]], cats: ["OBJECTS", "FOOD", "TOYS"] },
+
+    // GIVE → objects, food, drinks, toys
+    {
+      starters: [["GIVE"]],
+      cats: ["OBJECTS", "FOOD", "DRINKS", "TOYS", "CLOTHES"],
+    },
+    {
+      starters: [["GIVE", "ME"]],
+      cats: ["FOOD", "DRINKS", "TOYS", "CLOTHES", "OBJECTS"],
+    },
+    { starters: [["I", "GIVE"]], cats: ["OBJECTS", "FOOD", "TOYS"] },
+    { starters: [["I", "WANT", "GIVE"]], cats: ["OBJECTS", "FOOD", "TOYS"] },
+
+    // WEAR → clothes
+    { starters: [["WEAR"]], cats: ["CLOTHES"] },
+    { starters: [["I", "WEAR"]], cats: ["CLOTHES"] },
+    { starters: [["I", "WANT", "WEAR"]], cats: ["CLOTHES"] },
+
+    // SLEEP → feelings, home
+    { starters: [["SLEEP"]], cats: ["FEELINGS", "HOME"] },
+    { starters: [["I", "SLEEP"]], cats: ["FEELINGS", "HOME"] },
+    { starters: [["I", "WANT", "SLEEP"]], cats: ["FEELINGS", "HOME"] },
+
+    // PLAY → toys, leisure, sports
+    { starters: [["PLAY"]], cats: ["TOYS", "LEISURE", "SPORTS"] },
+    { starters: [["PLAY", "WITH"]], cats: ["TOYS", "PEOPLE", "ANIMALS"] },
+    { starters: [["I", "PLAY"]], cats: ["TOYS", "LEISURE", "SPORTS"] },
+    { starters: [["I", "WANT", "PLAY"]], cats: ["TOYS", "LEISURE", "SPORTS"] },
+
+    // BUY → objects, food, toys, clothes
+    { starters: [["BUY"]], cats: ["OBJECTS", "FOOD", "TOYS", "CLOTHES"] },
+    { starters: [["I", "BUY"]], cats: ["OBJECTS", "FOOD", "TOYS", "CLOTHES"] },
+    {
+      starters: [["I", "WANT", "BUY"]],
+      cats: ["OBJECTS", "FOOD", "TOYS", "CLOTHES"],
+    },
+
+    // VISIT → places, people
+    { starters: [["VISIT"]], cats: ["PLACES", "PEOPLE"] },
+    { starters: [["I", "VISIT"]], cats: ["PLACES", "PEOPLE"] },
+    { starters: [["I", "WANT", "VISIT"]], cats: ["PLACES", "PEOPLE"] },
+
+    // TRAVEL → places, transports
+    { starters: [["TRAVEL"]], cats: ["PLACES", "TRANSPORTS"] },
+    { starters: [["I", "TRAVEL"]], cats: ["PLACES", "TRANSPORTS"] },
+    { starters: [["I", "WANT", "TRAVEL"]], cats: ["PLACES", "TRANSPORTS"] },
+
+    // COME → places, home
+    { starters: [["COME"]], cats: ["PLACES", "HOME", "EVENTS"] },
+    { starters: [["I", "COME"]], cats: ["PLACES", "HOME"] },
+    { starters: [["I", "WANT", "COME"]], cats: ["PLACES", "HOME", "EVENTS"] },
+
+    // RETURN → places, home, school
+    { starters: [["RETURN"]], cats: ["PLACES", "HOME", "SCHOOL"] },
+    { starters: [["I", "RETURN"]], cats: ["PLACES", "HOME", "SCHOOL"] },
+    { starters: [["I", "WANT", "RETURN"]], cats: ["PLACES", "HOME", "SCHOOL"] },
+
+    // THINK → feelings, people, concepts
+    { starters: [["THINK"]], cats: ["FEELINGS", "PEOPLE", "CONCEPTS"] },
+    { starters: [["I", "THINK"]], cats: ["FEELINGS", "PEOPLE"] },
+    { starters: [["I", "WANT", "THINK"]], cats: ["FEELINGS", "PEOPLE"] },
+
+    // CRY → feelings
+    { starters: [["CRY"]], cats: ["FEELINGS"] },
+    { starters: [["I", "CRY"]], cats: ["FEELINGS"] },
+    { starters: [["I", "WANT", "CRY"]], cats: ["FEELINGS"] },
+
+    // LAUGH → feelings, people
+    { starters: [["LAUGH"]], cats: ["FEELINGS", "PEOPLE", "LEISURE"] },
+    { starters: [["I", "LAUGH"]], cats: ["FEELINGS", "LEISURE"] },
+    { starters: [["I", "WANT", "LAUGH"]], cats: ["FEELINGS", "LEISURE"] },
+
+    // DISCUSS → people, school
+    { starters: [["DISCUSS"]], cats: ["PEOPLE", "SCHOOL"] },
+    { starters: [["I", "DISCUSS"]], cats: ["PEOPLE", "SCHOOL"] },
+    { starters: [["I", "WANT", "DISCUSS"]], cats: ["PEOPLE", "SCHOOL"] },
+
+    // CELEBRATE → events, people
+    { starters: [["CELEBRATE"]], cats: ["EVENTS", "PEOPLE", "FOOD"] },
+    { starters: [["I", "CELEBRATE"]], cats: ["EVENTS", "PEOPLE"] },
+    {
+      starters: [["I", "WANT", "CELEBRATE"]],
+      cats: ["EVENTS", "PEOPLE", "FOOD"],
+    },
+
+    // WAIT → places, people, time
+    { starters: [["WAIT"]], cats: ["PLACES", "PEOPLE", "TIME"] },
+    { starters: [["I", "WAIT"]], cats: ["PLACES", "PEOPLE"] },
+    { starters: [["I", "WANT", "WAIT"]], cats: ["PLACES", "PEOPLE"] },
+
+    // BE/AM/IS → feelings (I am happy, I am tired)
+    { starters: [["I", "AM"]], cats: ["FEELINGS", "PLACES"] },
+    { starters: [["BE"]], cats: ["FEELINGS", "PLACES"] },
+
+    // Additional useful patterns
+    { starters: [["WATCH"]], cats: ["LEISURE", "SPORTS", "ANIMALS"] },
+    { starters: [["I", "WATCH"]], cats: ["LEISURE", "SPORTS"] },
+    { starters: [["I", "WANT", "WATCH"]], cats: ["LEISURE", "SPORTS"] },
+    { starters: [["READ"]], cats: ["SCHOOL", "LEISURE"] },
+    { starters: [["I", "READ"]], cats: ["SCHOOL"] },
+    { starters: [["I", "WANT", "READ"]], cats: ["SCHOOL"] },
+    { starters: [["WASH"]], cats: ["BODY", "HYGIENE"] },
+    { starters: [["CLEAN"]], cats: ["HYGIENE", "HOME"] },
+    { starters: [["DRAW"]], cats: ["COLORS", "SCHOOL"] },
   ];
 
   for (let tmpl of templates) {

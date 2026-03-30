@@ -7,7 +7,8 @@ stats.json
 yarn-error.log
 backup/
 .idea/
-
 .env
 coverage
 package-lock.json
+.unlighthouse
+.husky

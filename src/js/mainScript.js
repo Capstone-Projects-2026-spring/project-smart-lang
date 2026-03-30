@@ -8,6 +8,7 @@ import "./../css/gridlist.css";
 import "./../css/jquery.contextMenu.css";
 import "./../css/holy-grail.css";
 import { loginService } from "./service/loginService";
+import { authService } from "./service/authService";
 import { constants } from "./util/constants";
 import { keyboardShortcuts } from "./service/keyboardShortcuts";
 import { notificationService } from "./service/notificationService.js";
@@ -26,6 +27,14 @@ async function init() {
   keyboardShortcuts.init();
   notificationService.init();
   await MainVue.init();
+
+  // If user is not authenticated, redirect to login page
+  if (!authService.isLoggedIn()) {
+    if (!Router.isInitialized()) {
+      Router.init("#injectView", "#login");
+    }
+    return;
+  }
 
   let autologinUser = localStorageService.getAutologinUser();
 

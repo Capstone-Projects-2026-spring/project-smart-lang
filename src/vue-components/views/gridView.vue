@@ -17,6 +17,25 @@
         <i class="fas fa-expand" />
         <span class="hide-mobile">{{ $t("fullscreen") }}</span>
       </button>
+      <div v-if="studentId" class="student-header-group">
+        <span
+          class="student-id-badge"
+          @click="copyStudentId"
+          :title="studentIdCopyTooltip"
+          :aria-label="'Copy Student ID: ' + studentId"
+        >
+          ID: {{ studentId }}
+          <i :class="studentIdCopied ? 'fas fa-check' : 'fas fa-copy'" class="copy-icon"></i>
+        </span>
+        <button
+          class="student-logout-btn"
+          @click="studentLogout"
+          :aria-label="$t('logout')"
+          :title="$t('logout')"
+        >
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
     </header>
     <div class="srow content text-content" v-show="!renderGridData">
       <div class="grid-container grid-mask">
@@ -109,6 +128,7 @@ import { collectElementService } from "../../js/service/collectElementService";
 import { predictionService } from "../../js/service/predictionService";
 import { liveElementService } from "../../js/service/liveElementService";
 import { GridElement } from "../../js/model/GridElement";
+import { authService } from "../../js/service/authService";
 
 let vueApp = null;
 let UNLOCK_COUNT = 8;
@@ -141,6 +161,8 @@ let vueConfig = {
       highlightedElementId: null,
       systemActionService: systemActionService,
       gridUtil: gridUtil,
+      studentId: authService.isStudent() ? authService.getStudentId() : null,
+      studentIdCopied: false,
     };
   },
   components: {
@@ -151,7 +173,37 @@ let vueConfig = {
     MouseModal,
     HeaderIcon,
   },
+  computed: {
+    studentIdCopyTooltip() {
+      return this.studentIdCopied ? 'Copied!' : 'Copy Student ID';
+    },
+  },
   methods: {
+    copyStudentId() {
+      if (this.studentId) {
+        navigator.clipboard.writeText(this.studentId).then(() => {
+          this.studentIdCopied = true;
+          setTimeout(() => {
+            this.studentIdCopied = false;
+          }, 1500);
+        }).catch(err => {
+          console.error('Failed to copy student ID:', err);
+        });
+      }
+    },
+    async studentLogout() {
+      const confirmed = await MainVue.showConfirmBox(
+        'Are you sure you want to log-out?',
+        {
+          buttonPreset: constants.BUTTONS_YES_NO
+        }
+      );
+      if (confirmed) {
+        authService.logout();
+        window.location.hash = '';
+        window.location.reload();
+      }
+    },
     openModal(modalType) {
       this.showModal = modalType;
       stopInputMethods();
@@ -667,4 +719,69 @@ function initContextmenu() {
 export default vueConfig;
 </script>
 
-<style scoped></style>
+<style scoped>
+.student-header-group {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 0.5em;
+  gap: 0.4em;
+}
+
+.student-id-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.72em;
+  color: #666;
+  font-family: monospace;
+  letter-spacing: 0.05em;
+  padding: 0.35em 0.6em;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.student-id-badge:hover {
+  background: #e8f4fd;
+  border-color: #3498db;
+  color: #3498db;
+}
+
+.student-id-badge .copy-icon {
+  font-size: 0.9em;
+  opacity: 0.6;
+}
+
+.student-id-badge:hover .copy-icon {
+  opacity: 1;
+}
+
+.student-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3em 0.5em;
+  font-size: 0.85em;
+  color: #e74c3c;
+  background: transparent;
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.student-logout-btn:hover,
+.student-logout-btn:focus {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.student-logout-btn:focus {
+  outline: 2px solid #c0392b;
+  outline-offset: 2px;
+}
+</style>
