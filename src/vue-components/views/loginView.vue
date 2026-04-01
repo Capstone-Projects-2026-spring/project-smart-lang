@@ -26,7 +26,7 @@
 
       <div class="login-section">
         <p class="login-role-prompt">
-          {{ mode === 'login' ? 'Sign in as:' : 'Sign up as:' }}
+          {{ mode === "login" ? "Sign in as:" : "Sign up as:" }}
         </p>
 
         <button
@@ -36,13 +36,27 @@
         >
           <span class="google-icon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 18 18">
-              <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
-              <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
-              <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.548 0 9s.348 2.826.957 4.039l3.007-2.332z"/>
-              <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+              <path
+                fill="#4285F4"
+                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+              />
+              <path
+                fill="#34A853"
+                d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.548 0 9s.348 2.826.957 4.039l3.007-2.332z"
+              />
+              <path
+                fill="#EA4335"
+                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"
+              />
             </svg>
           </span>
-          <span>{{ mode === 'login' ? 'Sign in' : 'Sign up' }} as Caregiver</span>
+          <span
+            >{{ mode === "login" ? "Sign in" : "Sign up" }} as Caregiver</span
+          >
         </button>
 
         <button
@@ -52,13 +66,25 @@
         >
           <span class="google-icon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 18 18">
-              <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
-              <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
-              <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.548 0 9s.348 2.826.957 4.039l3.007-2.332z"/>
-              <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/>
+              <path
+                fill="#4285F4"
+                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+              />
+              <path
+                fill="#34A853"
+                d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.548 0 9s.348 2.826.957 4.039l3.007-2.332z"
+              />
+              <path
+                fill="#EA4335"
+                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"
+              />
             </svg>
           </span>
-          <span>{{ mode === 'login' ? 'Sign in' : 'Sign up' }} as Student</span>
+          <span>{{ mode === "login" ? "Sign in" : "Sign up" }} as Student</span>
         </button>
 
         <div v-if="loading" class="login-loading">
@@ -66,39 +92,54 @@
         </div>
       </div>
 
-      <p class="login-note">
-        Google OAuth integration coming soon. All sign-ins are accepted.
+      <p v-if="error" class="login-error">
+        {{ error }}
       </p>
+      <p class="login-note">Sign in with your Google account to continue.</p>
     </div>
   </div>
 </template>
 
 <script>
-import { authService } from '../../js/service/authService.js';
-import { Router } from '../../js/router.js';
+import { authService } from "../../js/service/authService.js";
+import { Router } from "../../js/router.js";
 
 export default {
-  name: 'LoginView',
+  name: "LoginView",
   data() {
     return {
-      mode: 'login',
+      mode: "login",
       loading: false,
+      error: null,
     };
   },
   methods: {
     async handleAuth(role) {
       this.loading = true;
+      this.error = null;
       try {
-        if (this.mode === 'login') {
+        if (this.mode === "login") {
           await authService.loginWithGoogle(role);
         } else {
           await authService.signUpWithGoogle(role);
         }
         // Reload the application so mainScript.js initializes properly with the new auth state
-        window.location.hash = '';
+        window.location.hash = "";
         window.location.reload();
       } catch (e) {
         this.loading = false;
+        // Handle specific Firebase auth errors
+        if (e.code === "auth/popup-closed-by-user") {
+          this.error = "Sign-in was cancelled. Please try again.";
+        } else if (e.code === "auth/popup-blocked") {
+          this.error =
+            "Pop-up was blocked. Please allow pop-ups for this site.";
+        } else if (e.code === "auth/network-request-failed") {
+          this.error = "Network error. Please check your connection.";
+        } else {
+          this.error = "Sign-in failed. Please try again.";
+          console.error("Auth error:", e);
+        }
       }
     },
   },
@@ -234,6 +275,17 @@ export default {
   font-size: 0.78em;
   color: #aaa;
   margin-top: 1.5em;
+  margin-bottom: 0;
+}
+
+.login-error {
+  font-size: 0.85em;
+  color: #e74c3c;
+  background: #fdf2f2;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 0.75em 1em;
+  margin-top: 1em;
   margin-bottom: 0;
 }
 </style>

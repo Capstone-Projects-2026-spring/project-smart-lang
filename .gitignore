@@ -12,3 +12,8 @@ coverage
 package-lock.json
 .unlighthouse
 .husky
+
+# Firebase Admin SDK credentials
+*-firebase-adminsdk-*.json
+firebase-adminsdk*.json
+serviceAccountKey.json
