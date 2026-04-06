@@ -171,8 +171,6 @@ predictionService.buildTileLabels = async function () {
 
         // Visible tiles always take priority; skip if already in visible map
         if (tileMap.has(key)) continue;
-        // If already stored as hidden but this instance is visible, promote to visible
-        if (elem.hidden && hiddenTileMap.has(key)) continue;
 
         let bgColor = MetaData.getElementColor(elem, metadata);
         let tileData = {
@@ -182,12 +180,13 @@ predictionService.buildTileLabels = async function () {
           colorCategory: elem.colorCategory || null,
         };
 
-        if (elem.hidden) {
-          hiddenTileMap.set(key, tileData);
-        } else {
-          // Remove from hidden map if a visible instance is found
+        if (!elem.hidden) {
+          // Visible instance: promote over any previously-stored hidden version
           hiddenTileMap.delete(key);
           tileMap.set(key, tileData);
+        } else if (!hiddenTileMap.has(key)) {
+          // Hidden instance: only store if not yet seen (first hidden instance wins)
+          hiddenTileMap.set(key, tileData);
         }
       }
     }
