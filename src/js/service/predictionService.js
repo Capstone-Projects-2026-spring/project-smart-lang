@@ -58,8 +58,11 @@ const EXPANSION_SLOTS = 2; // Number of suggestion slots reserved for expansion
 const EXPANSION_ENABLED = true; // Master toggle for vocabulary expansion
 
 // ── Tile cache ──────────────────────────────────────────────────────
-// lowercase label → { label, imageUrl, backgroundColor, colorCategory }
+// label (uppercase) → { label, imageUrl, backgroundColor, colorCategory }
+// _tileMap: visible (non-hidden) tiles only — used for normal suggestions
+// _hiddenTileMap: hidden tiles — used only for expansion (underused) suggestions
 let _tileMap = new Map();
+let _hiddenTileMap = new Map();
 
 // Category → child tile labels. Built during bootstrap, used for expansion suggestions.
 let _categoryChildren = new Map();
@@ -153,6 +156,7 @@ predictionService.buildTileLabels = async function () {
     let grids = await dataService.getGrids(true);
     let metadata = await dataService.getMetadata();
     let tileMap = new Map();
+    let hiddenTileMap = new Map();
 
     for (let grid of grids) {
       for (let elem of grid.gridElements || []) {
@@ -164,20 +168,33 @@ predictionService.buildTileLabels = async function () {
         let label = i18nService.getTranslation(elem.label);
         if (!label) continue;
         let key = label.toUpperCase().trim();
-        if (!tileMap.has(key)) {
-          let bgColor = MetaData.getElementColor(elem, metadata);
-          tileMap.set(key, {
-            label: label,
-            imageUrl: imageUrl,
-            backgroundColor: bgColor || "#ffffff",
-            colorCategory: elem.colorCategory || null,
-          });
+
+        // Visible tiles always take priority; skip if already in visible map
+        if (tileMap.has(key)) continue;
+        // If already stored as hidden but this instance is visible, promote to visible
+        if (elem.hidden && hiddenTileMap.has(key)) continue;
+
+        let bgColor = MetaData.getElementColor(elem, metadata);
+        let tileData = {
+          label: label,
+          imageUrl: imageUrl,
+          backgroundColor: bgColor || "#ffffff",
+          colorCategory: elem.colorCategory || null,
+        };
+
+        if (elem.hidden) {
+          hiddenTileMap.set(key, tileData);
+        } else {
+          // Remove from hidden map if a visible instance is found
+          hiddenTileMap.delete(key);
+          tileMap.set(key, tileData);
         }
       }
     }
 
     _tileMap = tileMap;
-    log.info("Tile cache: " + tileMap.size + " tiles");
+    _hiddenTileMap = hiddenTileMap;
+    log.info("Tile cache: " + tileMap.size + " tiles (" + hiddenTileMap.size + " hidden)");
 
     // Bootstrap on first launch
     if (!localStorage.getItem(BOOTSTRAP_KEY)) {
@@ -620,7 +637,7 @@ function _getExpansionSuggestions(
     if (inputWords.has(word) && words.length > 0) continue;
     if (userCandidates[word] && userCandidates[word] > USER_FREQUENCY_THRESHOLD)
       continue;
-    let tile = _tileMap.get(word);
+    let tile = _tileMap.get(word) || _hiddenTileMap.get(word);
     if (!tile) continue;
 
     eligible.push({

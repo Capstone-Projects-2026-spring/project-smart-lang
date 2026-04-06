@@ -429,6 +429,129 @@ describe('predictionService', () => {
             expect(global.log.warn).toHaveBeenCalled();
         });
 
+        test('should exclude hidden tiles from normal suggestions', async () => {
+            const mockGrids = [
+                {
+                    id: 'grid1',
+                    gridElements: [
+                        {
+                            type: 'ELEMENT_TYPE_NORMAL',
+                            label: { en: 'PIZZA' },
+                            image: { url: 'pizza.png' },
+                            hidden: false
+                        },
+                        {
+                            type: 'ELEMENT_TYPE_NORMAL',
+                            label: { en: 'DRINK' },
+                            image: { url: 'drink.png' },
+                            hidden: true
+                        }
+                    ]
+                }
+            ];
+            dataService.getGrids.mockResolvedValue(mockGrids);
+            dataService.getMetadata.mockResolvedValue({});
+
+            await predictionService.buildTileLabels();
+
+            // Log should report 1 visible tile and 1 hidden tile
+            expect(global.log.info).toHaveBeenCalledWith(
+                expect.stringMatching(/1 tiles \(1 hidden\)/)
+            );
+        });
+
+        test('should prefer visible tile over hidden tile with same label', async () => {
+            const mockGrids = [
+                {
+                    id: 'grid1',
+                    gridElements: [
+                        {
+                            type: 'ELEMENT_TYPE_NORMAL',
+                            label: { en: 'WATER' },
+                            image: { url: 'water-hidden.png' },
+                            hidden: true
+                        }
+                    ]
+                },
+                {
+                    id: 'grid2',
+                    gridElements: [
+                        {
+                            type: 'ELEMENT_TYPE_NORMAL',
+                            label: { en: 'WATER' },
+                            image: { url: 'water-visible.png' },
+                            hidden: false
+                        }
+                    ]
+                }
+            ];
+            dataService.getGrids.mockResolvedValue(mockGrids);
+            dataService.getMetadata.mockResolvedValue({});
+
+            await predictionService.buildTileLabels();
+
+            // Should have 1 visible tile and 0 hidden (visible took priority)
+            expect(global.log.info).toHaveBeenCalledWith(
+                expect.stringMatching(/1 tiles \(0 hidden\)/)
+            );
+        });
+
+        test('hidden tiles should appear as expansion suggestions but not normal suggestions', async () => {
+            // Bootstrap a bigram model so WANT → DRINK is a known pattern
+            mockLocalStorage['aac_ngram_bootstrapped_v1'] = 'true';
+            const savedModel = JSON.stringify({
+                bigrams: { 'WANT': { 'DRINK': 10 } },
+                trigrams: {},
+                unigrams: { 'DRINK': 5 },
+                userBigrams: {},
+                userTrigrams: {}
+            });
+            mockLocalStorage['aac_ngram_model_v1'] = savedModel;
+
+            // Re-init to load model
+            await predictionService.init();
+
+            const mockGrids = [
+                {
+                    id: 'grid1',
+                    gridElements: [
+                        {
+                            type: 'ELEMENT_TYPE_NORMAL',
+                            label: { en: 'WANT' },
+                            image: { url: 'want.png' },
+                            hidden: false
+                        },
+                        {
+                            type: 'ELEMENT_TYPE_NORMAL',
+                            label: { en: 'DRINK' },
+                            image: { url: 'drink.png' },
+                            hidden: true
+                        }
+                    ]
+                }
+            ];
+            dataService.getGrids.mockResolvedValue(mockGrids);
+            dataService.getMetadata.mockResolvedValue({});
+
+            await predictionService.buildTileLabels();
+
+            const suggestions = predictionService.getSuggestions('I WANT', 6);
+
+            // DRINK should not appear as a normal (non-expansion) suggestion
+            const normalSuggestions = suggestions.filter((s) => !s.isExpansion);
+            const drinkInNormal = normalSuggestions.find(
+                (s) => s.label && s.label.toUpperCase() === 'DRINK'
+            );
+            expect(drinkInNormal).toBeUndefined();
+
+            // DRINK may appear as an expansion suggestion (yellow border)
+            const expansionSuggestions = suggestions.filter((s) => s.isExpansion);
+            const drinkInExpansion = expansionSuggestions.find(
+                (s) => s.label && s.label.toUpperCase() === 'DRINK'
+            );
+            expect(drinkInExpansion).toBeDefined();
+        });
+
         test('should trigger bootstrap on first launch', async () => {
             const mockGrids = [
                 {

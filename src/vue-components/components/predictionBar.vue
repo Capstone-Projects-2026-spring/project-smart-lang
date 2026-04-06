@@ -95,6 +95,11 @@ export default {
     $(document).on(constants.EVENT_COLLECT_TEXT_CHANGED + ".predbar", () => {
       this.$nextTick(() => this.updateSuggestions());
     });
+    $(document).on(constants.EVENT_GRID_RERENDER + ".predbar", () => {
+      predictionService.buildTileLabels().then(() => {
+        this.updateSuggestions();
+      });
+    });
     // Note: Removed EVENT_GRID_LOADED handler - suggestions should only change
     // when tiles are added/removed from the sentence, not when navigating folders
     // Build tile cache + bootstrap, then show initial suggestions
