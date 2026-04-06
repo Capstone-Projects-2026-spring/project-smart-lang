@@ -1,8 +1,8 @@
 <template>
   <div class="modal">
     <div class="modal-mask" style="z-index: 9999">
-      <div class="modal-wrapper">
-        <div class="modal-container" @keydown.esc="$emit('close')">
+      <div class="modal-wrapper" @click="$emit('close')">
+        <div class="modal-container" @keydown.esc="$emit('close')" @click.stop>
           <a
             class="inline close-button"
             href="javascript:void(0);"
