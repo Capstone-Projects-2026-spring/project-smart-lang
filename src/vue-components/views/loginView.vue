@@ -7,26 +7,9 @@
         <p class="login-subtitle">AAC Communicator</p>
       </div>
 
-      <div class="login-tabs">
-        <button
-          class="login-tab-btn"
-          :class="{ active: mode === 'login' }"
-          @click="mode = 'login'"
-        >
-          Sign In
-        </button>
-        <button
-          class="login-tab-btn"
-          :class="{ active: mode === 'signup' }"
-          @click="mode = 'signup'"
-        >
-          Sign Up
-        </button>
-      </div>
-
       <div class="login-section">
         <p class="login-role-prompt">
-          {{ mode === "login" ? "Sign in as:" : "Sign up as:" }}
+          Sign in as:
         </p>
 
         <button
@@ -55,7 +38,7 @@
             </svg>
           </span>
           <span
-            >{{ mode === "login" ? "Sign in" : "Sign up" }} as Caregiver</span
+            >Sign in as Caregiver</span
           >
         </button>
 
@@ -84,7 +67,7 @@
               />
             </svg>
           </span>
-          <span>{{ mode === "login" ? "Sign in" : "Sign up" }} as Student</span>
+          <span>Sign in as Student</span>
         </button>
 
         <div v-if="loading" class="login-loading">
@@ -108,7 +91,6 @@ export default {
   name: "LoginView",
   data() {
     return {
-      mode: "login",
       loading: false,
       error: null,
     };
@@ -118,11 +100,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        if (this.mode === "login") {
-          await authService.loginWithGoogle(role);
-        } else {
-          await authService.signUpWithGoogle(role);
-        }
+        await authService.loginWithGoogle(role);
         // Reload the application so mainScript.js initializes properly with the new auth state
         window.location.hash = "";
         window.location.reload();
@@ -181,31 +159,6 @@ export default {
   color: #7f8c8d;
   margin: 0;
   font-size: 0.95em;
-}
-
-.login-tabs {
-  display: flex;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 1.5em;
-}
-
-.login-tab-btn {
-  flex: 1;
-  padding: 0.6em;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 1em;
-  color: #7f8c8d;
-  transition: background 0.2s, color 0.2s;
-}
-
-.login-tab-btn.active {
-  background: #3498db;
-  color: #fff;
-  font-weight: bold;
 }
 
 .login-role-prompt {
