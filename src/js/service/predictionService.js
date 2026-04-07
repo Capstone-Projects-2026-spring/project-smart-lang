@@ -317,6 +317,12 @@ predictionService.getSuggestions = function (input, count) {
     }
   }
 
+  // Keep only words that map to a visible tile — ensures hidden tiles can never
+  // appear in core (white) suggestions regardless of their n-gram scores.
+  combined = Object.fromEntries(
+    Object.entries(combined).filter(([w]) => _tileMap.has(w)),
+  );
+
   let inputWords = new Set(words);
   let seen = new Set();
 
