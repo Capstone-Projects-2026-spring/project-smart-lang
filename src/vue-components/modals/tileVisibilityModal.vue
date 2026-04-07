@@ -1,7 +1,7 @@
 <template>
   <div class="modal">
     <div class="modal-mask" style="z-index: 9999">
-      <div class="modal-wrapper">
+      <div class="modal-wrapper" @click.self="$emit('close')">
         <div class="modal-container" @keydown.esc="$emit('close')">
           <a
             class="inline close-button"
