@@ -226,6 +226,40 @@ describe("authService", () => {
     });
   });
 
+  describe("setStudentId", () => {
+    test("returns null when no auth state exists", () => {
+      expect(authService.setStudentId("SL-ABCD")).toBeNull();
+    });
+
+    test("updates studentId when logged in as student", () => {
+      const mockState = {
+        role: "student",
+        name: "ST",
+        email: "st@test.com",
+        uid: "firebase-uid-123",
+        studentId: "SL-OLD1",
+      };
+      localStorageMock.setItem(AUTH_KEY, JSON.stringify(mockState));
+
+      const updated = authService.setStudentId("SL-NEW1");
+
+      expect(updated.studentId).toBe("SL-NEW1");
+      expect(authService.getStudentId()).toBe("SL-NEW1");
+    });
+
+    test("returns null when logged in as caregiver", () => {
+      const mockState = {
+        role: "caregiver",
+        name: "CG",
+        email: "cg@test.com",
+        uid: "firebase-uid-123",
+      };
+      localStorageMock.setItem(AUTH_KEY, JSON.stringify(mockState));
+
+      expect(authService.setStudentId("SL-ABCD")).toBeNull();
+    });
+  });
+
   describe("loginWithGoogle", () => {
     test("logs in as caregiver with Firebase user data", async () => {
       const result = await authService.loginWithGoogle("caregiver");

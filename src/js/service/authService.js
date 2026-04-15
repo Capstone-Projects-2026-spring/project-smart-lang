@@ -18,13 +18,26 @@ authService.ROLE_CAREGIVER = ROLE_CAREGIVER;
 authService.ROLE_STUDENT = ROLE_STUDENT;
 
 /**
- * Generates a short unique student ID (e.g., "SL-A3F2").
+ * Derives a stable student ID (e.g., "SL-A3F2") deterministically from a Firebase UID.
+ * The same UID always produces the same ID — no randomness, no localStorage dependency.
+ * Uses a djb2-style hash so the 4-character suffix is well-distributed across the
+ * allowed character set (no ambiguous chars like I, O, 0, 1).
+ *
+ * @param {string} uid - Firebase Auth user UID
+ * @returns {string} e.g. "SL-A3F2"
  */
-function generateStudentId() {
+function generateStudentIdFromUid(uid) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  // djb2 hash of the UID string
+  let hash = 5381;
+  for (let i = 0; i < uid.length; i++) {
+    hash = ((hash << 5) + hash + uid.charCodeAt(i)) & 0x7fffffff;
+  }
   let id = "SL-";
+  let h = hash;
   for (let i = 0; i < 4; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
+    id += chars[h % chars.length];
+    h = Math.floor(h / chars.length);
   }
   return id;
 }
@@ -41,6 +54,10 @@ authService.getAuthState = function () {
     return null;
   }
 };
+
+function saveAuthState(authState) {
+  localStorage.setItem(AUTH_KEY, JSON.stringify(authState));
+}
 
 /**
  * Returns true if a user is currently logged in.
@@ -88,6 +105,23 @@ authService.getUid = function () {
 };
 
 /**
+ * Updates only the studentId in the persisted auth state.
+ * Used after resolving canonical student identity from cloud data.
+ *
+ * @param {string} studentId
+ * @returns {object|null} Updated auth state or null if not logged in as student
+ */
+authService.setStudentId = function (studentId) {
+  const state = authService.getAuthState();
+  if (!state || state.role !== ROLE_STUDENT || !studentId) {
+    return null;
+  }
+  const updated = { ...state, studentId };
+  saveAuthState(updated);
+  return updated;
+};
+
+/**
  * Google OAuth login using Firebase Authentication.
  * Opens a popup for the user to sign in with their Google account.
  *
@@ -116,16 +150,13 @@ authService.loginWithGoogle = async function (role) {
     };
 
     if (selectedRole === ROLE_STUDENT) {
-      // Preserve existing student ID if already set for this user
-      const existing = authService.getAuthState();
-      if (existing && existing.uid === user.uid && existing.studentId) {
-        authUser.studentId = existing.studentId;
-      } else {
-        authUser.studentId = generateStudentId();
-      }
+      // Derive student ID deterministically from Firebase UID.
+      // The same Google account always yields the same SL-XXXX code,
+      // regardless of localStorage state, device, or session history.
+      authUser.studentId = generateStudentIdFromUid(user.uid);
     }
 
-    localStorage.setItem(AUTH_KEY, JSON.stringify(authUser));
+    saveAuthState(authUser);
     return authUser;
   } catch (error) {
     localStorage.removeItem(ROLE_KEY);

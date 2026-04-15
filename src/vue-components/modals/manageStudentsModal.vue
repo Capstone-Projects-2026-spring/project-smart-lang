@@ -7,119 +7,148 @@
             class="inline close-button"
             href="javascript:void(0);"
             @click="$emit('close')"
-          ><i class="fas fa-times" /></a>
+          >
+            <i class="fas fa-times" />
+          </a>
 
           <div class="modal-header">
-            <h1><i class="fas fa-users" style="margin-right: 0.5em;"></i>Manage Students</h1>
+            <h1>
+              <i class="fas fa-users" style="margin-right: 0.5em"></i>Manage
+              Students
+            </h1>
           </div>
 
           <div class="modal-body">
-            <p class="manage-students-desc">
-              Enter a student's unique ID to view and manage their board.
-            </p>
-
-            <div class="student-id-input-row">
+            <!-- Add Student -->
+            <div class="add-student-row">
               <input
-                v-model="studentIdInput"
+                v-model="newStudentId"
                 type="text"
                 class="student-id-input"
                 placeholder="Student ID (e.g. SL-A3F2)"
-                @keydown.enter="loadStudent"
+                @keydown.enter="addStudent"
                 maxlength="7"
               />
-              <button class="load-btn" @click="loadStudent" :disabled="!studentIdInput.trim()">
-                <i class="fas fa-search"></i> Load Board
+              <button
+                class="btn-primary-sm"
+                @click="addStudent"
+                :disabled="!newStudentId.trim() || addingStudent"
+              >
+                <i
+                  class="fas"
+                  :class="addingStudent ? 'fa-spinner fa-spin' : 'fa-plus'"
+                ></i>
+                Add
               </button>
             </div>
+            <p
+              v-if="addMessage"
+              :class="['ms-status', addSuccess ? 'ms-success' : 'ms-error']"
+            >
+              {{ addMessage }}
+            </p>
 
-            <div v-if="error" class="manage-error">
-              <i class="fas fa-exclamation-circle"></i> {{ error }}
+            <!-- Loading -->
+            <div v-if="loadingStudents" class="ms-loading">
+              <i class="fas fa-spinner fa-spin"></i> Loading students...
             </div>
 
-            <div v-if="loadedStudent" class="loaded-student-info">
-              <div class="student-info-header">
-                <i class="fas fa-user-graduate"></i>
-                <span v-if="!editingName">Student: <strong>{{ loadedStudent.name }}</strong></span>
-                <input
-                  v-else
-                  v-model="editNameInput"
-                  type="text"
-                  class="edit-name-input"
-                  placeholder="Enter student name"
-                  @keydown.enter="saveName"
-                  @keydown.esc="cancelEdit"
-                  ref="editNameInput"
-                />
-              </div>
-              <div class="student-actions">
-                <button v-if="!editingName" class="action-btn edit-btn" @click="startEditName">
-                  <i class="fas fa-pencil-alt"></i> Edit Name
-                </button>
-                <button v-if="editingName" class="action-btn save-btn" @click="saveName">
-                  <i class="fas fa-check"></i> Save
-                </button>
-                <button v-if="editingName" class="action-btn cancel-btn" @click="cancelEdit">
-                  <i class="fas fa-times"></i> Cancel
-                </button>
-                <button class="action-btn primary-btn" @click="viewBoard">
-                  <i class="fas fa-th"></i> View Tile Board
-                </button>
-              </div>
+            <!-- Empty -->
+            <div v-else-if="students.length === 0" class="ms-empty">
+              <i class="fas fa-user-plus"></i>
+              <p>No students linked yet.</p>
+              <p class="ms-hint">
+                Have your student sign in, then enter their Student ID above.
+              </p>
             </div>
 
-            <div class="recent-students" v-if="recentStudents.length > 0">
-              <h3>Recently Accessed</h3>
-              <ul class="recent-list">
-                <li v-for="s in recentStudents" :key="s.id">
-                  <div class="recent-student-main" @click="selectRecent(s)">
-                    <i class="fas fa-user-graduate"></i>
-                    <span v-if="editingRecentId !== s.id">{{ s.name }}</span>
-                    <input
-                      v-else
-                      v-model="editRecentNameInput"
-                      type="text"
-                      class="edit-recent-name-input"
-                      placeholder="Enter student name"
-                      @keydown.enter="saveRecentName(s)"
-                      @keydown.esc="cancelRecentEdit"
-                      @click.stop
-                      ref="editRecentNameInput"
-                    />
-                    <span 
-                      class="recent-id clickable-id"
-                      @click.stop="copyIdToClipboard(s.id)"
-                      :title="copiedId === s.id ? 'Copied!' : 'Click to copy'"
-                    >
-                      {{ s.id }}
-                      <i :class="copiedId === s.id ? 'fas fa-check' : 'fas fa-copy'" class="copy-icon"></i>
+            <!-- Student List -->
+            <div v-else class="ms-student-list">
+              <div
+                v-for="student in students"
+                :key="student.id"
+                class="ms-student-card"
+              >
+                <div class="ms-student-info">
+                  <span class="ms-id-badge">{{ student.id }}</span>
+                  <div class="ms-student-details">
+                    <span class="ms-student-name">{{
+                      student.name || "Unnamed Student"
+                    }}</span>
+                    <span class="ms-student-email" v-if="student.email">{{
+                      student.email
+                    }}</span>
+                    <span class="ms-board-label" v-if="student.activeBoardSet">
+                      <i class="fas fa-th-large"></i>
+                      {{ student.activeBoardSet }}
                     </span>
                   </div>
+                </div>
+                <div class="ms-student-actions">
                   <button
-                    v-if="editingRecentId !== s.id"
-                    class="edit-recent-btn"
-                    @click.stop="startEditRecentName(s)"
-                    title="Edit Name"
+                    class="btn-action btn-push"
+                    :disabled="pushingStudentId === student.id"
+                    @click="pushBoard(student)"
+                    title="Push current board to student"
                   >
-                    <i class="fas fa-pencil-alt"></i>
+                    <i
+                      class="fas"
+                      :class="
+                        pushingStudentId === student.id
+                          ? 'fa-spinner fa-spin'
+                          : 'fa-upload'
+                      "
+                    ></i>
+                    Push Board
                   </button>
                   <button
-                    v-if="editingRecentId === s.id"
-                    class="save-recent-btn"
-                    @click.stop="saveRecentName(s)"
-                    title="Save"
+                    class="btn-action btn-unlink"
+                    @click="confirmUnlink(student)"
+                    title="Unlink student"
                   >
-                    <i class="fas fa-check"></i>
+                    <i class="fas fa-unlink"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Push result message -->
+            <p
+              v-if="pushMessage"
+              :class="['ms-status', pushSuccess ? 'ms-success' : 'ms-error']"
+              style="margin-top: 0.6em"
+            >
+              {{ pushMessage }}
+            </p>
+
+            <!-- Confirm unlink -->
+            <div v-if="unlinkTarget" class="ms-confirm-overlay">
+              <div class="ms-confirm-box">
+                <p>
+                  Unlink <strong>{{ unlinkTarget.id }}</strong
+                  >? Their local board data won't be affected.
+                </p>
+                <div class="ms-confirm-actions">
+                  <button
+                    class="btn-secondary-sm"
+                    @click="unlinkTarget = null"
+                    :disabled="unlinking"
+                  >
+                    Cancel
                   </button>
                   <button
-                    v-if="editingRecentId === s.id"
-                    class="cancel-recent-btn"
-                    @click.stop="cancelRecentEdit"
-                    title="Cancel"
+                    class="btn-danger-sm"
+                    @click="doUnlink"
+                    :disabled="unlinking"
                   >
-                    <i class="fas fa-times"></i>
+                    <i
+                      class="fas"
+                      :class="unlinking ? 'fa-spinner fa-spin' : 'fa-unlink'"
+                    ></i>
+                    {{ unlinking ? "Removing..." : "Unlink" }}
                   </button>
-                </li>
-              </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -129,414 +158,401 @@
 </template>
 
 <script>
-import '../../css/modal.css';
-
-// Mock student lookup — in production this would query a backend.
-const MOCK_STUDENTS = {
-    'SL-A3F2': { id: 'SL-A3F2', name: 'Alex Smith' },
-    'SL-B7C1': { id: 'SL-B7C1', name: 'Jordan Lee' },
-    'SL-D4E9': { id: 'SL-D4E9', name: 'Taylor Brown' },
-};
-
-const RECENT_KEY = 'SMART_LANG_RECENT_STUDENTS';
+import "../../css/modal.css";
+import { authService } from "../../js/service/authService.js";
+import { firestoreSyncService } from "../../js/service/firestoreSyncService.js";
+import { dataService } from "../../js/service/data/dataService.js";
 
 export default {
-    name: 'ManageStudentsModal',
-    data() {
-        return {
-            studentIdInput: '',
-            loadedStudent: null,
-            error: null,
-            recentStudents: [],
-            editingName: false,
-            editNameInput: '',
-            editingRecentId: null,
-            editRecentNameInput: '',
-            copiedId: null,
-        };
+  name: "ManageStudentsModal",
+  data() {
+    return {
+      students: [],
+      loadingStudents: true,
+
+      newStudentId: "",
+      addingStudent: false,
+      addMessage: "",
+      addSuccess: false,
+
+      pushingStudentId: null,
+      pushMessage: "",
+      pushSuccess: false,
+
+      unlinkTarget: null,
+      unlinking: false,
+    };
+  },
+  async mounted() {
+    await this.loadStudents();
+  },
+  methods: {
+    async loadStudents() {
+      this.loadingStudents = true;
+      try {
+        let ids = await firestoreSyncService.getStudents();
+        let details = await Promise.all(
+          ids.map((id) =>
+            firestoreSyncService
+              .getStudentInfo(id)
+              .then((info) => info || { id, name: "", email: "" }),
+          ),
+        );
+        this.students = details;
+      } catch (e) {
+        console.error("Failed to load students:", e);
+        this.students = [];
+      }
+      this.loadingStudents = false;
     },
-    mounted() {
-        try {
-            this.recentStudents = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-        } catch (e) {
-            this.recentStudents = [];
+
+    async addStudent() {
+      const id = this.newStudentId.trim().toUpperCase();
+      if (!id) return;
+      this.addingStudent = true;
+      this.addMessage = "";
+      try {
+        let result = await firestoreSyncService.addStudent(id);
+        this.addMessage = result.message;
+        this.addSuccess = result.success;
+        if (result.success) {
+          this.newStudentId = "";
+          await this.loadStudents();
         }
+      } catch (e) {
+        this.addMessage = "Failed to add student. Please try again.";
+        this.addSuccess = false;
+        console.error("Add student error:", e);
+      }
+      this.addingStudent = false;
+      setTimeout(() => {
+        this.addMessage = "";
+      }, 5000);
     },
-    methods: {
-        copyIdToClipboard(studentId) {
-            navigator.clipboard.writeText(studentId).then(() => {
-                this.copiedId = studentId;
-                setTimeout(() => {
-                    this.copiedId = null;
-                }, 1500);
-            }).catch(err => {
-                console.error('Failed to copy student ID:', err);
-            });
-        },
-        loadStudent() {
-            this.error = null;
-            this.loadedStudent = null;
-            const id = this.studentIdInput.trim().toUpperCase();
-            if (!id) return;
 
-            // Mock lookup — any ID starting with "SL-" followed by 4 chars is accepted
-            let student = MOCK_STUDENTS[id];
-            if (!student && /^SL-[A-Z0-9]{4}$/.test(id)) {
-                student = { id: id, name: 'Student (' + id + ')' };
-            }
-
-            if (student) {
-                this.loadedStudent = student;
-                this.addToRecent(student);
-            } else {
-                this.error = 'No student found with ID "' + id + '". Please check the ID and try again.';
-            }
-        },
-        addToRecent(student) {
-            const list = this.recentStudents.filter(s => s.id !== student.id);
-            list.unshift(student);
-            this.recentStudents = list.slice(0, 5);
-            try {
-                localStorage.setItem(RECENT_KEY, JSON.stringify(this.recentStudents));
-            } catch (e) {
-                // ignore
-            }
-        },
-        selectRecent(student) {
-            this.studentIdInput = student.id;
-            this.loadedStudent = student;
-            this.error = null;
-        },
-        viewBoard() {
-            if (this.loadedStudent) {
-                // In a full implementation, this would switch to the student's board data.
-                // For now, emit an event and close the modal.
-                this.$emit('view-student-board', this.loadedStudent);
-                this.$emit('close');
-            }
-        },
-        startEditName() {
-            this.editingName = true;
-            this.editNameInput = this.loadedStudent.name;
-            this.$nextTick(() => {
-                if (this.$refs.editNameInput) {
-                    this.$refs.editNameInput.focus();
-                }
-            });
-        },
-        saveName() {
-            const newName = this.editNameInput.trim();
-            if (newName && this.loadedStudent) {
-                this.loadedStudent.name = newName;
-                this.updateRecentStudent(this.loadedStudent);
-            }
-            this.editingName = false;
-        },
-        cancelEdit() {
-            this.editingName = false;
-            this.editNameInput = '';
-        },
-        startEditRecentName(student) {
-            this.editingRecentId = student.id;
-            this.editRecentNameInput = student.name;
-            this.$nextTick(() => {
-                if (this.$refs.editRecentNameInput) {
-                    const input = Array.isArray(this.$refs.editRecentNameInput)
-                        ? this.$refs.editRecentNameInput[0]
-                        : this.$refs.editRecentNameInput;
-                    if (input) input.focus();
-                }
-            });
-        },
-        saveRecentName(student) {
-            const newName = this.editRecentNameInput.trim();
-            if (newName) {
-                student.name = newName;
-                this.saveRecentStudents();
-                if (this.loadedStudent && this.loadedStudent.id === student.id) {
-                    this.loadedStudent.name = newName;
-                }
-            }
-            this.editingRecentId = null;
-            this.editRecentNameInput = '';
-        },
-        cancelRecentEdit() {
-            this.editingRecentId = null;
-            this.editRecentNameInput = '';
-        },
-        updateRecentStudent(student) {
-            const idx = this.recentStudents.findIndex(s => s.id === student.id);
-            if (idx !== -1) {
-                this.recentStudents[idx].name = student.name;
-                this.saveRecentStudents();
-            }
-        },
-        saveRecentStudents() {
-            try {
-                localStorage.setItem(RECENT_KEY, JSON.stringify(this.recentStudents));
-            } catch (e) {
-                // ignore
-            }
-        },
+    async pushBoard(student) {
+      this.pushingStudentId = student.id;
+      this.pushMessage = "";
+      try {
+        // Build visibility config keyed by grid LABEL (not ID) because
+        // caregiver and student import the gridset independently and get
+        // different generated IDs.  Elements are identified by their label
+        // text combined with their (x,y) grid position so a match is
+        // unambiguous even if two tiles share the same text.
+        let grids = await dataService.getGrids(true);
+        let visibilityConfig = {};
+        for (let grid of grids) {
+          let gridLabel = this.getGridLabel(grid);
+          if (!gridLabel) continue;
+          let hiddenElements = (grid.gridElements || [])
+            .filter(e => e.hidden)
+            .map(e => ({
+              label: this.getElementLabel(e),
+              x: e.x,
+              y: e.y,
+            }));
+          if (hiddenElements.length > 0) {
+            visibilityConfig[gridLabel] = hiddenElements;
+          }
+        }
+        let result = await firestoreSyncService.pushVisibilityToStudent(student.id, visibilityConfig);
+        this.pushMessage = result.message;
+        this.pushSuccess = result.success;
+        if (result.success) {
+          await this.loadStudents();
+          setTimeout(() => {
+            this.pushMessage = "";
+          }, 4000);
+        }
+      } catch (e) {
+        this.pushMessage = "Failed to push board. Please try again.";
+        this.pushSuccess = false;
+        console.error("Push board error:", e);
+      }
+      this.pushingStudentId = null;
     },
+
+    getGridLabel(grid) {
+      if (!grid || !grid.label) return "";
+      // grid.label is an i18n object like { en: "Core Words" }
+      // Extract the first available translation
+      let keys = Object.keys(grid.label);
+      for (let k of keys) {
+        if (grid.label[k]) return grid.label[k];
+      }
+      return "";
+    },
+
+    getElementLabel(elem) {
+      if (!elem || !elem.label) return "";
+      let keys = Object.keys(elem.label);
+      for (let k of keys) {
+        if (elem.label[k]) return elem.label[k];
+      }
+      return "";
+    },
+
+    confirmUnlink(student) {
+      this.unlinkTarget = student;
+    },
+
+    async doUnlink() {
+      if (!this.unlinkTarget) return;
+      this.unlinking = true;
+      try {
+        await firestoreSyncService.removeStudent(this.unlinkTarget.id);
+        await this.loadStudents();
+      } catch (e) {
+        console.error("Unlink error:", e);
+      }
+      this.unlinking = false;
+      this.unlinkTarget = null;
+    },
+  },
 };
 </script>
 
 <style scoped>
-.manage-students-desc {
-    color: #555;
-    margin-bottom: 1.2em;
-}
-
-.student-id-input-row {
-    display: flex;
-    gap: 0.5em;
-    margin-bottom: 0.8em;
+.add-student-row {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 0.6em;
 }
 
 .student-id-input {
-    flex: 1;
-    padding: 0.5em 0.75em;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 1em;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  flex: 1;
+  padding: 0.5em 0.75em;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: border-color 0.2s;
 }
-
 .student-id-input:focus {
-    border-color: #3498db;
-    outline: none;
+  border-color: #3498db;
 }
 
-.load-btn {
-    padding: 0.5em 1em;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    white-space: nowrap;
+.btn-primary-sm {
+  padding: 0.5em 1em;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-primary-sm:hover:not(:disabled) {
+  background: #2980b9;
+}
+.btn-primary-sm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.load-btn:hover:not(:disabled) {
-    background: #2980b9;
+.ms-status {
+  font-size: 0.85em;
+  padding: 0.4em 0.6em;
+  border-radius: 5px;
+  margin-top: 0.4em;
+}
+.ms-success {
+  background: #eafaf1;
+  color: #219a52;
+  border: 1px solid #27ae60;
+}
+.ms-error {
+  background: #fdf2f2;
+  color: #c0392b;
+  border: 1px solid #e74c3c;
 }
 
-.load-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.ms-loading,
+.ms-empty {
+  text-align: center;
+  padding: 2em 1em;
+  color: #999;
+  font-size: 0.95em;
+}
+.ms-empty i {
+  font-size: 2em;
+  display: block;
+  margin-bottom: 0.4em;
+  opacity: 0.4;
+}
+.ms-hint {
+  font-size: 0.85em;
+  color: #bbb;
+  margin: 0;
 }
 
-.manage-error {
-    color: #e74c3c;
-    margin-bottom: 0.8em;
-    font-size: 0.9em;
+.ms-student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin-top: 0.8em;
 }
 
-.loaded-student-info {
-    background: #eafaf1;
-    border: 1px solid #27ae60;
-    border-radius: 8px;
-    padding: 1em;
-    margin-bottom: 1em;
+.ms-student-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.65em 0.9em;
+  gap: 0.75em;
 }
 
-.student-info-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    margin-bottom: 0.8em;
-    color: #219a52;
-    font-size: 1.05em;
+.ms-student-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  min-width: 0;
 }
 
-.student-actions {
-    display: flex;
-    gap: 0.5em;
-    flex-wrap: wrap;
+.ms-id-badge {
+  background: #3498db;
+  color: #fff;
+  padding: 0.25em 0.55em;
+  border-radius: 5px;
+  font-size: 0.78em;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.action-btn {
-    padding: 0.5em 1em;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.95em;
-    display: flex;
-    align-items: center;
-    gap: 0.4em;
+.ms-student-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+  min-width: 0;
+}
+.ms-student-name {
+  font-weight: 600;
+  font-size: 0.92em;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms-student-email {
+  font-size: 0.78em;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms-board-label {
+  font-size: 0.75em;
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
 }
 
-.primary-btn {
-    background: #27ae60;
-    color: white;
+.ms-student-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  flex-shrink: 0;
 }
 
-.primary-btn:hover {
-    background: #219a52;
+.btn-action {
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8em;
+  padding: 0.4em 0.7em;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-push {
+  background: rgba(39, 174, 96, 0.12);
+  color: #219a52;
+  border: 1px solid rgba(39, 174, 96, 0.25);
+}
+.btn-push:hover:not(:disabled) {
+  background: rgba(39, 174, 96, 0.22);
+}
+.btn-push:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-unlink {
+  background: rgba(231, 76, 60, 0.09);
+  color: #c0392b;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+.btn-unlink:hover {
+  background: rgba(231, 76, 60, 0.18);
 }
 
-.recent-students h3 {
-    font-size: 0.95em;
-    color: #777;
-    margin: 0.5em 0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+/* Inline confirm */
+.ms-confirm-overlay {
+  margin-top: 0.75em;
+  background: #fff8f8;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 0.9em 1em;
+}
+.ms-confirm-box p {
+  margin: 0 0 0.75em;
+  font-size: 0.9em;
+  color: #444;
+}
+.ms-confirm-actions {
+  display: flex;
+  gap: 0.5em;
 }
 
-.recent-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.btn-secondary-sm {
+  padding: 0.4em 0.9em;
+  background: #eee;
+  color: #555;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.88em;
+  transition: background 0.15s;
+}
+.btn-secondary-sm:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+.btn-secondary-sm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.recent-id {
-    margin-left: auto;
-    color: #999;
-    font-family: monospace;
-    font-size: 0.9em;
+.btn-danger-sm {
+  padding: 0.4em 0.9em;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.88em;
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  transition: background 0.15s;
 }
-
-.clickable-id {
-    cursor: pointer;
-    padding: 0.3em 0.5em;
-    border-radius: 4px;
-    transition: background-color 0.15s, color 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 0.3em;
+.btn-danger-sm:hover:not(:disabled) {
+  background: #c0392b;
 }
-
-.clickable-id:hover {
-    background: #e8f4fd;
-    color: #3498db;
-}
-
-.copy-icon {
-    font-size: 0.85em;
-    opacity: 0.7;
-}
-
-.clickable-id:hover .copy-icon {
-    opacity: 1;
-}
-
-.edit-name-input {
-    flex: 1;
-    padding: 0.3em 0.5em;
-    border: 2px solid #3498db;
-    border-radius: 4px;
-    font-size: 1em;
-    margin-left: 0.3em;
-}
-
-.edit-name-input:focus {
-    outline: none;
-    border-color: #2980b9;
-}
-
-.edit-btn {
-    background: #f39c12;
-    color: white;
-}
-
-.edit-btn:hover {
-    background: #d68910;
-}
-
-.save-btn {
-    background: #27ae60;
-    color: white;
-}
-
-.save-btn:hover {
-    background: #219a52;
-}
-
-.cancel-btn {
-    background: #95a5a6;
-    color: white;
-}
-
-.cancel-btn:hover {
-    background: #7f8c8d;
-}
-
-.recent-list li {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    padding: 0.4em 0.5em;
-    border-radius: 4px;
-    color: #444;
-    font-size: 0.95em;
-}
-
-.recent-student-main {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    flex: 1;
-    cursor: pointer;
-}
-
-.recent-student-main:hover {
-    background: #f0f0f0;
-    border-radius: 4px;
-}
-
-.edit-recent-name-input {
-    flex: 1;
-    padding: 0.2em 0.4em;
-    border: 2px solid #3498db;
-    border-radius: 4px;
-    font-size: 0.9em;
-    max-width: 140px;
-}
-
-.edit-recent-name-input:focus {
-    outline: none;
-    border-color: #2980b9;
-}
-
-.edit-recent-btn,
-.save-recent-btn,
-.cancel-recent-btn {
-    padding: 0.3em 0.5em;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8em;
-    display: flex;
-    align-items: center;
-}
-
-.edit-recent-btn {
-    background: #f39c12;
-    color: white;
-}
-
-.edit-recent-btn:hover {
-    background: #d68910;
-}
-
-.save-recent-btn {
-    background: #27ae60;
-    color: white;
-}
-
-.save-recent-btn:hover {
-    background: #219a52;
-}
-
-.cancel-recent-btn {
-    background: #95a5a6;
-    color: white;
-}
-
-.cancel-recent-btn:hover {
-    background: #7f8c8d;
+.btn-danger-sm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

@@ -189,6 +189,8 @@ Router.toLogin = function () {
   Router.to("#login");
 };
 
+
+
 Router.getCurrentView = function () {
   return _currentView;
 };

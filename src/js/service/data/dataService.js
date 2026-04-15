@@ -887,14 +887,25 @@ $(document).on(constants.EVENT_DB_INITIAL_SYNC_COMPLETE, () => {
  * Skips elements that already have data cached. Runs silently in the background.
  */
 dataService.cacheAllImageData = async function () {
-  let grids = await dataService.getGrids();
+  // getGrids(true) returns full objects (not short/preview stubs).
+  // Short versions have isShortVersion=true and cannot be saved back via databaseService.
+  let grids = await dataService.getGrids(true);
   let cachedCount = 0;
   for (let grid of grids) {
     let gridUpdated = false;
     for (let element of grid.gridElements || []) {
-      if (element.image && element.image.url && !element.image.data) {
+      let needsCache = element.image && element.image.url && (
+        !element.image.data ||
+        // Re-cache images that were previously saved as JPEG — those lost
+        // transparency and show black backgrounds on PNG pictograms.
+        (element.image.data && element.image.data.startsWith("data:image/jpeg"))
+      );
+      if (needsCache) {
+        // Force PNG so transparency is preserved. ARASAAC API URLs lack
+        // a .png extension, causing MIME detection to fall back to JPEG
+        // which fills transparent pixels with black.
         let base64 = await imageUtil
-          .urlToBase64(element.image.url)
+          .urlToBase64(element.image.url, undefined, "image/png")
           .catch(() => null);
         if (base64) {
           element.image.data = base64;

@@ -14,10 +14,12 @@ import { keyboardShortcuts } from "./service/keyboardShortcuts";
 import { notificationService } from "./service/notificationService.js";
 import { dataService } from "./service/data/dataService";
 import { predictionService } from "./service/predictionService";
+import { firestoreSyncService } from "./service/firestoreSyncService";
 
 const TARGET_GRIDSET_FILENAME = "Global-Core_Communicator_ARASAAC_EN.grd.json";
 const GRIDSET_URL = "app/gridsets/" + TARGET_GRIDSET_FILENAME;
-const AAC_USERNAME = "aac-user";
+const OAUTH_DB_PREFIX = "oauth-";
+let _isApplyingCloudBoard = false;
 
 async function init() {
   log.setLevel(log.levels.INFO);
@@ -36,15 +38,17 @@ async function init() {
     return;
   }
 
-  let autologinUser = localStorageService.getAutologinUser();
-
-  if (autologinUser) {
-    // User already exists, just login
+  let autologinUser = getOauthLocalDbUser();
+  if (!autologinUser) {
+    throw new Error(
+      "No authenticated user UID found for local database setup.",
+    );
+  }
+  localStorageService.setAutologinUser(autologinUser);
+  if (localStorageService.isSavedLocalUser(autologinUser)) {
     await loginService.loginStoredUser(autologinUser, true);
   } else {
-    // First launch: create offline user
-    await loginService.registerOffline(AAC_USERNAME, AAC_USERNAME);
-    autologinUser = AAC_USERNAME;
+    await loginService.registerOffline(autologinUser, autologinUser);
   }
 
   // Always check if grids exist — import if missing (handles failed first imports)
@@ -63,6 +67,9 @@ async function init() {
   // Init prediction engine (loads n-gram model from localStorage)
   await predictionService.init();
   log.info("Prediction service initialized.");
+
+  // === Cloud Sync: Firestore integration ===
+  await initCloudSync();
 
   localStorageService.setLastActiveUser(autologinUser);
   if (!Router.isInitialized()) {
@@ -85,6 +92,149 @@ async function importDefaultGridset() {
   } catch (e) {
     log.error("Failed to import default gridset:", e);
   }
+}
+
+/**
+ * Initializes Firestore cloud sync based on user role.
+ * - Caregivers: register their profile in Firestore
+ * - Students: register their profile and listen for board pushes from caregivers
+ */
+async function initCloudSync() {
+  try {
+    if (authService.isCaregiver()) {
+      await firestoreSyncService.ensureCaregiverProfile();
+      log.info("Caregiver profile synced to Firestore.");
+    } else if (authService.isStudent()) {
+      let studentId = await firestoreSyncService.ensureStudentProfile();
+      if (!studentId) {
+        studentId = firestoreSyncService.getCurrentStudentId();
+      }
+      log.info("Student profile synced to Firestore.");
+      if (studentId) {
+        let syncSequenceKey = `SMART_LANG_LAST_BOARD_SYNC_${studentId}`;
+        let getLastAppliedSequence = () => {
+          return Number(localStorage.getItem(syncSequenceKey) || "0");
+        };
+        let getIncomingSequence = (assignmentData) => {
+          let version = Number(assignmentData?.version || 0);
+          if (version > 0) {
+            return version;
+          }
+          return assignmentData?.updatedAt
+            ? assignmentData.updatedAt.toMillis()
+            : 0;
+        };
+        let applyAssignmentIfNew = async (assignmentData, reloadOnSuccess) => {
+          if (!assignmentData || _isApplyingCloudBoard) return;
+          let hasPayload = assignmentData.visibilityConfig || assignmentData.boardData;
+          if (!hasPayload) return;
+
+          let incomingSequence = getIncomingSequence(assignmentData);
+          if (incomingSequence <= getLastAppliedSequence()) return;
+
+          _isApplyingCloudBoard = true;
+          try {
+            if (assignmentData.type === "visibility" && assignmentData.visibilityConfig) {
+              await applyVisibilityConfig(assignmentData.visibilityConfig);
+            } else if (assignmentData.boardData) {
+              // Legacy: full board import from before visibility-only approach
+              await dataService.importBackupData(assignmentData.boardData, { skipDelete: false });
+            }
+            localStorage.setItem(syncSequenceKey, String(incomingSequence));
+            if (reloadOnSuccess) window.location.reload();
+          } finally {
+            _isApplyingCloudBoard = false;
+          }
+        };
+
+        // Check for any existing assignment that's newer than our local state
+        let assignment = await firestoreSyncService.getLatestBoardAssignment(studentId);
+        await applyAssignmentIfNew(assignment, false);
+
+        // Listen for future pushes from the caregiver
+        firestoreSyncService.listenForBoardUpdates(
+          studentId,
+          async (assignmentData) => {
+            await applyAssignmentIfNew(assignmentData, true);
+          },
+        );
+        log.info("Listening for board updates from caregiver.");
+      }
+    }
+  } catch (e) {
+    log.warn("Cloud sync initialization failed (app will work offline):", e);
+  }
+}
+
+/**
+ * Applies a visibility config from the caregiver to the student's local grids.
+ * The config is keyed by grid LABEL (not ID) because each device generates
+ * different IDs when importing the same default gridset.
+ * Each hidden element is described by { label, x, y } for unambiguous matching.
+ *
+ * @param {Object} visibilityConfig - { [gridLabel]: { label, x, y }[] }
+ */
+async function applyVisibilityConfig(visibilityConfig) {
+  let grids = await dataService.getGrids(true);
+
+  // Build a lookup: grid label → grid object
+  let gridsByLabel = {};
+  for (let grid of grids) {
+    let label = getFirstLabel(grid.label);
+    if (label) gridsByLabel[label] = grid;
+  }
+
+  for (let [gridLabel, hiddenElements] of Object.entries(visibilityConfig)) {
+    let grid = gridsByLabel[gridLabel];
+    if (!grid) continue;
+
+    // Build a set of hidden element keys for fast lookup
+    let hiddenKeys = new Set(
+      hiddenElements.map((h) => `${h.label || ""}|${h.x}|${h.y}`)
+    );
+
+    let changed = false;
+    for (let elem of grid.gridElements || []) {
+      let elemKey = `${getFirstLabel(elem.label)}|${elem.x}|${elem.y}`;
+      let shouldHide = hiddenKeys.has(elemKey);
+      if (!!elem.hidden !== shouldHide) {
+        elem.hidden = shouldHide || undefined;
+        changed = true;
+      }
+    }
+    if (changed) {
+      await dataService.saveGrid(grid);
+    }
+  }
+}
+
+/**
+ * Extracts the first non-empty translation string from an i18n label object.
+ * @param {Object|string} labelObj e.g. { en: "Hello" }
+ * @returns {string}
+ */
+function getFirstLabel(labelObj) {
+  if (!labelObj) return "";
+  if (typeof labelObj === "string") return labelObj;
+  for (let key of Object.keys(labelObj)) {
+    if (labelObj[key]) return labelObj[key];
+  }
+  return "";
+}
+
+function getOauthLocalDbUser() {
+  let uid = authService.getUid();
+  if (!uid) {
+    return null;
+  }
+  let normalizedUid = String(uid)
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .toLowerCase();
+  if (!normalizedUid) {
+    return null;
+  }
+  return `${OAUTH_DB_PREFIX}${normalizedUid}`;
 }
 
 init();

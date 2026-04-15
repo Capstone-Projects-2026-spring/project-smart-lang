@@ -2,10 +2,12 @@
  * firebaseConfig.js
  * Firebase configuration for Smart Lang AAC application.
  * Uses Firebase Authentication with Google OAuth provider.
+ * Uses Firestore for caregiver-student cloud sync.
  */
 
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Firebase configuration for smartlangaac project
 // Project ID: smartlangaac
@@ -26,6 +28,9 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication
 const auth = getAuth(app);
 
+// Initialize Firestore (used for caregiver↔student board sync)
+const firestore = getFirestore(app);
+
 // Initialize Google Auth Provider
 const googleProvider = new GoogleAuthProvider();
 
@@ -34,4 +39,4 @@ googleProvider.setCustomParameters({
   prompt: "select_account",
 });
 
-export { app, auth, googleProvider };
+export { app, auth, firestore, googleProvider };
