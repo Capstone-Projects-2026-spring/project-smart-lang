@@ -85,7 +85,6 @@
 
 <script>
 import { authService } from "../../js/service/authService.js";
-import { Router } from "../../js/router.js";
 
 export default {
   name: "LoginView",
