@@ -161,7 +161,6 @@
 import "../../css/modal.css";
 import { authService } from "../../js/service/authService.js";
 import { firestoreSyncService } from "../../js/service/firestoreSyncService.js";
-import { dataService } from "../../js/service/data/dataService.js";
 
 export default {
   name: "ManageStudentsModal",
