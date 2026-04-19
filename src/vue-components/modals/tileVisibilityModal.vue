@@ -1,7 +1,7 @@
 <template>
   <div class="modal">
     <div class="modal-mask" style="z-index: 9999">
-      <div class="modal-wrapper">
+      <div class="modal-wrapper" @click.self="$emit('close')">
         <div class="modal-container" @keydown.esc="$emit('close')">
           <a
             class="inline close-button"
@@ -177,10 +177,13 @@ export default {
       let term = this.searchTerm.toLocaleLowerCase();
       this.filteredGridGroups = this.gridGroups
         .map((group) => {
-          let matchingTiles = group.tiles.filter((tile) => {
-            let label = this.getTileLabel(tile).toLocaleLowerCase();
-            return label.includes(term);
-          });
+          let groupNameMatches = (group.gridLabel || "").toLocaleLowerCase().includes(term);
+          let matchingTiles = groupNameMatches
+            ? group.tiles
+            : group.tiles.filter((tile) => {
+                let label = this.getTileLabel(tile).toLocaleLowerCase();
+                return label.includes(term);
+              });
           if (matchingTiles.length === 0) return null;
           let visibleCount = matchingTiles.filter((t) => !t.hidden).length;
           let hiddenCount = matchingTiles.filter((t) => t.hidden).length;

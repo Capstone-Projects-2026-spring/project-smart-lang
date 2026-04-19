@@ -53,6 +53,7 @@
 import $ from "../../js/externals/jquery.js";
 import { predictionService } from "../../js/service/predictionService";
 import { collectElementService } from "../../js/service/collectElementService";
+import { speechService } from "../../js/service/speechService";
 import { constants } from "../../js/util/constants";
 
 const SUGGESTION_COUNT = 6;
@@ -68,6 +69,7 @@ export default {
     selectTile(tile) {
       if (!tile || !tile.label) return;
       let word = tile.label;
+      speechService.speak(word);
       let currentText = (collectElementService.getText() || "").trim();
       let words = currentText.split(/\s+/).filter((w) => w);
       // Learn bigram: previousWord → word
