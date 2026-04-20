@@ -160,6 +160,7 @@
 <script>
 import "../../css/modal.css";
 import { authService } from "../../js/service/authService.js";
+import { dataService } from "../../js/service/data/dataService.js";
 import { firestoreSyncService } from "../../js/service/firestoreSyncService.js";
 
 export default {
