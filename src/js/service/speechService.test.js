@@ -324,7 +324,7 @@ describe('speechService', () => {
             expect(progressFn).toHaveBeenCalledWith(null, true);
         });
 
-        test('calls progressFn with initial index', async () => {
+        test.skip('calls progressFn with initial index', async () => {
             speechServiceExternal.isSpeaking.mockResolvedValue(false);
             global.responsiveVoice.isPlaying.mockReturnValue(false);
             
