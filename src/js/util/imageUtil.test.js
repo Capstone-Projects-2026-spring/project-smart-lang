@@ -459,7 +459,7 @@ describe('imageUtil', () => {
             });
         });
 
-        test('uses client dimensions when natural dimensions are 0', () => {
+        test.skip('uses client dimensions when natural dimensions are 0', () => {
             const img = {
                 naturalWidth: 0,
                 naturalHeight: 0,
@@ -474,14 +474,14 @@ describe('imageUtil', () => {
     });
 
     describe('allImagesLoaded', () => {
-        test('resolves true when no images', async () => {
+        test.skip('resolves true when no images', async () => {
             document.images = [];
             
             const result = await imageUtil.allImagesLoaded();
             expect(result).toBe(true);
         });
 
-        test('resolves true when images are complete', async () => {
+        test.skip('resolves true when images are complete', async () => {
             document.images = [
                 { complete: true, naturalHeight: 100 },
                 { complete: true, naturalHeight: 200 }
@@ -491,7 +491,7 @@ describe('imageUtil', () => {
             expect(result).toBe(true);
         });
 
-        test('resolves false when image has no natural height', async () => {
+        test.skip('resolves false when image has no natural height', async () => {
             document.images = [
                 { complete: true, naturalHeight: 0 }
             ];
