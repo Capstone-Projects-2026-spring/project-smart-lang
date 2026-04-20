@@ -177,16 +177,11 @@ async function initCloudSync() {
 async function applyVisibilityConfig(visibilityConfig) {
   let grids = await dataService.getGrids(true);
 
-  // Build a lookup: grid label → grid object
-  let gridsByLabel = {};
+  // Iterate over ALL local grids — not just grids in the config.
+  // Grids absent from the config have zero hidden elements (everything visible).
   for (let grid of grids) {
     let label = getFirstLabel(grid.label);
-    if (label) gridsByLabel[label] = grid;
-  }
-
-  for (let [gridLabel, hiddenElements] of Object.entries(visibilityConfig)) {
-    let grid = gridsByLabel[gridLabel];
-    if (!grid) continue;
+    let hiddenElements = (label && visibilityConfig[label]) || [];
 
     // Build a set of hidden element keys for fast lookup
     let hiddenKeys = new Set(
