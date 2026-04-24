@@ -59,8 +59,8 @@ async function init() {
   }
 
   // Cache pictogram images as base64 in PouchDB for reliable offline use.
-  // Runs in the background — does not block app startup.
-  dataService
+  // Must complete BEFORE cloud sync so the two don't race on the same grids.
+  await dataService
     .cacheAllImageData()
     .catch((e) => log.warn("Image data caching failed:", e));
 
@@ -124,13 +124,10 @@ async function initCloudSync() {
             ? assignmentData.updatedAt.toMillis()
             : 0;
         };
-        let applyAssignmentIfNew = async (assignmentData, reloadOnSuccess) => {
+        let applyAssignment = async (assignmentData) => {
           if (!assignmentData || _isApplyingCloudBoard) return;
           let hasPayload = assignmentData.visibilityConfig || assignmentData.boardData;
           if (!hasPayload) return;
-
-          let incomingSequence = getIncomingSequence(assignmentData);
-          if (incomingSequence <= getLastAppliedSequence()) return;
 
           _isApplyingCloudBoard = true;
           try {
@@ -140,22 +137,30 @@ async function initCloudSync() {
               // Legacy: full board import from before visibility-only approach
               await dataService.importBackupData(assignmentData.boardData, { skipDelete: false });
             }
-            localStorage.setItem(syncSequenceKey, String(incomingSequence));
-            if (reloadOnSuccess) window.location.reload();
+            let seq = getIncomingSequence(assignmentData);
+            localStorage.setItem(syncSequenceKey, String(seq));
           } finally {
             _isApplyingCloudBoard = false;
           }
         };
 
-        // Check for any existing assignment that's newer than our local state
+        // On startup, ALWAYS apply the latest config from Firestore.
+        // This guarantees the student sees the correct visibility state
+        // regardless of any stale sequence key in localStorage.
         let assignment = await firestoreSyncService.getLatestBoardAssignment(studentId);
-        await applyAssignmentIfNew(assignment, false);
+        await applyAssignment(assignment);
 
-        // Listen for future pushes from the caregiver
+        // Listen for future pushes from the caregiver.
+        // Use the sequence check here to avoid redundant page reloads
+        // when the listener fires for an already-applied assignment.
         firestoreSyncService.listenForBoardUpdates(
           studentId,
           async (assignmentData) => {
-            await applyAssignmentIfNew(assignmentData, true);
+            if (!assignmentData) return;
+            let incomingSeq = getIncomingSequence(assignmentData);
+            if (incomingSeq <= getLastAppliedSequence()) return;
+            await applyAssignment(assignmentData);
+            window.location.reload();
           },
         );
         log.info("Listening for board updates from caregiver.");
