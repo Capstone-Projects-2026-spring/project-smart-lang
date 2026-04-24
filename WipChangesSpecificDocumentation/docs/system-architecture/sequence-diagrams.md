@@ -11,19 +11,19 @@ sidebar_position: 3
 sequenceDiagram
     actor User
     participant App as Smart Lang App
-    participant Auth as superlogin-client
-    participant DB as CouchDB
+    participant Auth as Firebase Auth
+    participant DB as Cloud Firestore
 
     User->>App: Opens App
     App-->>User: Display Login / Register Options
-    User->>App: Enter Username & Password
-    App->>Auth: Submit Credentials
-    Auth->>DB: Validate User
-    DB-->>Auth: Return Auth Result
+    User->>App: Enter Username & Password / Select Google Login
+    App->>Auth: Authenticate User
+    Auth->>DB: Fetch/Validate Profile
+    DB-->>Auth: Return Result
 
     alt Credentials Validated
         Auth-->>App: Return Session Token
-        App->>DB: Sync User Data (PouchDB ↔ CouchDB)
+        App->>DB: Sync User Data (PouchDB ↔ Cloud Firestore)
         DB-->>App: Data Synced
         App-->>User: Redirect to Homepage (Access AAC Board)
     else Credentials Invalid
@@ -33,10 +33,10 @@ sequenceDiagram
 ```
 
 1. The user opens the Smart Lang app, and login options are displayed on the landing page.
-2. The user enters their username and password (or uses the app without registration in offline mode).
-3. The app sends credentials to the superlogin authentication service.
-4. superlogin validates the credentials against the CouchDB user database.
-5. If valid, a session token is returned and the app syncs local PouchDB data with the remote CouchDB server.
+2. The user selects Google OAuth or enters credentials (or uses the app without registration in offline mode).
+3. The app authenticates the user via Firebase Authentication.
+4. Firebase Auth validates the user and fetches profile data from Cloud Firestore.
+5. If valid, a session token is returned and the app syncs local PouchDB data with the remote Cloud Firestore server.
 6. The user is directed to the homepage and can access the AAC board. If credentials are invalid, the user is notified that login failed.
 
 ### Use Case 2: Offline Accessibility

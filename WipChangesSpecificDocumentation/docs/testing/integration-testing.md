@@ -8,8 +8,8 @@ Integration tests validate behavior across module boundaries, especially where s
 
 ## Scope
 
-- Login/session flow with superlogin client adapter
-- Board loading and persistence with PouchDB-backed services
+- Login/session flow with Firebase Google OAuth adapter
+- Board loading and persistence with Firestore-backed services
 - Speech pipeline from sentence builder to selected speech provider
 - Service worker and cached asset behavior under offline conditions
 

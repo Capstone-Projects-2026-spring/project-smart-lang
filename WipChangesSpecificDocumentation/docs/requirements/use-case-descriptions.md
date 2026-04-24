@@ -10,13 +10,14 @@ sidebar_position: 5
 <i>Triggering Event: User opens Smart Lang app and clicks Login</i>
 
 1. The user opens the Smart Lang app, and login options are displayed on the landing page.
-2. The user enters their username and password (or uses the app without registration in offline mode).
-3. The app sends credentials to the superlogin authentication service.
-4. superlogin validates the credentials against the CouchDB user database.
-5. If valid, a session token is returned and the app syncs local PouchDB data with the remote CouchDB server.
-6. The user is directed to the homepage and can access the AAC board. If credentials are invalid, the user is notified that login failed.
+2. The user clicks the "Sign in with Google" button (or uses the app without registration in offline mode).
+3. The app authenticates the user via Firebase Authentication using Google OAuth SSO.
+4. Firebase validates the login and returns a user authentication token.
+5. If valid, the app initializes syncing of local PouchDB data with Firebase Cloud Firestore.
+6. The user is directed to the homepage and can access the AAC board. If login fails, the user is notified.
 
 ### Use Case 2 - Offline Accessibility
+
 <i>As a user, I want to access the Smart Lang app when I have no internet connection </i>
 <i>Triggering Event: User opens Smart Lang app offline, and clicks continue in offline mode</i>
 
@@ -25,6 +26,7 @@ sidebar_position: 5
 3. The user is directed to the homepage and can access the AAC board.
 
 ### Use Case 3 - Sentence Creation (without suggestion)
+
 <i>As a user, I want to create a message using just the vocabulary displayed on the AAC device. </i>
 <i>Triggering Event: User clicks on a vocab word to add to the speech box from the board </i>
 
@@ -38,6 +40,7 @@ sidebar_position: 5
 8. The system reads the complete sentence using text-to-speech.
 
 ### Use Case 4 - Sentence Creation (with suggestion)
+
 <i>As a user, I want to create a message using the suggested words feature displayed on the AAC device. </i>
 <i>Triggering Event: User clicks on a suggested vocab word to add to the speech box from the board </i>
 
@@ -52,6 +55,7 @@ sidebar_position: 5
 9. The system reads the complete sentence using text-to-speech.
 
 ### Use Case 5 - Sentence Editing
+
 <i>As a user, I want to edit my message in the speech box.</i>
 <i>Triggering Event: User deletes a vocab word from the speech box on the board </i>
 
@@ -65,6 +69,7 @@ sidebar_position: 5
 8. The system reads the updated sentence using text-to-speech.
 
 ### Use Case 6 - Caregiver Adds Vocabulary (without suggestion)
+
 <i> As a caregiver, I want to add new vocabulary words so that the user can express more ideas on the AAC board. </i>
 <i>Triggering Event: Caregiver realizes they should include a word and clicks on the vocabulary management page. </i>
 
@@ -79,6 +84,7 @@ sidebar_position: 5
 9. The system updates the AAC board with the new vocabulary word.
 
 ### Use Case 7 - Caregiver Adds Vocabulary (with suggestion)
+
 <i> As a caregiver, I want to add new vocabulary words using the suggestion feature so that the user can express more ideas on the AAC board. </i>
 <i>Triggering Event: Caregiver clicks on a suggested word to add through the vocabulary management page. </i>
 
@@ -93,6 +99,7 @@ sidebar_position: 5
 9. The system updates the AAC board with the new vocabulary word.
 
 ### Use Case 8 - Caregiver Removes Vocabulary Word
+
 <i> As a caregiver, I want to remove unused vocabulary words so that the user has a simple board. </i>
 <i>Triggering Event: Caregiver realizes user doesn't use a vocab word and goes to remove it through the vocabulary management page. </i>
 
@@ -105,8 +112,3 @@ sidebar_position: 5
 7. The caregiver clicks and submits the selected word to remove.
 8. The system saves and removes the word from the database.
 9. The system updates the AAC board with the removed vocabulary word.
-
-
-
-
-
