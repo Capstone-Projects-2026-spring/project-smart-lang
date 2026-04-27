@@ -12,7 +12,7 @@ This section documents the integration-facing behavior of Smart Lang AAC. It cov
 The running application is primarily client-side and includes these implemented integration layers:
 
 - Local persistence with PouchDB
-- Optional cloud sync flow via `superlogin-client` + CouchDB
+- Optional cloud sync flow via Firebase Authentication and Firestore
 - Speech providers: browser SpeechSynthesis, ResponsiveVoice, and a configurable external speech endpoint wrapper
 - HTTP action service for grid-triggered API requests
 

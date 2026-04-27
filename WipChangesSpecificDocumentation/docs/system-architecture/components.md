@@ -18,7 +18,7 @@ Vue communicates with local storage (PouchDB) and speech services through servic
 
 PouchDB is a browser-based NoSQL database that enables offline-first data storage. It stores user data locally, including vocabulary sets, board configurations, user preferences, and usage history.
 
-When connectivity is available, PouchDB can synchronize with a remote CouchDB database. This allows the application to function without internet access while maintaining eventual consistency once the network is restored.
+When connectivity is available, PouchDB can synchronize with a remote Firebase Cloud Firestore database. This allows the application to function without internet access while maintaining eventual consistency once the network is restored.
 
 ## Browser SpeechSynthesis (Web Speech API)
 
@@ -44,11 +44,11 @@ The application registers a service worker that enables Progressive Web App (PWA
 
 When the application detects a new version, it notifies the user and applies the update on the next page load. The service worker ensures that core communication functionality remains available even without an active internet connection.
 
-## CouchDB Cloud Sync Service
+## Firebase Cloud Firestore Sync Service
 
-The application provides optional cloud synchronization through CouchDB, enabling users to access their grids and settings across multiple devices. The sync service uses the superlogin-client library for authentication and establishes secure connections to a remote CouchDB instance.
+The application provides optional cloud synchronization through Firebase Cloud Firestore, enabling users to access their grids and settings across multiple devices. The sync service uses Firebase Authentication for secure access and establishes real-time connections to a remote Cloud Firestore instance.
 
-When cloud sync is enabled, PouchDB automatically replicates local changes to the remote database and vice versa, providing conflict resolution and eventual consistency. Users can register an account, log in, and enable bidirectional sync while maintaining full offline functionality.
+When cloud sync is enabled, local changes are automatically synchronized to the remote database and vice versa, providing conflict resolution and eventual consistency. Users can register an account, log in using Google OAuth SSO, and enable bidirectional sync while maintaining full offline functionality.
 
 ## ResponsiveVoice TTS Service
 
@@ -66,9 +66,13 @@ The external service API supports two voice types: streaming playback (where aud
 
 ElevenLabs is a premium AI-powered text-to-speech service that offers high-quality, natural-sounding voice synthesis with support for multiple languages and voice cloning. Integration with ElevenLabs is planned as an additional speech provider within the External Speech Service framework. Once implemented, users will be able to select ElevenLabs voices alongside browser-native and ResponsiveVoice options for enhanced speech quality.
 
-## Google OAuth (Planned Integration)
+## Google OAuth via Firebase Authentication
 
-Google OAuth is planned as an additional authentication method alongside the existing superlogin username/password system. Once implemented, users will be able to sign in with their Google account via OAuth 2.0 SSO, providing a simplified login experience and reducing the need for separate credentials. The OAuth flow will complement the existing superlogin-client authentication, not replace it.
+Google OAuth is integrated as the primary authentication method via Firebase Authentication. Users can sign in with their Google account using OAuth 2.0 SSO. This provides a simplified login experience, a unified account system, and seamless support for linked caregiver-student profile workflows, entirely replacing the legacy superlogin authentication.
+
+## Firestore Sync Service
+
+The Firestore Sync Service (firestoreSyncService.js) acts as the central mechanism for cloud storage. It handles synchronization of caregiver and student profile associations, visibility configurations, board assignments, and general data backups. It uses Firebase Authentication to derive a deterministic student ID from the user's UID and provides real-time updates for assigned communication boards, fully replacing the legacy CouchDB infrastructure for cross-device state synchronization.
 
 ## HTTP REST Action Service
 

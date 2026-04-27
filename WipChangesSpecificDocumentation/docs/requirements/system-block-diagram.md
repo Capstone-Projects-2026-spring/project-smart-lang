@@ -6,7 +6,6 @@ sidebar_position: 2
 
 ![System Block Diagram](https://github.com/user-attachments/assets/ef4b926b-0c1f-4d13-bb26-ca631a3e9bb0)
 
-
 **Figure 1** provides an overview of the grid-based AAC (Augmentative and Alternative Communication) application architecture.
 
 ## System Overview
@@ -24,6 +23,7 @@ The frontend is built using **Vue 2.7** with **HTML5** and **JavaScript** and co
   Used for configuration, vocabulary management, and system personalization.
 
 The frontend follows an **offline-first architecture** using:
+
 - **PouchDB** (IndexedDB-backed) for local data storage
 - **Service Workers** (via Workbox) for caching and offline access
 
@@ -46,18 +46,20 @@ The system tracks user interaction patterns locally:
 - **UsageLog** – Records tile usage frequency and context for the client-side prediction engine
 
 **Logging Flow:**
+
 1. Events captured locally in **PouchDB** during all sessions
 2. Data used by the client-side n-gram prediction engine to improve word suggestions
-3. Optional synchronization to **CouchDB** when cloud sync is configured
+3. Optional synchronization to **Firebase Cloud Firestore** when cloud sync is configured
 
 ## Backend Architecture
 
 The application does **not** use a custom backend server. Instead, it relies on:
 
-- **CouchDB** as a remote database for optional cloud sync (via PouchDB replication)
-- **superlogin-client** for user authentication (username/password registration and login)
+- **Firebase Cloud Firestore** as a remote database for optional cloud sync
+- **Firebase Authentication** for user authentication (Google OAuth SSO)
 
 Backend responsibilities include:
+
 - User authentication via **Google OAuth (SSO)**
 - Vocabulary synchronization across devices
 - **Persistent storage and analysis of usage logs**
@@ -70,6 +72,7 @@ Backend responsibilities include:
 The data storage architecture includes:
 
 - **PouchDB (Local Browser Storage)**
+
   - User grids and board configurations (GridData documents)
   - Grid element definitions (GridElement documents)
   - Board metadata and settings (MetaData documents)
@@ -77,9 +80,10 @@ The data storage architecture includes:
   - Encrypted data wrappers (EncryptedObject documents)
   - Usage history for prediction
 
-- **CouchDB (Optional Remote Sync)**
+- **Firebase Cloud Firestore (Optional Remote Sync)**
+
   - Mirrors local PouchDB data for cross-device synchronization
-  - User authentication via superlogin
+  - User authentication via Firebase Authentication (Google OAuth SSO)
 
 - **Service Worker Cache**
   - Application assets (JS bundles, CSS, fonts, icons)
@@ -90,15 +94,15 @@ The data storage architecture includes:
 The system integrates with:
 
 - **ARASAAC API** for pictogram/symbol search and retrieval
-- **CouchDB** for optional cloud data synchronization
-- **superlogin** for user registration and authentication
+- **Firebase Cloud Firestore** for optional cloud data synchronization
+- **Firebase Authentication** for Google OAuth SSO
 - **ResponsiveVoice** as a complementary text-to-speech engine
-- **Google OAuth** (planned) for SSO authentication alongside superlogin
 - **ElevenLabs** (planned) for premium AI-powered voice synthesis
 
 ## Design Priorities
 
 The application is designed with a strong emphasis on:
+
 - Accessibility
 - Offline functionality
 - Personalization
