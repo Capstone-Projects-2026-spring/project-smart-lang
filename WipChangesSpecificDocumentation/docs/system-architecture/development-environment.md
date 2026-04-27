@@ -17,6 +17,8 @@ sidebar_position: 4
 - Navigo (client-side router)
 - Custom stateService.js (application state management)
 - PouchDB (browser-based offline storage)
+- CouchDB (remote database sync)
+- Superlogin (authentication wrapper for CouchDB)
 - Firebase Cloud Firestore (remote sync, profiles, and board assignments)
 - Google OAuth (Firebase Authentication for SSO)
 - jQuery 3.7 (DOM manipulation)

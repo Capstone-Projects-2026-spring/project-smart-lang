@@ -1,33 +1,23 @@
-# Website
+# Wip Changes Specific Documentation
 
-This website is built using [Docusaurus 3](https://docusaurus.io/), a modern static website generator.
+This directory contains the updated documentation for the Smart Lang AAC project. It is built using [Docusaurus 3](https://docusaurus.io/), a modern static website generator.
 
-## CLI Usage
+This folder is intended to be merged into the main `documentation` folder once the WIP changes and Firebase migrations are finalized. 
 
-### Add documentation to an existing project
+## Local Development
 
-```bash
-npx create-project-docs add
-```
+1. Run `yarn install` inside this directory to install dependencies.
+2. Run `yarn start` to start the local Docusaurus server.
 
-Add documentation to a specific directory:
+This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
 
-```bash
-npx create-project-docs add --path ../my-project
-```
-
-### Create a new project with documentation
+## Building
 
 ```bash
-npx create-project-docs new my-project
-cd my-project
+yarn build
 ```
 
-### Options
-
-- `--force` - Overwrite existing documentation folder
-- `--skip-install` - Skip running yarn install
-- `--help` - Show help
+This command generates static content into the `build` directory and can be served using any static hosting service.
 
 ### Installation
 
