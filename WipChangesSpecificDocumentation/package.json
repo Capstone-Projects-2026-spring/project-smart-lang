@@ -1,6 +1,6 @@
 {
-  "name": "create-project-docs",
-  "description": "Create a project with a Docusaurus documentation website template designed for Temple University CIS Projects in Computer Science courses.",
+  "name": "smart-lang-docs",
+  "description": "Smart Lang AAC implementation and API documentation.",
   "version": "2.0.0",
   "scripts": {
     "docusaurus": "docusaurus",

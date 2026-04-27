@@ -1,16 +1,17 @@
 ---
 id: database-diagram
 title: Database Diagram
-sidebar_label: Database Diagram
+sidebar_label: Database Diagrams
 ---
 
 # AAC Database - Document Model
 
-The application uses PouchDB (a browser-based NoSQL database) for local storage, with optional CouchDB synchronization for cloud backup. Data is stored as JSON documents rather than in relational tables.
+The application uses PouchDB (a browser-based NoSQL database) for local storage, with CouchDB and Firebase Cloud Firestore synchronization for cloud backup. Data is stored as JSON documents rather than in relational tables.
 
 ## Core Document Types
 
 ### GridData
+
 Represents a complete communication grid (board). Each grid contains an array of grid elements arranged in a layout.
 
 ```
@@ -27,6 +28,7 @@ GridData {
 ```
 
 ### GridElement
+
 Represents a single tile/cell within a grid. Elements can be normal communication tiles, collect elements, prediction elements, or live data elements.
 
 ```
@@ -51,6 +53,7 @@ GridElement {
 ```
 
 ### MetaData
+
 Stores user-level settings and configuration.
 
 ```
@@ -66,6 +69,7 @@ MetaData {
 ```
 
 ### GridImage
+
 Image data associated with a grid element.
 
 ```
@@ -78,7 +82,8 @@ GridImage {
 ```
 
 ### EncryptedObject
-Wrapper for encrypted data stored in CouchDB.
+
+Wrapper for encrypted data stored in Cloud Firestore.
 
 ```
 EncryptedObject {
@@ -103,7 +108,7 @@ erDiagram
 ## Storage Architecture
 
 - **Local**: PouchDB stores documents in IndexedDB within the browser
-- **Remote** (optional): CouchDB instance for cross-device synchronization
+- **Remote** (optional): Firebase Cloud Firestore instance for cross-device synchronization, caregiver/student profile metadata, and board assignments.
 - **Encryption**: All remote data is AES-encrypted using SJCL before sync
-- **Authentication**: superlogin-client handles user registration and login
+- **Authentication**: Firebase Authentication (Google OAuth SSO) handles user registration and login.
 - **Prediction Model**: Stored separately in localStorage as JSON (~50KB)

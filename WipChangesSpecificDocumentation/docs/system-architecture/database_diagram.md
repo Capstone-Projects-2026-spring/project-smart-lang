@@ -6,7 +6,7 @@ sidebar_label: Database Diagrams
 
 # AAC Database - Document Model
 
-The application uses PouchDB (a browser-based NoSQL database) for local storage, with Firebase Cloud Firestore synchronization for cloud backup. Data is stored as JSON documents rather than in relational tables.
+The application uses PouchDB (a browser-based NoSQL database) for local storage, with CouchDB and Firebase Cloud Firestore synchronization for cloud backup. Data is stored as JSON documents rather than in relational tables.
 
 ## Core Document Types
 
