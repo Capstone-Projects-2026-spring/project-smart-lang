@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
-<title data-rh="true">System Block Diagram | Project Smart Lang</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="System Block Diagram | Project Smart Lang"><meta data-rh="true" name="description" content="System Block Diagram"><meta data-rh="true" property="og:description" content="System Block Diagram"><link data-rh="true" rel="icon" href="/project-smart-lang/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram" hreflang="en"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Requirements Specification","item":"https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/category/requirements-specification"},{"@type":"ListItem","position":2,"name":"System Block Diagram","item":"https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"}]}</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><link rel="stylesheet" href="/project-smart-lang/assets/css/styles.7aa687c6.css">
-<script src="/project-smart-lang/assets/js/runtime~main.d310806c.js" defer="defer"></script>
-<script src="/project-smart-lang/assets/js/main.919a2b7e.js" defer="defer"></script>
+<title data-rh="true">System Block Diagram | Project Smart Lang</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="System Block Diagram | Project Smart Lang"><meta data-rh="true" name="description" content="System Block Diagram"><meta data-rh="true" property="og:description" content="System Block Diagram"><link data-rh="true" rel="icon" href="/project-smart-lang/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram" hreflang="en"><link data-rh="true" rel="alternate" href="https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Requirements Specification","item":"https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/category/requirements-specification"},{"@type":"ListItem","position":2,"name":"System Block Diagram","item":"https://Capstone-Projects-2026-spring.github.io/project-smart-lang/docs/requirements/system-block-diagram"}]}</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><link rel="stylesheet" href="/project-smart-lang/assets/css/styles.36e752a8.css">
+<script src="/project-smart-lang/assets/js/runtime~main.7eeb4376.js" defer="defer"></script>
+<script src="/project-smart-lang/assets/js/main.4c98b770.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
 <svg style="display: none;"><defs>
@@ -51,13 +51,13 @@ Used for configuration, vocabulary management, and system personalization.</p>
 <ol>
 <li class="">Events captured locally in <strong>PouchDB</strong> during all sessions</li>
 <li class="">Data used by the client-side n-gram prediction engine to improve word suggestions</li>
-<li class="">Optional synchronization to <strong>CouchDB</strong> when cloud sync is configured</li>
+<li class="">Optional synchronization to <strong>Firebase Cloud Firestore</strong> when cloud sync is configured</li>
 </ol>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="backend-architecture">Backend Architecture<a href="#backend-architecture" class="hash-link" aria-label="Direct link to Backend Architecture" title="Direct link to Backend Architecture" translate="no">​</a></h2>
 <p>The application does <strong>not</strong> use a custom backend server. Instead, it relies on:</p>
 <ul>
-<li class=""><strong>CouchDB</strong> as a remote database for optional cloud sync (via PouchDB replication)</li>
-<li class=""><strong>superlogin-client</strong> for user authentication (username/password registration and login)</li>
+<li class=""><strong>Firebase Cloud Firestore</strong> as a remote database for optional cloud sync</li>
+<li class=""><strong>Firebase Authentication</strong> for user authentication (Google OAuth SSO)</li>
 </ul>
 <p>Backend responsibilities include:</p>
 <ul>
@@ -83,10 +83,10 @@ Used for configuration, vocabulary management, and system personalization.</p>
 </ul>
 </li>
 <li class="">
-<p><strong>CouchDB (Optional Remote Sync)</strong></p>
+<p><strong>Firebase Cloud Firestore (Optional Remote Sync)</strong></p>
 <ul>
 <li class="">Mirrors local PouchDB data for cross-device synchronization</li>
-<li class="">User authentication via superlogin</li>
+<li class="">User authentication via Firebase Authentication (Google OAuth SSO)</li>
 </ul>
 </li>
 <li class="">
@@ -101,10 +101,9 @@ Used for configuration, vocabulary management, and system personalization.</p>
 <p>The system integrates with:</p>
 <ul>
 <li class=""><strong>ARASAAC API</strong> for pictogram/symbol search and retrieval</li>
-<li class=""><strong>CouchDB</strong> for optional cloud data synchronization</li>
-<li class=""><strong>superlogin</strong> for user registration and authentication</li>
+<li class=""><strong>Firebase Cloud Firestore</strong> for optional cloud data synchronization</li>
+<li class=""><strong>Firebase Authentication</strong> for Google OAuth SSO</li>
 <li class=""><strong>ResponsiveVoice</strong> as a complementary text-to-speech engine</li>
-<li class=""><strong>Google OAuth</strong> (planned) for SSO authentication alongside superlogin</li>
 <li class=""><strong>ElevenLabs</strong> (planned) for premium AI-powered voice synthesis</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="design-priorities">Design Priorities<a href="#design-priorities" class="hash-link" aria-label="Direct link to Design Priorities" title="Direct link to Design Priorities" translate="no">​</a></h2>
