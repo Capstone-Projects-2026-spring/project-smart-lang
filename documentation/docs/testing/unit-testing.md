@@ -1,18 +1,27 @@
 ---
 sidebar_position: 1
 ---
-# Unit Tests
 
-We plan to use Jest for unit testing due to its familiarity and overall ease of use. We are aiming for a minimum of 80% code coverage across our codebase.
+# Unit tests
 
-**Backend Testing Strategy**
-Our backend tests will focus on data integrity, API responses, and business logic. Examples include:
-* Ensuring CRUD operations for suggestions correctly update the database.
-* Validating that the API returns the correct number of suggestion records when a user selects a tile, and further ensuring that the count of tile usage is being incremented and decremented properly. 
-* Ensuring the search API endpoint correctly filters and returns the expected payload of suggestions based on query parameters.
+Unit tests validate isolated logic without requiring full application startup.
 
-**Frontend Testing Strategy**
-Our frontend tests will focus on component rendering, user interface state, and user interactions. Examples include:
-* Verifying that picture and audio assets are properly linked and rendered within the suggestion tiles.
-* Ensuring that UI styling and colors remain consistent when suggestion tiles are dynamically added or removed from the DOM.
-* Confirming that caregiver linking codes are properly fetched and displayed to the user.
+## Scope
+
+- Data model behavior in `src/js/model/`
+- Service-level pure logic, especially prediction and formatting helpers
+- Utility modules used by rendering and actions
+
+## Guidelines
+
+- Cover normal inputs, edge cases, and invalid inputs.
+- Mock browser-only dependencies (`window`, `localStorage`, speech APIs).
+- Keep unit tests deterministic and independent of network state.
+
+## Priority Examples
+
+- N-gram update and next-word ranking behavior
+- Serialization/parsing of grid model objects
+- Action payload generation for HTTP actions
+
+Each test case should document inputs, expected outputs, and the reason the behavior matters for AAC usage.
