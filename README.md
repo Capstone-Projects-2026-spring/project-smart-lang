@@ -34,6 +34,7 @@ Smart Lang AAC is an augmentative and alternative communication (AAC) web applic
 ## Known Bugs
 - The initial cloud sync might experience a slight delay depending on network connectivity.
 - Some strict browsers (e.g., Safari on iOS) may require manual screen interaction before Text-to-Speech voices initialize.
+- Board syncing is sometimes inconsistent. Clearing browser cache or re-pushing may fix it.
 
 ## Configuration Instructions
 To run the app with full cloud sync, you must set up Firebase. Create a `.env.local` file in the root directory with your Firebase configuration:
